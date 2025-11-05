@@ -378,5 +378,6 @@ This test plan is created for portfolio demonstration purposes.
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
-| 1.0 | Nov 2024 | Arévalo, Marc | Initial test plan creation |
+| 1.0 | Nov 2025 | Arévalo, Marc | Initial test plan creation |
 | 2.0 | Nov 5, 2025 | Arévalo, Marc | Updated with Phase 2 results: 36 test cases executed, 29 bugs found. Added metrics, findings, and recommendations. Ready for Phase 3. |
+
