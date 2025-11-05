@@ -205,3 +205,15 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# Ignorar carpetas de caché de Python
+__pycache__/
+*.pyc
+
+# Ignorar la carpeta de caché de pytest (aunque ya la movimos)
+.pytest_cache/
+
+# ¡Ignorar TODOS los resultados generados!
+# Nunca subimos reportes o logs a Git.
+testloginsresults/
