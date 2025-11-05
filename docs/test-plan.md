@@ -5,7 +5,7 @@
 This document outlines the testing strategy for DemoBlaze (https://www.demoblaze.com), a demo e-commerce application. The purpose of this project is to demonstrate manual and automated testing skills through comprehensive functional testing of core e-commerce features.
 
 **Project Duration:** 2 weeks  
-**Tester:** [Your Name]  
+**Tester:** Marc
 **Version:** 1.0  
 **Date:** November 2024
 
@@ -162,22 +162,22 @@ The following artifacts will be produced:
 ### 7.1 Entry Criteria
 
 Testing will begin when:
-- ✅ Test environment is accessible (demoblaze.com is up)
-- ✅ Testing tools are installed and configured
-- ✅ User flows are documented
-- ✅ Test cases are prepared
-- ✅ GitHub repository is set up
+-  Test environment is accessible (demoblaze.com is up)
+-  Testing tools are installed and configured
+-  User flows are documented
+-  Test cases are prepared
+-  GitHub repository is set up
 
 ### 7.2 Exit Criteria
 
 Testing will be considered complete when:
-- ✅ All planned test cases have been executed
-- ✅ Minimum 15-20 test cases documented
-- ✅ All critical and high-severity bugs are documented
-- ✅ At least 5-8 automated tests are implemented
-- ✅ Test summary report is completed
-- ✅ Code coverage of critical flows reaches 80%+
-- ✅ All deliverables are uploaded to GitHub
+-  All planned test cases have been executed
+-  Minimum 15-20 test cases documented
+-  All critical and high-severity bugs are documented
+-  At least 5-8 automated tests are implemented
+-  Test summary report is completed
+-  Code coverage of critical flows reaches 80%+
+-  All deliverables are uploaded to GitHub
 
 ---
 
@@ -211,7 +211,7 @@ Testing will be considered complete when:
 ## 9. Resources
 
 ### 9.1 Human Resources
-- **QA Tester/Automation Engineer:** [Your Name]
+- **QA Tester/Automation Engineer:** Marc
 - **Role:** Test planning, execution, automation, and reporting
 
 ### 9.2 Tools and Technologies
@@ -284,4 +284,5 @@ This test plan is created for portfolio demonstration purposes.
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+
 | 1.0 | Nov 2024 | Arévalo, Marc | Initial test plan creation |
