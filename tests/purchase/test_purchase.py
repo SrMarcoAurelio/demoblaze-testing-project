@@ -468,5 +468,353 @@ def test_order_form_validation_robustness_security(order_modal_page, test_id, na
     logging.info(f"✅ {test_id}: PASSED")
 
 
+def test_add_same_product_multiple_times(browser):
+    """TC-PURCH-015: Add Same Product Multiple Times"""
+    logging.info("🚀 TC-PURCH-015: Starting same product multiple times test...")
+    browser.get(BASE_URL)
+    
+    price = add_product_to_cart(browser, FIRST_PRODUCT_LINK)
+    add_product_to_cart(browser, FIRST_PRODUCT_LINK)
+    
+    browser.find_element(*CART_NAV_LINK).click()
+    
+    cart_items = WebDriverWait(browser, TIMEOUT).until(
+        EC.presence_of_all_elements_located((By.XPATH, "//tbody[@id='tbodyid']/tr"))
+    )
+    
+    assert len(cart_items) == 2, f"Expected 2 items in cart, got {len(cart_items)}"
+    
+    total = wait_for_cart_total_update(browser)
+    expected_total = price * 2
+    
+    assert total == expected_total, \
+        f"Total incorrect. Expected: {expected_total}, Got: {total}"
+    
+    logging.info(f"✅ Same product added twice: {len(cart_items)} items, total: {total}")
+    logging.info("✅ TC-PURCH-015: PASSED")
+
+
+def test_navigation_after_purchase(order_modal_page):
+    """TC-PURCH-016: Navigation After Purchase"""
+    logging.info("🚀 TC-PURCH-016: Starting navigation after purchase test...")
+    browser = order_modal_page
+    
+    fill_order_form(browser, "QA Tester", "Spain", "Barcelona", "1234567890", "12", "2028")
+    browser.find_element(*PURCHASE_BUTTON).click()
+    
+    WebDriverWait(browser, TIMEOUT).until(
+        EC.visibility_of_element_located(PURCHASE_CONFIRM_MSG)
+    )
+    
+    browser.find_element(*CONFIRM_OK_BUTTON).click()
+    
+    WebDriverWait(browser, TIMEOUT).until(
+        EC.invisibility_of_element_located(PURCHASE_CONFIRM_MODAL)
+    )
+    
+    current_url = browser.current_url
+    logging.info(f"After purchase, URL: {current_url}")
+    
+    assert BASE_URL in current_url, "Should remain on DemoBlaze site"
+    
+    logging.info("✅ TC-PURCH-016: PASSED")
+
+
+def test_cart_empty_after_purchase(order_modal_page):
+    """TC-PURCH-017: Cart Empty After Successful Purchase"""
+    logging.info("🚀 TC-PURCH-017: Starting cart empty after purchase test...")
+    browser = order_modal_page
+    
+    fill_order_form(browser, "QA Tester", "Spain", "Barcelona", "1234567890", "12", "2028")
+    browser.find_element(*PURCHASE_BUTTON).click()
+    
+    WebDriverWait(browser, TIMEOUT).until(
+        EC.visibility_of_element_located(PURCHASE_CONFIRM_MSG)
+    )
+    browser.find_element(*CONFIRM_OK_BUTTON).click()
+    
+    browser.find_element(*CART_NAV_LINK).click()
+    
+    WebDriverWait(browser, TIMEOUT).until(
+        EC.visibility_of_element_located(PLACE_ORDER_BUTTON)
+    )
+    
+    cart_items = browser.find_elements(By.XPATH, "//tbody[@id='tbodyid']/tr")
+    
+    assert len(cart_items) == 0, f"Cart should be empty after purchase, but has {len(cart_items)} items"
+    
+    logging.info("✅ Cart is empty after purchase")
+    logging.info("✅ TC-PURCH-017: PASSED")
+
+
+def test_add_many_products_to_cart(browser):
+    """TC-PURCH-018: Add Many Products to Cart (Boundary Test)"""
+    logging.info("🚀 TC-PURCH-018: Starting boundary test - adding 10 products...")
+    browser.get(BASE_URL)
+    
+    total_expected = 0
+    items_to_add = 10
+    
+    for i in range(items_to_add):
+        price = add_product_to_cart(browser, FIRST_PRODUCT_LINK)
+        total_expected += price
+        logging.info(f"Added product {i+1}/{items_to_add}")
+    
+    browser.find_element(*CART_NAV_LINK).click()
+    
+    cart_items = WebDriverWait(browser, TIMEOUT).until(
+        EC.presence_of_all_elements_located((By.XPATH, "//tbody[@id='tbodyid']/tr"))
+    )
+    
+    assert len(cart_items) == items_to_add, \
+        f"Expected {items_to_add} items, got {len(cart_items)}"
+    
+    total_actual = wait_for_cart_total_update(browser)
+    
+    assert total_actual == total_expected, \
+        f"Total mismatch. Expected: {total_expected}, Got: {total_actual}"
+    
+    logging.info(f"✅ Successfully added {items_to_add} products, total: {total_actual}")
+    logging.info("✅ TC-PURCH-018: PASSED")
+
+
+def test_delete_all_items_from_cart(browser):
+    """TC-PURCH-019: Delete All Items From Cart"""
+    logging.info("🚀 TC-PURCH-019: Starting delete all items test...")
+    browser.get(BASE_URL)
+    
+    add_product_to_cart(browser, FIRST_PRODUCT_LINK)
+    add_product_to_cart(browser, SECOND_PRODUCT_LINK)
+    
+    browser.find_element(*CART_NAV_LINK).click()
+    
+    cart_items = WebDriverWait(browser, TIMEOUT).until(
+        EC.presence_of_all_elements_located((By.XPATH, "//tbody[@id='tbodyid']/tr"))
+    )
+    initial_count = len(cart_items)
+    logging.info(f"Initial cart items: {initial_count}")
+    
+    for i in range(initial_count):
+        browser.find_element(*DELETE_ITEM_LINK).click()
+        WebDriverWait(browser, TIMEOUT).until(
+            lambda d: len(d.find_elements(By.XPATH, "//tbody[@id='tbodyid']/tr")) == initial_count - (i + 1)
+        )
+        logging.info(f"Deleted item {i+1}/{initial_count}")
+    
+    remaining_items = browser.find_elements(By.XPATH, "//tbody[@id='tbodyid']/tr")
+    
+    assert len(remaining_items) == 0, "Cart should be empty after deleting all items"
+    
+    logging.info("✅ All items deleted successfully")
+    logging.info("✅ TC-PURCH-019: PASSED")
+
+
+def test_open_close_order_modal_multiple_times(cart_page):
+    """TC-PURCH-020: Open and Close Order Modal Multiple Times"""
+    logging.info("🚀 TC-PURCH-020: Starting modal open/close multiple times test...")
+    browser = cart_page
+    
+    for i in range(3):
+        logging.info(f"Iteration {i+1}/3")
+        
+        browser.find_element(*PLACE_ORDER_BUTTON).click()
+        
+        WebDriverWait(browser, TIMEOUT).until(
+            EC.visibility_of_element_located(ORDER_NAME_FIELD)
+        )
+        
+        assert browser.find_element(*ORDER_MODAL).is_displayed(), \
+            f"Modal should be open on iteration {i+1}"
+        
+        browser.find_element(*CLOSE_ORDER_MODAL_BUTTON).click()
+        
+        WebDriverWait(browser, TIMEOUT).until(
+            EC.invisibility_of_element_located(ORDER_MODAL)
+        )
+        
+        assert browser.find_element(*PLACE_ORDER_BUTTON).is_displayed(), \
+            f"Should be back on cart page on iteration {i+1}"
+    
+    logging.info("✅ Modal opened and closed 3 times successfully")
+    logging.info("✅ TC-PURCH-020: PASSED")
+
+
+def test_access_empty_cart(browser):
+    """TC-PURCH-021: Access Cart Without Adding Products"""
+    logging.info("🚀 TC-PURCH-021: Starting empty cart access test...")
+    browser.get(BASE_URL)
+    
+    browser.find_element(*CART_NAV_LINK).click()
+    
+    WebDriverWait(browser, TIMEOUT).until(
+        EC.visibility_of_element_located(PLACE_ORDER_BUTTON)
+    )
+    
+    cart_items = browser.find_elements(By.XPATH, "//tbody[@id='tbodyid']/tr")
+    
+    assert len(cart_items) == 0, "Cart should be empty"
+    
+    place_order_btn = browser.find_element(*PLACE_ORDER_BUTTON)
+    assert place_order_btn.is_displayed(), "Place Order button should still be visible"
+    
+    logging.info("✅ Empty cart accessible, Place Order button visible (Bug #13)")
+    logging.info("✅ TC-PURCH-021: PASSED")
+
+
+@pytest.mark.parametrize("field_name, field_locator, payload", [
+    ("name", ORDER_NAME_FIELD, "' OR '1'='1"),
+    ("name", ORDER_NAME_FIELD, "admin'--"),
+    ("country", ORDER_COUNTRY_FIELD, "' OR '1'='1"),
+    ("city", ORDER_CITY_FIELD, "' OR '1'='1"),
+    ("card", ORDER_CARD_FIELD, "' OR '1'='1"),
+])
+def test_sql_injection_all_order_fields(order_modal_page, field_name, field_locator, payload):
+    """TC-PURCH-022: SQL Injection in All Order Form Fields"""
+    logging.info(f"🚀 TC-PURCH-022: SQL injection in {field_name} field")
+    logging.info(f"   Payload: {payload}")
+    browser = order_modal_page
+    
+    browser.find_element(*ORDER_NAME_FIELD).send_keys("QA Tester")
+    browser.find_element(*ORDER_COUNTRY_FIELD).send_keys("Spain")
+    browser.find_element(*ORDER_CITY_FIELD).send_keys("Barcelona")
+    browser.find_element(*ORDER_CARD_FIELD).send_keys("1234567890")
+    browser.find_element(*ORDER_MONTH_FIELD).send_keys("12")
+    browser.find_element(*ORDER_YEAR_FIELD).send_keys("2028")
+    
+    target_field = browser.find_element(*field_locator)
+    target_field.clear()
+    target_field.send_keys(payload)
+    
+    browser.find_element(*PURCHASE_BUTTON).click()
+    
+    try:
+        WebDriverWait(browser, TIMEOUT).until(
+            EC.visibility_of_element_located(PURCHASE_CONFIRM_MSG)
+        )
+        logging.info(f"✅ Purchase completed safely with SQL payload in {field_name}")
+        browser.find_element(*CONFIRM_OK_BUTTON).click()
+    except TimeoutException:
+        logging.info(f"✅ Purchase blocked or failed safely with SQL payload in {field_name}")
+    
+    logging.info(f"✅ TC-PURCH-022 ({field_name}): PASSED")
+
+
+@pytest.mark.parametrize("field_name, field_locator, payload", [
+    ("name", ORDER_NAME_FIELD, "<script>alert('XSS')</script>"),
+    ("country", ORDER_COUNTRY_FIELD, "<img src=x onerror=alert('XSS')>"),
+    ("city", ORDER_CITY_FIELD, "<svg/onload=alert('XSS')>"),
+    ("card", ORDER_CARD_FIELD, "javascript:alert('XSS')"),
+])
+def test_xss_all_order_fields(order_modal_page, field_name, field_locator, payload):
+    """TC-PURCH-023: XSS in All Order Form Fields"""
+    logging.info(f"🚀 TC-PURCH-023: XSS in {field_name} field")
+    logging.info(f"   Payload: {payload}")
+    browser = order_modal_page
+    
+    browser.find_element(*ORDER_NAME_FIELD).send_keys("QA Tester")
+    browser.find_element(*ORDER_COUNTRY_FIELD).send_keys("Spain")
+    browser.find_element(*ORDER_CITY_FIELD).send_keys("Barcelona")
+    browser.find_element(*ORDER_CARD_FIELD).send_keys("1234567890")
+    browser.find_element(*ORDER_MONTH_FIELD).send_keys("12")
+    browser.find_element(*ORDER_YEAR_FIELD).send_keys("2028")
+    
+    target_field = browser.find_element(*field_locator)
+    target_field.clear()
+    target_field.send_keys(payload)
+    
+    browser.find_element(*PURCHASE_BUTTON).click()
+    
+    alert_text = wait_for_alert_and_get_text(browser, 2)
+    
+    if alert_text and 'XSS' in alert_text:
+        logging.critical("="*50)
+        logging.critical("🚨 XSS VULNERABILITY DETECTED 🚨")
+        logging.critical(f"XSS payload executed in {field_name} field")
+        logging.critical("="*50)
+        pytest.fail(f"XSS vulnerability in {field_name} field")
+    
+    try:
+        WebDriverWait(browser, TIMEOUT).until(
+            EC.visibility_of_element_located(PURCHASE_CONFIRM_MSG)
+        )
+        logging.info(f"✅ XSS payload sanitized in {field_name}, purchase completed safely")
+        browser.find_element(*CONFIRM_OK_BUTTON).click()
+    except TimeoutException:
+        logging.info(f"✅ Purchase blocked safely with XSS payload in {field_name}")
+    
+    logging.info(f"✅ TC-PURCH-023 ({field_name}): PASSED")
+
+
+@pytest.mark.parametrize("field_name, field_locator, payload", [
+    ("name", ORDER_NAME_FIELD, "Test@#$%^&*()"),
+    ("country", ORDER_COUNTRY_FIELD, "España™®©"),
+    ("city", ORDER_CITY_FIELD, "Test<>?:|\\"),
+    ("card", ORDER_CARD_FIELD, "1234-5678-9012-3456"),
+])
+def test_special_characters_all_order_fields(order_modal_page, field_name, field_locator, payload):
+    """TC-PURCH-024: Special Characters in All Order Form Fields"""
+    logging.info(f"🚀 TC-PURCH-024: Special characters in {field_name} field")
+    logging.info(f"   Payload: {payload}")
+    browser = order_modal_page
+    
+    browser.find_element(*ORDER_NAME_FIELD).send_keys("QA Tester")
+    browser.find_element(*ORDER_COUNTRY_FIELD).send_keys("Spain")
+    browser.find_element(*ORDER_CITY_FIELD).send_keys("Barcelona")
+    browser.find_element(*ORDER_CARD_FIELD).send_keys("1234567890")
+    browser.find_element(*ORDER_MONTH_FIELD).send_keys("12")
+    browser.find_element(*ORDER_YEAR_FIELD).send_keys("2028")
+    
+    target_field = browser.find_element(*field_locator)
+    target_field.clear()
+    target_field.send_keys(payload)
+    
+    browser.find_element(*PURCHASE_BUTTON).click()
+    
+    alert_text = wait_for_alert_and_get_text(browser, 2)
+    assert alert_text is None, f"Unexpected alert: {alert_text}"
+    
+    try:
+        WebDriverWait(browser, TIMEOUT).until(
+            EC.visibility_of_element_located(PURCHASE_CONFIRM_MSG)
+        )
+        logging.info(f"✅ Special characters handled in {field_name}")
+        browser.find_element(*CONFIRM_OK_BUTTON).click()
+    except TimeoutException:
+        pytest.fail(f"Purchase failed with special characters in {field_name}")
+    
+    logging.info(f"✅ TC-PURCH-024 ({field_name}): PASSED")
+
+
+@pytest.mark.parametrize("test_input", [
+    "Test\x00User",
+    "\x00Test",
+    "Test\x00",
+])
+def test_null_bytes_order_form(order_modal_page, test_input):
+    """TC-PURCH-025: Null Bytes in Order Form"""
+    logging.info(f"🚀 TC-PURCH-025: Null bytes test - {repr(test_input)}")
+    browser = order_modal_page
+    
+    try:
+        fill_order_form(browser, test_input, "Spain", "Barcelona", "1234567890", "12", "2028")
+        browser.find_element(*PURCHASE_BUTTON).click()
+        
+        alert_text = wait_for_alert_and_get_text(browser, 2)
+        
+        try:
+            WebDriverWait(browser, TIMEOUT).until(
+                EC.visibility_of_element_located(PURCHASE_CONFIRM_MSG)
+            )
+            logging.info("✅ Null bytes handled safely")
+            browser.find_element(*CONFIRM_OK_BUTTON).click()
+        except TimeoutException:
+            logging.info("✅ Purchase blocked or handled safely")
+        
+    except Exception as e:
+        logging.info(f"✅ Exception caught (expected for null bytes): {e}")
+    
+    logging.info(f"✅ TC-PURCH-025 ({repr(test_input)}): PASSED")
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])
