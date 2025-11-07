@@ -179,6 +179,91 @@ Ensures cart totals dynamically update when items removed - critical for UX and 
 
 ---
 
+#### TC-PURCH-015: Add Same Product Multiple Times
+**Priority:** High  
+**Type:** Positive Test  
+
+**Test Steps:**
+1. Navigate to home
+2. Add first product to cart
+3. Return to home
+4. Add same product again
+5. Navigate to cart
+6. Count items in cart
+7. Verify total = price × 2
+
+**Expected Result:**
+- Product appears twice as separate items (DemoBlaze has no quantity selector)
+- Cart shows 2 items
+- Total = price × 2
+
+**Note:**
+DemoBlaze does NOT implement quantity selection. Adding same product multiple times creates duplicate cart entries.
+
+---
+
+#### TC-PURCH-018: Add Many Products to Cart
+**Priority:** Medium  
+**Type:** Boundary Test  
+
+**Test Steps:**
+1. Add 10 products to cart (same product)
+2. Navigate to cart
+3. Verify 10 items present
+4. Verify total = price × 10
+
+**Expected Result:**
+- System handles 10 items without issues
+- Total calculates correctly
+- No performance degradation
+
+**Why 10 and not 100:**
+- Realistic boundary test
+- Avoids excessive test execution time
+- Still validates cart can handle multiple items
+
+---
+
+#### TC-PURCH-019: Delete All Items From Cart
+**Priority:** Medium  
+**Type:** Positive Test  
+
+**Test Steps:**
+1. Add 2 products
+2. Navigate to cart
+3. Delete first item
+4. Wait for removal
+5. Delete second item
+6. Verify cart is empty
+
+**Expected Result:**
+- Both items deleted successfully
+- Cart shows 0 items
+- No errors during deletion loop
+
+---
+
+#### TC-PURCH-017: Cart Empty After Successful Purchase
+**Priority:** High  
+**Type:** Positive Test  
+
+**Test Steps:**
+1. Add product to cart (via fixture)
+2. Complete purchase successfully
+3. Click OK on confirmation
+4. Navigate to cart
+5. Verify cart is empty
+
+**Expected Result:**
+- Cart cleared after successful purchase
+- User can start new shopping session
+- No orphaned items
+
+**Why This Test Matters:**
+Ensures proper session management - prevents confusion and ensures clean state for next purchase.
+
+---
+
 ### Functional Tests - User Scenarios
 
 #### TC-PURCH-012: Purchase as Logged-In User
@@ -223,6 +308,68 @@ DemoBlaze does NOT implement user profile data storage. Even when logged in, use
 - Modal closes without errors
 - User returns to cart page
 - Cart contents preserved
+
+---
+
+#### TC-PURCH-016: Navigation After Purchase
+**Priority:** Medium  
+**Type:** Positive Test  
+
+**Test Steps:**
+1. Complete purchase successfully
+2. Click OK on confirmation modal
+3. Observe current URL
+4. Verify still on DemoBlaze site
+
+**Expected Result:**
+- User remains on DemoBlaze
+- No redirect to external site
+- URL contains BASE_URL
+
+**Note:**
+This test verifies basic navigation - actual destination page may vary (home, cart, etc.)
+
+---
+
+#### TC-PURCH-020: Open and Close Order Modal Multiple Times
+**Priority:** Low  
+**Type:** Robustness Test  
+
+**Test Steps:**
+1. Add item to cart (via fixture)
+2. Click "Place Order" → modal opens
+3. Click "Close" → modal closes
+4. Repeat steps 2-3 two more times (3 iterations total)
+5. Verify no errors or state issues
+
+**Expected Result:**
+- Modal opens/closes reliably each time
+- No memory leaks or DOM issues
+- Cart contents preserved throughout
+
+**Why This Test Matters:**
+Users may open/close modal multiple times while deciding. System must handle this gracefully.
+
+---
+
+#### TC-PURCH-021: Access Cart Without Adding Products
+**Priority:** Medium  
+**Type:** Edge Case Test  
+
+**Test Steps:**
+1. Navigate to home
+2. Click cart link (without adding products)
+3. Verify cart page loads
+4. Verify cart is empty
+5. Verify "Place Order" button still visible
+
+**Expected Result:**
+- Empty cart accessible
+- No errors
+- "Place Order" button visible (related to Bug #13)
+
+**Note:**
+This test documents that "Place Order" button is always visible, even for empty cart (Bug #13).
 
 ---
 
@@ -382,7 +529,96 @@ DemoBlaze does NOT validate card format - accepts any input. This tests system r
 
 ---
 
-<a name="bugs"></a>
+### Security Tests - Order Form (Comprehensive)
+
+#### TC-PURCH-022: SQL Injection in All Order Form Fields
+**Priority:** Critical  
+**Type:** Security Test (Parametrized - 5 iterations)  
+
+**Fields tested:**
+- Name field
+- Country field
+- City field
+- Card field
+
+**Payloads:**
+- `' OR '1'='1`
+- `admin'--`
+
+**Expected Result:**
+- SQL payloads blocked or sanitized
+- No database manipulation
+- Purchase completes safely or fails gracefully
+
+**Test runs:** 5 (4 fields × multiple payloads)
+
+---
+
+#### TC-PURCH-023: XSS in All Order Form Fields
+**Priority:** Critical  
+**Type:** Security Test (Parametrized - 4 iterations)  
+
+**Fields tested:**
+- Name field
+- Country field
+- City field  
+- Card field
+
+**Payloads:**
+- `<script>alert('XSS')</script>`
+- `<img src=x onerror=alert('XSS')>`
+- `<svg/onload=alert('XSS')>`
+- `javascript:alert('XSS')`
+
+**Expected Result:**
+- XSS payloads sanitized
+- No script execution
+- Purchase completes safely
+
+**Critical check:**
+If alert appears with 'XSS' text → VULNERABILITY DETECTED → Test fails
+
+**Test runs:** 4 (one payload per field)
+
+---
+
+#### TC-PURCH-024: Special Characters in All Order Form Fields
+**Priority:** Medium  
+**Type:** Robustness Test (Parametrized - 4 iterations)  
+
+**Fields tested:**
+- Name: `Test@#$%^&*()`
+- Country: `España™®©`
+- City: `Test<>?:|\\`
+- Card: `1234-5678-9012-3456`
+
+**Expected Result:**
+- Special characters handled gracefully
+- No crashes
+- Purchase completes successfully
+
+**Test runs:** 4 (one per field)
+
+---
+
+#### TC-PURCH-025: Null Bytes in Order Form
+**Priority:** High  
+**Type:** Security Test (Parametrized - 3 iterations)  
+
+**Test inputs:**
+- `Test\x00User` (null byte in middle)
+- `\x00Test` (null byte at start)
+- `Test\x00` (null byte at end)
+
+**Expected Result:**
+- Null bytes handled safely
+- No string truncation exploits
+- Purchase blocks or completes safely
+
+**Test runs:** 3
+
+---
+
 ## 3. Related Bugs
 
 | Bug ID | Severity | Title | Test Case | Status |
@@ -810,7 +1046,265 @@ DemoBlaze updates DOM first, then recalculates total asynchronously.
 
 ---
 
+### `test_add_same_product_multiple_times(browser)`
+
+**Flow:**
+1. Add first product → get price
+2. Add same product again
+3. Navigate to cart
+4. Count items in cart
+5. Verify 2 items present
+6. Verify total = price × 2
+
+**Key check:**
+```python
+cart_items = browser.find_elements(By.XPATH, "//tbody[@id='tbodyid']/tr")
+assert len(cart_items) == 2
+```
+
+DemoBlaze creates duplicate entries (no quantity field).
+
+---
+
+### `test_navigation_after_purchase(order_modal_page)`
+
+**Flow:**
+1. Complete purchase
+2. Click OK on confirmation
+3. Get current URL
+4. Verify still on DemoBlaze domain
+
+**Purpose:**
+Ensures no unexpected redirects to external sites after purchase.
+
+---
+
+### `test_cart_empty_after_purchase(order_modal_page)`
+
+**Flow:**
+1. Complete purchase (cart has 1 item)
+2. Click OK
+3. Navigate to cart
+4. Count items
+5. Verify 0 items
+
+**Why important:**
+Confirms proper session management - cart clears after successful purchase.
+
+---
+
+### `test_add_many_products_to_cart(browser)`
+
+**Flow:**
+1. Loop 10 times:
+   - Add product
+   - Accumulate expected total
+2. Navigate to cart
+3. Verify 10 items present
+4. Verify total matches expected
+
+**Why 10 not 100:**
+- Realistic boundary test
+- Reasonable execution time
+- Still validates cart handles multiple items
+
+---
+
+### `test_delete_all_items_from_cart(browser)`
+
+**Flow:**
+1. Add 2 products
+2. Navigate to cart
+3. Loop to delete both items:
+   - Click delete
+   - Wait for item removal
+4. Verify cart empty
+
+**Key loop:**
+```python
+for i in range(initial_count):
+    browser.find_element(*DELETE_ITEM_LINK).click()
+    # Wait for count to decrease
+    WebDriverWait(browser, TIMEOUT).until(
+        lambda d: len(d.find_elements(...)) == initial_count - (i + 1)
+    )
+```
+
+---
+
+### `test_open_close_order_modal_multiple_times(cart_page)`
+
+**Flow:**
+1. Repeat 3 times:
+   - Click "Place Order"
+   - Verify modal opens
+   - Click "Close"
+   - Verify modal closes
+   - Verify back on cart
+
+**Purpose:**
+Ensures modal can be opened/closed multiple times without issues.
+
+---
+
+### `test_access_empty_cart(browser)`
+
+**Flow:**
+1. Navigate to home
+2. Go directly to cart (no products added)
+3. Verify cart is empty
+4. Verify "Place Order" button still visible
+
+**Documents Bug #13:**
+"Place Order" button visible even for empty cart.
+
+---
+
+### `test_sql_injection_all_order_fields(...)` **(Parametrized)**
+
+**Runs 5 times** - tests SQL injection in each field:
+
+| Field | Payload |
+|-------|---------|
+| Name | `' OR '1'='1` |
+| Name | `admin'--` |
+| Country | `' OR '1'='1` |
+| City | `' OR '1'='1` |
+| Card | `' OR '1'='1` |
+
+**Logic:**
+1. Fill all fields with valid data
+2. Replace target field with SQL payload
+3. Submit purchase
+4. Verify purchase completes safely or blocks appropriately
+
+---
+
+### `test_xss_all_order_fields(...)` **(Parametrized)**
+
+**Runs 4 times** - tests XSS in each field:
+
+| Field | Payload |
+|-------|---------|
+| Name | `<script>alert('XSS')</script>` |
+| Country | `<img src=x onerror=alert('XSS')>` |
+| City | `<svg/onload=alert('XSS')>` |
+| Card | `javascript:alert('XSS')` |
+
+**Critical check:**
+```python
+if alert_text and 'XSS' in alert_text:
+    logging.critical("🚨 XSS VULNERABILITY DETECTED 🚨")
+    pytest.fail(f"XSS vulnerability in {field_name} field")
+```
+
+If XSS executes → test fails with security warning.
+
+---
+
+### `test_special_characters_all_order_fields(...)` **(Parametrized)**
+
+**Runs 4 times** - tests special characters:
+
+Tests various special characters in each field to ensure robustness.
+
+---
+
+### `test_null_bytes_order_form(...)` **(Parametrized)**
+
+**Runs 3 times** - tests null byte injection:
+
+Ensures null bytes don't cause string truncation exploits.
+
+---
+
 ### `test_purchase_as_logged_in_user(browser)`
+
+**Flow:**
+1. Login
+2. Add product
+3. Navigate to cart
+4. Open order modal
+5. Verify name field is empty (DemoBlaze doesn't auto-fill)
+6. Fill form manually
+7. Complete purchase
+8. Verify confirmation
+
+**Key Assertion:**
+```python
+assert name_field.get_attribute("value") == "", \
+    "Name field should NOT auto-fill"
+```
+
+Documents DemoBlaze limitation.
+
+---
+
+### `test_order_modal_close_button(order_modal_page)`
+
+**Flow:**
+1. Verify modal visible
+2. Click "Close"
+3. Wait for modal to disappear
+4. Verify back on cart page
+
+**Why test UI buttons:**
+- Ensures users can cancel checkout
+- Verifies modal behavior correct
+- Cart contents preserved
+
+---
+
+### `test_purchase_empty_cart(browser)` **(xfail)**
+
+**Flow:**
+1. Navigate to cart without adding products
+2. Click "Place Order" (shouldn't be possible but is)
+3. Fill form
+4. Submit
+5. Observe confirmation appears (BUG)
+6. Verify "Amount: 0 USD"
+7. Fail with message about Bug #13
+
+**Marked xfail:**
+```python
+@pytest.mark.xfail(reason="Bug #13: System allows purchasing with empty cart")
+```
+
+Test will fail as expected until bug fixed.
+
+---
+
+### `test_order_form_validation_robustness_security(...)` **(Parametrized)**
+
+**Runs 8 times** with different data:
+
+| Test ID | Data | Expected Result |
+|---------|------|-----------------|
+| TC-PURCH-004 | All empty | Alert |
+| TC-PURCH-005 | Name only | Alert |
+| TC-PURCH-006 | Card only | Alert |
+| TC-PURCH-007 | Letters in card | Purchase completes |
+| TC-PURCH-008 | Letters in month/year | Purchase completes |
+| TC-PURCH-009 | 1000 char name | Purchase completes |
+| TC-PURCH-010 | SQL injection | Purchase completes safely |
+| TC-PURCH-011 | XSS payload | Purchase completes safely |
+
+**Logic:**
+```python
+if expected_alert:
+    # Validation tests
+    alert_text = wait_for_alert_and_get_text(browser)
+    assert alert_text == expected_alert
+else:
+    # Robustness/security tests
+    assert no unexpected alert
+    assert purchase completes or fails gracefully
+```
+
+---
+
+## 10. Execution Guide
 
 **Flow:**
 1. Login
@@ -962,20 +1456,27 @@ test_results/purchase/report_chrome_2025-11-07_15-30-45.html
 | Test Category | Tests | Pass | Xfail | Total |
 |--------------|-------|------|-------|-------|
 | Purchase Flow | 1 | 1 | 0 | 1 |
-| Cart Operations | 3 | 3 | 0 | 3 |
+| Cart Operations | 7 | 7 | 0 | 7 |
 | User Scenarios | 1 | 1 | 0 | 1 |
-| UI Interaction | 1 | 1 | 0 | 1 |
+| UI Interaction | 4 | 4 | 0 | 4 |
 | Validation | 8 | 8 | 0 | 8 |
+| Security - SQL Injection | 5 | 5 | 0 | 5 |
+| Security - XSS | 4 | 4 | 0 | 4 |
+| Security - Special Chars | 4 | 4 | 0 | 4 |
+| Security - Null Bytes | 3 | 3 | 0 | 3 |
 | Known Bugs | 1 | 0 | 1 | 1 |
-| **TOTAL** | **15** | **14** | **1** | **15** |
+| **TOTAL TESTS** | **28** | **27** | **1** | **28** |
+| **TOTAL RUNS** | **~41** | **~40** | **1** | **~41** |
+
+**Note:** Some tests are parametrized, resulting in more test runs than test functions.
 
 ### Success Criteria
 
 Test suite PASSED if:
-- 14 stable tests pass
+- 27 stable tests pass
 - 1 xfail test fails as expected (Bug #13)
 - No unexpected failures
-- Execution time under 3 minutes
+- Execution time under 5 minutes
 
 ### Performance Benchmarks
 
@@ -983,7 +1484,7 @@ Test suite PASSED if:
 - Simple tests: 8-12 seconds each
 - Multi-item tests: 15-20 seconds
 - Parametrized tests: 5-8 seconds per iteration
-- Total suite: ~2.5 minutes
+- Total suite: ~4-5 minutes (varies by number of products added)
 
 ---
 
