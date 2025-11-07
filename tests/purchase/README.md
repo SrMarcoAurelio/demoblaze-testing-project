@@ -1,14 +1,14 @@
-# Test Suite: Login & Authentication
+# Test Suite: Purchase & Cart Functionality
 
-**Module:** `test_dem_login.py`  
+**Module:** `test_purchase.py`  
 **Author:** Arévalo, Marc  
 **Created:** November 2025  
-**Version:** 1.0  
+**Version:** 2.0 - Enhanced logging, improved waits, clean code  
 **Application Under Test:** DemoBlaze (https://www.demoblaze.com/)
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
 1. [Overview](#overview)
 2. [Test Cases Covered](#test-cases)
@@ -19,11 +19,10 @@
 7. [Fixtures Deep Dive](#fixtures)
 8. [Helper Functions](#helpers)
 9. [Test Functions Breakdown](#tests)
-10. [How to Obtain Locators](#locators)
-11. [Execution Guide](#execution)
-12. [Expected Results](#results)
-13. [Troubleshooting](#troubleshooting)
-14. [Best Practices Applied](#practices)
+10. [Execution Guide](#execution)
+11. [Expected Results](#results)
+12. [Troubleshooting](#troubleshooting)
+13. [Best Practices Applied](#practices)
 
 ---
 
@@ -32,176 +31,354 @@
 
 ### Purpose
 
-This test suite automates the validation of DemoBlaze's authentication system, including login, registration, and session management functionalities. The primary goal is to verify both positive scenarios (successful login) and negative scenarios (failed login attempts, security vulnerabilities).
+This test suite automates comprehensive validation of DemoBlaze's purchase and cart functionality, including:
+- Complete purchase flow (add to cart, checkout, payment)
+- Cart operations (add, delete, update quantities)
+- Price calculations and verification
+- Order form validation
+- Security testing (SQL injection, XSS in order form)
+- Purchase scenarios (guest vs logged-in user)
 
 ### Scope
 
 **In Scope:**
-- Valid login with correct credentials
-- Invalid login scenarios (wrong password, non-existent user, empty fields)
-- Weak password acceptance (security vulnerability)
-- Username enumeration vulnerability
-- Session state verification
+- Adding products to cart
+- Cart total calculation (single and multiple items)
+- Deleting items from cart
+- Price verification throughout purchase flow
+- Order form validation (required fields)
+- Complete purchase flow with confirmation
+- Purchase as guest user
+- Purchase as logged-in user
+- Empty cart validation
+- Order modal interaction (open/close)
+- SQL Injection attempts in order form
+- Cross-Site Scripting (XSS) in order form
+- Boundary tests (very long inputs in order form)
+- Non-numeric input validation (card, month, year)
 
 **Out of Scope:**
-- Password recovery functionality
-- Remember me checkbox
-- Social login integrations
-- Multi-factor authentication (not implemented in DemoBlaze)
+- Product catalog browsing (separate module)
+- Product search functionality
+- Product filtering/sorting
+- Quantity selection (DemoBlaze doesn't implement this)
+- Coupon/discount codes
+- Multiple shipping addresses
+- Payment gateway integration (DemoBlaze uses mock payment)
 
-### Why This Module First?
+### Version History
 
-Authentication is the foundation of any web application. Without proper login functionality:
-- Users cannot access protected features
-- E-commerce transactions cannot be completed
-- Security vulnerabilities expose user data
+**v2.0 (Current):**
+- Enhanced logging for real-time feedback
+- Eliminated `time.sleep()` in favor of explicit waits
+- Added `wait_for_cart_total_update()` helper
+- Improved wait strategies for cart recalculation
+- Clean code (no excessive comments)
+- Comprehensive docstrings moved to README
 
-Testing login first ensures:
-1. Base functionality works before testing dependent modules
-2. Critical security flaws are identified early
-3. Other test suites can reuse login functions
+**v1.0:**
+- Initial release with basic purchase tests
 
 ---
 
 <a name="test-cases"></a>
 ## 2. Test Cases Covered
 
-### TC-LOGIN-001: Valid Login
-**Objective:** Verify successful login with valid credentials  
+### Functional Tests - Purchase Flow
+
+#### TC-PURCH-001: Successful Purchase with Price Verification
 **Priority:** Critical  
 **Type:** Positive Test  
-**Automation Status:** ✅ Automated
 
 **Test Steps:**
-1. Navigate to DemoBlaze homepage
-2. Click "Log in" button in navigation bar
-3. Enter valid username
-4. Enter valid password
-5. Click "Log in" submit button
+1. Add product to cart (via fixture)
+2. Navigate to cart
+3. Click "Place Order"
+4. Get cart total before purchase
+5. Fill order form with valid data
+6. Submit purchase
+7. Verify confirmation modal appears
+8. Extract "Amount" from confirmation
+9. Compare with cart total
 
 **Expected Result:**
-- User successfully authenticated
-- "Log out" button appears in navbar
-- Username displayed as "Welcome [username]"
-- Modal closes automatically
+- Purchase completes successfully
+- Confirmation shows "Thank you for your purchase!"
+- Amount in confirmation matches cart total exactly
+- No price discrepancies
+
+**Why This Test Matters:**
+Critical for e-commerce - price integrity throughout checkout ensures:
+- Customer trust
+- Financial accuracy
+- No revenue loss
 
 ---
 
-### TC-LOGIN-002: Invalid Password
-**Objective:** Verify error handling for incorrect password  
+#### TC-PURCH-002: Multiple Items Total Calculation
 **Priority:** High  
-**Type:** Negative Test  
-**Automation Status:** ✅ Automated
+**Type:** Positive Test  
 
 **Test Steps:**
-1. Navigate to login modal
-2. Enter valid username (existing user)
-3. Enter incorrect password
-4. Click submit
+1. Navigate to home
+2. Add first product (capture price1)
+3. Return to home
+4. Add second product (capture price2)
+5. Navigate to cart
+6. Wait for total to calculate
+7. Verify total = price1 + price2
 
 **Expected Result:**
-- Login rejected
-- JavaScript alert displays: "Wrong password."
-- User remains logged out
-- Modal remains open
+- Cart total equals sum of individual prices
+- Calculation is accurate
+
+**Note:**
+DemoBlaze calculates cart total asynchronously via JavaScript. Test uses `wait_for_cart_total_update()` to ensure total is calculated before assertion.
 
 ---
 
-### TC-LOGIN-003: Non-existent User
-**Objective:** Verify error for username that doesn't exist  
+### Functional Tests - Cart Operations
+
+#### TC-PURCH-003: Delete Item from Cart
 **Priority:** High  
-**Type:** Negative Test  
-**Automation Status:** ✅ Automated
+**Type:** Positive Test  
 
 **Test Steps:**
-1. Navigate to login modal
-2. Enter non-existent username
-3. Enter any password
-4. Click submit
+1. Add item to cart (via fixture)
+2. Navigate to cart
+3. Verify item is visible
+4. Click "Delete" link
+5. Wait for item removal
+6. Verify item no longer in cart
 
 **Expected Result:**
-- Login rejected
-- JavaScript alert displays: "User does not exist."
-- User remains logged out
+- Item successfully removed from DOM
+- NoSuchElementException when trying to find deleted item
 
 ---
 
-### TC-LOGIN-004: Empty Fields Validation
-**Objective:** Verify client-side validation for empty fields  
+#### TC-PURCH-003B: Delete Item and Recalculate Total
+**Priority:** High  
+**Type:** Positive Test  
+
+**Test Steps:**
+1. Add two products (price1, price2)
+2. Navigate to cart
+3. Verify total = price1 + price2
+4. Delete first item
+5. Wait for total recalculation
+6. Verify new total = price2
+
+**Expected Result:**
+- Initial total correct
+- After deletion, total recalculates correctly
+- Shows only remaining item's price
+
+**Why This Test Matters:**
+Ensures cart totals dynamically update when items removed - critical for UX and preventing checkout errors.
+
+---
+
+### Functional Tests - User Scenarios
+
+#### TC-PURCH-012: Purchase as Logged-In User
 **Priority:** Medium  
-**Type:** Negative Test  
-**Automation Status:** ✅ Automated
+**Type:** Positive Test  
 
 **Test Steps:**
-1. Navigate to login modal
-2. Leave username field empty
-3. Leave password field empty
-4. Click submit
+1. Login with test credentials
+2. Add product to cart
+3. Navigate to cart
+4. Click "Place Order"
+5. Verify order form fields are empty (no auto-fill)
+6. Fill form manually
+7. Complete purchase
+8. Verify confirmation with correct price
 
 **Expected Result:**
-- Form submission prevented
-- JavaScript alert displays: "Please fill out Username and Password."
-- No server request sent
+- Logged-in user can purchase successfully
+- Order form does NOT auto-fill (DemoBlaze limitation)
+- Purchase confirmation correct
+
+**Note:**
+DemoBlaze does NOT implement user profile data storage. Even when logged in, users must manually fill shipping/payment info. This test verifies this behavior.
 
 ---
 
-### TC-LOGIN-005: Weak Password Vulnerability
-**Objective:** Document security flaw - system accepts weak passwords  
-**Priority:** Critical  
-**Type:** Security Test  
-**Automation Status:** ✅ Automated (xfail)  
-**Related Bug:** #11
+### UI Interaction Tests
+
+#### TC-PURCH-013: Order Modal Close Button
+**Priority:** Low  
+**Type:** Functional Test  
 
 **Test Steps:**
-1. Register new user with password "123"
-2. Attempt login with that weak password
+1. Add item to cart (via fixture)
+2. Click "Place Order"
+3. Verify modal opens
+4. Click "Close" button
+5. Verify modal closes
+6. Verify returned to cart page
 
-**Current Behavior (BUG):**
-- System accepts "123" as valid password
-- No password complexity requirements enforced
-
-**Expected Behavior (Post-Fix):**
-- System should reject weak passwords
-- Minimum requirements should include:
-  - 8+ characters
-  - At least 1 uppercase letter
-  - At least 1 lowercase letter
-  - At least 1 number
-  - At least 1 special character
-
-**Test Status:** Marked as `xfail` (expected to fail) until bug is resolved
+**Expected Result:**
+- Modal closes without errors
+- User returns to cart page
+- Cart contents preserved
 
 ---
 
-### TC-LOGIN-006: Username Enumeration Vulnerability
-**Objective:** Document security flaw - different error messages reveal valid usernames  
+### Known Vulnerability Tests (xfail)
+
+#### TC-PURCH-014: Purchase with Empty Cart
 **Priority:** Critical  
-**Type:** Security Test  
-**Automation Status:** ✅ Automated (xfail)  
-**Related Bug:** #10
+**Type:** Security/UX Test  
+**Status:** Expected to fail (Bug #13)
 
 **Test Steps:**
-1. Attempt login with existing username + wrong password
-2. Note error message: "Wrong password."
-3. Attempt login with non-existent username + any password
-4. Note error message: "User does not exist."
-5. Compare messages
+1. Navigate to cart WITHOUT adding products
+2. Click "Place Order" (should be disabled but isn't)
+3. Fill order form with valid data
+4. Submit purchase
+5. Observe confirmation appears
 
 **Current Behavior (BUG):**
-- Different error messages reveal whether username exists
-- Attacker can enumerate valid usernames
+- System allows purchase with empty cart
+- Confirmation shows "Amount: 0 USD"
+- No validation prevents this
 
 **Expected Behavior (Post-Fix):**
-- Generic error message for all failed login attempts
-- Example: "Invalid username or password."
-- Prevents username enumeration attacks
+- "Place Order" button disabled for empty cart
+- OR alert: "Your cart is empty"
+- Prevent meaningless transactions
 
-**Security Impact:**
-- Attackers can build list of valid usernames
-- Targeted password attacks become easier
-- OWASP Top 10 vulnerability
+**Security/Business Impact:**
+- Creates invalid orders in database
+- Wastes server resources
+- Poor user experience
+- Potential for abuse
 
-**Test Status:** Marked as `xfail` until bug is resolved
+**Test Status:** Marked as `xfail` until Bug #13 is resolved
+
+---
+
+### Validation Tests - Order Form
+
+#### TC-PURCH-004: Empty Form Validation
+**Priority:** High  
+**Type:** Negative Test (Parametrized)  
+
+**Test Data:**
+All fields empty
+
+**Expected Result:**
+- Alert: "Please fill out Name and Creditcard."
+- Purchase not submitted
+
+---
+
+#### TC-PURCH-005: Name Only (Missing Card)
+**Priority:** High  
+**Type:** Negative Test (Parametrized)  
+
+**Test Data:**
+- Name: "QA Tester"
+- Card: (empty)
+
+**Expected Result:**
+- Alert: "Please fill out Name and Creditcard."
+
+---
+
+#### TC-PURCH-006: Card Only (Missing Name)
+**Priority:** High  
+**Type:** Negative Test (Parametrized)  
+
+**Test Data:**
+- Name: (empty)
+- Card: "1234567890"
+
+**Expected Result:**
+- Alert: "Please fill out Name and Creditcard."
+
+---
+
+### Robustness Tests - Order Form
+
+#### TC-PURCH-007: Non-Numeric Card Number
+**Priority:** Medium  
+**Type:** Robustness Test (Parametrized)  
+
+**Test Data:**
+- Card: "abcdefg"
+
+**Expected Result:**
+- System handles gracefully
+- Purchase completes or shows appropriate error
+- No crash
+
+**Note:**
+DemoBlaze does NOT validate card format - accepts any input. This tests system robustness.
+
+---
+
+#### TC-PURCH-008: Non-Numeric Month/Year
+**Priority:** Medium  
+**Type:** Robustness Test (Parametrized)  
+
+**Test Data:**
+- Month: "abc"
+- Year: "def"
+
+**Expected Result:**
+- System handles without crashing
+- Purchase may complete (no validation)
+
+---
+
+#### TC-PURCH-009: Very Long Name (1000 chars)
+**Priority:** Medium  
+**Type:** Boundary Test (Parametrized)  
+
+**Test Data:**
+- Name: "a" * 1000
+
+**Expected Result:**
+- System handles large input
+- No buffer overflow
+- No crash
+
+---
+
+### Security Tests - Order Form
+
+#### TC-PURCH-010: SQL Injection in Name Field
+**Priority:** Critical  
+**Type:** Security Test (Parametrized)  
+
+**Payload:**
+```
+' OR '1'='1
+```
+
+**Expected Result:**
+- SQL injection blocked or sanitized
+- Purchase completes safely
+- No database manipulation
+
+---
+
+#### TC-PURCH-011: XSS in City Field
+**Priority:** Critical  
+**Type:** Security Test (Parametrized)  
+
+**Payload:**
+```html
+<script>alert(1)</script>
+```
+
+**Expected Result:**
+- XSS payload sanitized
+- No script execution
+- Purchase completes safely
 
 ---
 
@@ -210,17 +387,12 @@ Testing login first ensures:
 
 | Bug ID | Severity | Title | Test Case | Status |
 |--------|----------|-------|-----------|--------|
-| #10 | High | Username enumeration vulnerability | TC-LOGIN-006 | Open |
-| #11 | High | System accepts weak passwords | TC-LOGIN-005 | Open |
-| #12 | High | No rate limiting on login attempts | Not automated yet | Open |
+| #13 | High | System allows purchasing with empty cart | TC-PURCH-014 | Open |
 
-**Note on Bug #12:**
-Rate limiting tests require multiple rapid login attempts (100+ requests). This is not included in current test suite to avoid:
-- Overloading demo server
-- Extended test execution time
-- Potential IP blocking
-
-Recommendation: Test rate limiting manually or in dedicated security testing suite.
+**Bug #13 Details:**
+- **Impact:** Creates invalid orders, wastes resources
+- **Recommendation:** Add cart validation before checkout
+- **Expected Fix:** Disable "Place Order" button when cart empty
 
 ---
 
@@ -230,1898 +402,715 @@ Recommendation: Test rate limiting manually or in dedicated security testing sui
 ### File Structure
 
 ```
-tests/
-├── test_dem_login.py          # Executable test code
-└── test_dem_login.md          # This documentation
+project_root/
+├── tests/
+│   ├── login/
+│   │   └── ...
+│   └── purchase/
+│       ├── __init__.py
+│       ├── test_purchase.py
+│       └── README.md (this file)
+├── test_results/
+│   └── purchase/
+│       └── report_chrome_YYYY-MM-DD_HH-MM-SS.html
+├── conftest.py
+└── requirements.txt
 ```
 
 ### Code Organization
 
-The Python file is organized into 6 sections:
+The Python file is organized into 5 sections:
 
-1. **IMPORTS** - External libraries and dependencies
-2. **CONFIGURATION** - Constants and test data
-3. **FIXTURES** - Setup/teardown automation
-4. **HELPER FUNCTIONS** - Reusable utility functions
+1. **HEADER** - Module documentation
+2. **IMPORTS** - External libraries
+3. **CONFIGURATION** - Constants and locators
+4. **HELPERS & FIXTURES** - Reusable functions and setup
 5. **TEST CASES** - Actual test functions
-6. **EXECUTION BLOCK** - Optional direct execution
-
-### Design Pattern: Page Object Model (Simplified)
-
-While not a full POM implementation, the code follows POM principles:
-- Locators centralized in CONFIGURATION section
-- Business logic separated from test logic
-- Helper functions encapsulate page interactions
-- Tests focus on "what to test" not "how to test"
-
-**Why Simplified POM?**
-- Single page/modal being tested
-- Reduces complexity for portfolio project
-- Easier to understand for learning purposes
-- Can be extended to full POM if needed
 
 ---
 
 <a name="imports"></a>
 ## 5. Imports Explanation
 
-### Why Each Library is Needed
+### Core Selenium Imports
 
-#### `from selenium import webdriver`
-**Purpose:** Core Selenium library - controls browser automation  
-**What it does:**
-- Opens and closes browsers
-- Provides WebDriver interface
-- Manages browser sessions
+Same as login module:
+- `webdriver` - Browser control
+- `By` - Locator strategies
+- `WebDriverWait` & `expected_conditions` - Explicit waits
+- `TimeoutException`, `NoSuchElementException` - Error handling
 
-**Usage in code:**
+### Additional Imports
+
 ```python
-driver = webdriver.Chrome()  # Opens Chrome browser
+import re
 ```
+**Purpose:** Parse prices from strings
 
----
+DemoBlaze displays prices in various formats:
+- "$790"
+- "790 *includes tax"
+- "Amount: 790 USD"
 
-#### `from selenium.webdriver.common.by import By`
-**Purpose:** Locator strategy enum  
-**What it does:**
-- Defines how to find elements (ID, XPath, CSS, etc.)
-- Replaces deprecated methods like `find_element_by_id()`
-
-**Modern vs Deprecated:**
+The `parse_price()` function uses regex to extract numeric value:
 ```python
-# Modern (correct)
-element = driver.find_element(By.ID, "login2")
-
-# Deprecated (old way)
-element = driver.find_element_by_id("login2")
+match = re.search(r'\d+', price_str)
 ```
-
-**Why modern is better:**
-- More flexible
-- Better error messages
-- Future-proof
-
----
-
-#### `from selenium.webdriver.support.ui import WebDriverWait`
-**Purpose:** Explicit waits for dynamic content  
-**What it does:**
-- Waits for specific conditions before proceeding
-- Prevents "element not found" errors
-- More reliable than `time.sleep()`
-
-**Usage example:**
-```python
-WebDriverWait(driver, 10).until(
-    EC.presence_of_element_located((By.ID, "login2"))
-)
-```
-Translation: "Wait up to 10 seconds until element with ID 'login2' appears"
-
----
-
-#### `from selenium.webdriver.support import expected_conditions as EC`
-**Purpose:** Pre-built wait conditions  
-**What it does:**
-- Provides common waiting scenarios
-- Works with WebDriverWait
-
-**Common conditions:**
-- `presence_of_element_located` - Element exists in DOM
-- `visibility_of_element_located` - Element is visible
-- `element_to_be_clickable` - Element can be clicked
-- `alert_is_present` - JavaScript alert appeared
-
----
-
-#### `from selenium.common.exceptions import TimeoutException`
-**Purpose:** Handle timeout errors gracefully  
-**What it does:**
-- Catches when WebDriverWait times out
-- Allows custom error handling
-
-**Usage:**
-```python
-try:
-    WebDriverWait(driver, 10).until(EC.alert_is_present())
-except TimeoutException:
-    return None  # No alert appeared
-```
-
----
-
-#### `from webdriver_manager.chrome import ChromeDriverManager`
-**Purpose:** Automatic ChromeDriver management  
-**What it does:**
-- Downloads correct ChromeDriver version automatically
-- Matches Chrome browser version
-- Eliminates manual driver setup
-
-**Without WebDriver Manager:**
-1. Check Chrome version
-2. Download matching ChromeDriver
-3. Add to PATH or specify location
-4. Update when Chrome updates
-
-**With WebDriver Manager:**
-```python
-service = Service(ChromeDriverManager().install())
-driver = webdriver.Chrome(service=service)
-```
-Done. Automatic.
-
----
-
-#### `from selenium.webdriver.chrome.service import Service`
-**Purpose:** Manage ChromeDriver service  
-**What it does:**
-- Interfaces with ChromeDriver process
-- Required for WebDriver Manager integration
-
----
-
-#### `import pytest`
-**Purpose:** Testing framework  
-**What it does:**
-- Discovers and runs tests
-- Provides fixtures
-- Generates reports
-- Manages test lifecycle
-
-**Key features used:**
-- `@pytest.fixture` - Setup/teardown
-- `@pytest.mark.xfail` - Expected failures
-- `pytest.main()` - Programmatic execution
-- Assertions - Test validations
-
----
-
-#### `import time`
-**Purpose:** Time-related utilities  
-**What it does:**
-- Generate timestamps for unique usernames
-- Add small delays when needed (sparingly)
-
-**Usage in code:**
-```python
-timestamp = str(int(time.time()))  # "1699123456"
-unique_username = f"testuser_{timestamp}"
-```
-
-**Why unique usernames?**
-- Tests can be run multiple times
-- Avoid "username already exists" errors
-- Each test run is independent
 
 ---
 
 <a name="configuration"></a>
 ## 6. Configuration Variables
 
-### How These Values Were Determined
+### Base Configuration
 
-#### `BASE_URL = "https://www.demoblaze.com/"`
-**Source:** Manual - Known URL of application under test  
-**Type:** String constant  
-**Purpose:** Central point for site URL
-
-**Why constant?**
-- If site moves to different domain, change once
-- Easy to switch between environments:
-  ```python
-  # Development
-  BASE_URL = "https://dev.demoblaze.com/"
-  
-  # Production
-  BASE_URL = "https://www.demoblaze.com/"
-  ```
-
----
-
-#### `TIMEOUT = 10`
-**Source:** Industry best practice  
-**Type:** Integer (seconds)  
-**Purpose:** Maximum wait time for elements
-
-**Why 10 seconds?**
-- Standard in automation testing
-- Sufficient for slow networks
-- Not too long (tests don't hang forever)
-- Balances reliability vs speed
-
-**Used in:**
-- WebDriverWait calls
-- Implicit waits
-- Alert waiting
-
----
-
-#### `TEST_USERNAME = "testuser_qa_2024"`
-**Source:** Manually created test account  
-**Type:** String  
-**Purpose:** Valid username for positive tests
-
-**Prerequisites:**
-- Account must be pre-registered in DemoBlaze
-- Use strong password (for Bug #11 testing contrast)
-
-**Best Practice:**
-- Use descriptive username (includes "test" and year)
-- Easy to identify as test account
-- Can be filtered in production data
-
----
-
-#### `TEST_PASSWORD = "SecurePass123!"`
-**Source:** Manually defined  
-**Type:** String  
-**Purpose:** Strong password for valid login tests
-
-**Why this password?**
-- Demonstrates contrast with weak passwords
-- Meets security best practices:
-  - 8+ characters ✅
-  - Uppercase ✅
-  - Lowercase ✅
-  - Numbers ✅
-  - Special character ✅
-
----
-
-### Locators - How They Were Found
-
-#### `LOGIN_BUTTON_NAV = "login2"`
-**Element:** "Log in" button in navigation bar  
-**Type:** ID locator  
-**How obtained:**
-
-1. Navigate to https://www.demoblaze.com/
-2. Right-click "Log in" button
-3. Select "Inspect" or press F12
-4. HTML revealed:
-   ```html
-   <a id="login2" data-toggle="modal" data-target="#logInModal">Log in</a>
-   ```
-5. Extract ID: `login2`
-
-**Why use ID?**
-- Fastest locator strategy
-- Most reliable (IDs should be unique)
-- Less likely to break with UI changes
-
----
-
-#### `LOGIN_USERNAME_FIELD = "loginusername"`
-**Element:** Username input field in login modal  
-**Type:** ID locator  
-**How obtained:**
-
-1. Click "Log in" button to open modal
-2. Right-click username field
-3. Inspect element
-4. HTML:
-   ```html
-   <input type="text" class="form-control" id="loginusername" placeholder="Username">
-   ```
-5. Extract ID: `loginusername`
-
----
-
-#### `LOGIN_PASSWORD_FIELD = "loginpassword"`
-**Element:** Password input field in login modal  
-**Type:** ID locator  
-**How obtained:**
-
-1. Same modal as username field
-2. Inspect password field
-3. HTML:
-   ```html
-   <input type="password" class="form-control" id="loginpassword" placeholder="Password">
-   ```
-4. Extract ID: `loginpassword`
-
----
-
-#### `LOGIN_SUBMIT_BUTTON = "//button[text()='Log in']"`
-**Element:** Submit button inside login modal  
-**Type:** XPath locator  
-**How obtained:**
-
-1. Inspect submit button
-2. HTML:
-   ```html
-   <button type="button" class="btn btn-primary" onclick="logIn()">Log in</button>
-   ```
-3. No unique ID present
-4. Create XPath based on button text:
-   ```xpath
-   //button[text()='Log in']
-   ```
-
-**Why XPath here?**
-- No unique ID available
-- Text is distinctive
-- Multiple "Log in" elements exist, but only one is a button
-
-**XPath breakdown:**
-- `//` - Search anywhere in document
-- `button` - Element type
-- `[text()='Log in']` - Condition: text equals "Log in"
-
-**Alternative locators (not used):**
 ```python
-# By onclick attribute
-"//button[@onclick='logIn()']"
-
-# By classes (fragile)
-"button.btn.btn-primary"
+BASE_URL = "https://www.demoblaze.com/"
+TIMEOUT = 10
+EXPLICIT_WAIT = 5
 ```
 
-**Why text-based XPath is better:**
-- More readable
-- Less likely to break if CSS classes change
-- Self-documenting
+Same as login module.
 
----
+### Test Credentials
 
-#### `LOGOUT_BUTTON = "logout2"`
-**Element:** "Log out" button in navbar  
-**Type:** ID locator  
-**How obtained:**
+```python
+TEST_USERNAME = "testuser_qa_2024"
+TEST_PASSWORD = "SecurePass123!"
+```
 
-1. Login first to make element visible
-2. Inspect "Log out" button
-3. HTML:
+Used in TC-PURCH-012 (logged-in user purchase).
+
+### Locators Organization
+
+Locators grouped by functionality:
+
+**Product Locators:**
+- `FIRST_PRODUCT_LINK` - First product on home page
+- `SECOND_PRODUCT_LINK` - Second product
+- `PRODUCT_PRICE_HEADER` - Price on product detail page
+- `ADD_TO_CART_BUTTON` - Add to cart button
+
+**Navigation Locators:**
+- `HOME_NAV_LINK` - Home link in navbar
+- `CART_NAV_LINK` - Cart link in navbar
+
+**Cart Locators:**
+- `PLACE_ORDER_BUTTON` - Checkout button
+- `DELETE_ITEM_LINK` - Delete button for first item
+- `CART_TOTAL_PRICE` - Total price display
+- `FIRST_ITEM_IN_CART_NAME` - First item name in cart table
+
+**Order Modal Locators:**
+- `ORDER_NAME_FIELD` - Name input
+- `ORDER_COUNTRY_FIELD` - Country input
+- `ORDER_CITY_FIELD` - City input
+- `ORDER_CARD_FIELD` - Credit card input
+- `ORDER_MONTH_FIELD` - Expiration month
+- `ORDER_YEAR_FIELD` - Expiration year
+- `PURCHASE_BUTTON` - Final purchase button
+- `CLOSE_ORDER_MODAL_BUTTON` - Close modal button
+
+**Confirmation Locators:**
+- `PURCHASE_CONFIRM_MODAL` - Success modal
+- `PURCHASE_CONFIRM_MSG` - "Thank you" message
+- `CONFIRM_OK_BUTTON` - OK button to close confirmation
+
+### How Locators Were Obtained
+
+Same process as login module (see login README section 10).
+
+**Example - Cart Total:**
+
+1. Add product to cart
+2. Navigate to cart page
+3. Right-click total price → Inspect
+4. HTML:
    ```html
-   <a id="logout2" onclick="logOut()">Log out</a>
+   <h3 id="totalp">790</h3>
    ```
-4. Extract ID: `logout2`
-
-**Usage:** Verify user is logged in by checking if this element exists
-
----
-
-#### `WELCOME_USER_TEXT = "nameofuser"`
-**Element:** Welcome message showing username  
-**Type:** ID locator  
-**How obtained:**
-
-1. Login to make element visible
-2. Inspect welcome text (e.g., "Welcome testuser_qa_2024")
-3. HTML:
-   ```html
-   <a id="nameofuser">Welcome testuser_qa_2024</a>
-   ```
-4. Extract ID: `nameofuser`
-
-**Usage:** Verify correct username is displayed after login
+5. Extract: `(By.ID, "totalp")`
 
 ---
 
 <a name="fixtures"></a>
 ## 7. Fixtures Deep Dive
 
-### What Are Fixtures?
-
-Fixtures are pytest's mechanism for setup and teardown code that runs before and after tests.
-
-**Analogy:**
-Think of fixtures like a restaurant table setup:
-- **Setup:** Clean table, place silverware, napkins (before customer arrives)
-- **Test:** Customer eats meal
-- **Teardown:** Clear table, clean (after customer leaves)
-
 ### Fixture: `browser`
 
-**Purpose:** Provides fresh browser instance for each test
-
-**Code structure:**
-```python
-@pytest.fixture
-def browser():
-    # SETUP (before test)
-    driver = webdriver.Chrome()
-    
-    # HANDOFF (give to test)
-    yield driver
-    
-    # TEARDOWN (after test)
-    driver.quit()
-```
-
-**What happens:**
-
-1. **Before test runs:**
-   ```python
-   service = Service(ChromeDriverManager().install())
-   driver = webdriver.Chrome(service=service)
-   driver.maximize_window()
-   driver.implicitly_wait(TIMEOUT)
-   ```
-   - Downloads/verifies ChromeDriver
-   - Opens Chrome browser
-   - Maximizes window (better for element visibility)
-   - Sets implicit wait (backup if explicit waits not used)
-
-2. **During test:**
-   - Test receives `driver` object
-   - Test uses it to interact with browser
-
-3. **After test completes:**
-   ```python
-   driver.quit()
-   ```
-   - Closes browser
-   - Cleans up resources
-   - Happens even if test fails
-
-**Why `yield` instead of `return`?**
-
-```python
-# With return (doesn't work for teardown)
-def browser():
-    driver = webdriver.Chrome()
-    return driver
-    # Code here never runs
-
-# With yield (proper teardown)
-def browser():
-    driver = webdriver.Chrome()
-    yield driver
-    driver.quit()  # This WILL run
-```
-
-**Test isolation benefit:**
-Each test gets a fresh browser:
-- No cookies from previous tests
-- No cached data
-- Clean state
-- Tests don't affect each other
+Defined in root `conftest.py`. Provides cross-browser support. See login README for details.
 
 ---
 
-### Fixture: `login_page`
+### Fixture: `cart_page`
 
-**Purpose:** Opens browser AND navigates to login modal
-
-**Why separate fixture?**
-- Many tests start at login modal
-- Avoid repeating navigation code in every test
-
-**Dependencies:**
-```python
-def login_page(browser):  # Requires browser fixture
-```
-This fixture uses the `browser` fixture. Pytest handles the dependency automatically.
+**Purpose:** Navigates to cart with one product already added
 
 **What it does:**
+1. Navigate to home page
+2. Add first product to cart (using `add_product_to_cart()`)
+3. Navigate to cart page
+4. Wait for "Place Order" button to appear
+5. Return browser instance
 
-1. **Navigate to homepage:**
-   ```python
-   browser.get(BASE_URL)
-   ```
+**Why useful:**
+- Many tests start with item in cart
+- Avoids repeating setup code
+- Ensures consistent starting state
 
-2. **Wait for page to load:**
-   ```python
-   WebDriverWait(browser, TIMEOUT).until(
-       EC.presence_of_element_located((By.ID, LOGIN_BUTTON_NAV))
-   )
-   ```
-   Translation: "Don't proceed until 'Log in' button appears"
-
-3. **Click login button:**
-   ```python
-   login_btn = browser.find_element(By.ID, LOGIN_BUTTON_NAV)
-   login_btn.click()
-   ```
-
-4. **Wait for modal to open:**
-   ```python
-   WebDriverWait(browser, TIMEOUT).until(
-       EC.visibility_of_element_located((By.ID, LOGIN_USERNAME_FIELD))
-   )
-   ```
-   Translation: "Don't proceed until username field is visible"
-
-5. **Return browser:**
-   ```python
-   return browser
-   ```
-   Test now has browser with login modal open and ready
-
-**Usage in tests:**
+**Usage:**
 ```python
-def test_login_valid_credentials(login_page):
-    # login_page is browser with modal already open
-    # No need to navigate or click "Log in"
-    perform_login(login_page, username, password)
+def test_delete_item_from_cart(cart_page):
+    # Cart already has one item
+    cart_page.find_element(*DELETE_ITEM_LINK).click()
 ```
 
-**Why this is efficient:**
-- 5 lines of setup code → 0 lines in test
-- Test focuses on what's being tested, not navigation
-- Consistent starting point for all login tests
+---
+
+### Fixture: `order_modal_page`
+
+**Purpose:** Opens order modal with item in cart
+
+**Dependencies:**
+- Requires `cart_page` fixture (composition)
+
+**What it does:**
+1. Receive browser from `cart_page` fixture
+2. Click "Place Order" button
+3. Wait for order form to appear
+4. Return browser instance
+
+**Usage:**
+```python
+def test_successful_purchase(order_modal_page):
+    # Order modal already open
+    fill_order_form(order_modal_page, ...)
+```
 
 ---
 
 <a name="helpers"></a>
 ## 8. Helper Functions
 
-### Function: `perform_login(browser, username, password)`
+### `wait_for_alert_and_get_text(browser, timeout)`
 
-**Purpose:** Encapsulates the login action
+Same as login module - handles JavaScript alerts.
 
-**Why it exists:**
-- Login is needed in almost every test
-- Without helper:
-  ```python
-  # Repeated in EVERY test (bad)
-  def test_something():
-      browser.find_element(By.ID, "loginusername").send_keys(username)
-      browser.find_element(By.ID, "loginpassword").send_keys(password)
-      browser.find_element(By.XPATH, "//button[text()='Log in']").click()
-  ```
-- With helper:
-  ```python
-  # Clean and reusable (good)
-  def test_something():
-      perform_login(browser, username, password)
-  ```
-
-**What it does:**
-
-1. **Find username field and enter text:**
-   ```python
-   username_field = browser.find_element(By.ID, LOGIN_USERNAME_FIELD)
-   username_field.clear()  # Clear any existing text
-   username_field.send_keys(username)
-   ```
-
-2. **Find password field and enter text:**
-   ```python
-   password_field = browser.find_element(By.ID, LOGIN_PASSWORD_FIELD)
-   password_field.clear()
-   password_field.send_keys(password)
-   ```
-
-3. **Click submit button:**
-   ```python
-   submit_btn = browser.find_element(By.XPATH, LOGIN_SUBMIT_BUTTON)
-   submit_btn.click()
-   ```
-
-**Parameters explained:**
-- `browser` - WebDriver instance to use
-- `username` - String to enter in username field
-- `password` - String to enter in password field
-
-**Return value:** None (performs action, doesn't return data)
-
-**Design decision:**
-- Generic function (not specific to valid/invalid login)
-- Caller decides what credentials to pass
-- Flexible for positive and negative tests
+**Usage in purchase module:**
+- Capture "Product added" confirmation
+- Capture form validation alerts
 
 ---
 
-### Function: `wait_for_alert_and_get_text(browser, timeout=TIMEOUT)`
+### `fill_order_form(browser, name, country, city, card, month, year)`
 
-**Purpose:** Handle JavaScript alerts (error messages in DemoBlaze)
+**Purpose:** Fills all order form fields
 
-**Why it exists:**
-DemoBlaze uses JavaScript alerts for feedback:
-- "Wrong password."
-- "User does not exist."
-- "Please fill out Username and Password."
-
-**Problem without this function:**
-```python
-# Breaks if no alert appears
-alert = browser.switch_to.alert
-text = alert.text  # Error: no alert present
-```
-
-**Solution: Safe alert handling**
+**Parameters:** All strings, all optional (defaults to empty)
 
 **What it does:**
+1. Wait for name field to appear
+2. Send keys to each field
+3. Log what was entered
+4. Raise exception if error occurs
 
-1. **Wait for alert to appear:**
-   ```python
-   try:
-       WebDriverWait(browser, timeout).until(EC.alert_is_present())
-   ```
-   - Waits up to `timeout` seconds
-   - Returns when alert detected
-   - Raises `TimeoutException` if no alert
+**Why needed:**
+- Order form has 6 fields
+- Without helper: 6 lines per test
+- With helper: 1 line per test
 
-2. **Switch to alert context:**
-   ```python
-   alert = browser.switch_to.alert
-   ```
-   Browser focus moves from page to alert popup
-
-3. **Get alert text:**
-   ```python
-   alert_text = alert.text
-   ```
-   Extracts message like "Wrong password."
-
-4. **Close alert:**
-   ```python
-   alert.accept()
-   ```
-   Clicks "OK" button programmatically
-
-5. **Return text:**
-   ```python
-   return alert_text
-   ```
-
-6. **Handle no alert scenario:**
-   ```python
-   except TimeoutException:
-       return None
-   ```
-   If no alert appears, return `None` instead of crashing
-
-**Usage in tests:**
+**Usage:**
 ```python
-perform_login(browser, "wrong", "credentials")
-alert_text = wait_for_alert_and_get_text(browser)
-
-if alert_text:
-    assert "Wrong password" in alert_text
-else:
-    # No alert appeared (unexpected)
-    pytest.fail("Expected error alert but none appeared")
+fill_order_form(browser, "John Doe", "USA", "NYC", "4111111111111111", "12", "2025")
 ```
-
-**Why `timeout` is a parameter:**
-- Default: Use global `TIMEOUT` (10 seconds)
-- Flexibility: Can override if needed
-  ```python
-  # Wait only 3 seconds for alert
-  text = wait_for_alert_and_get_text(browser, timeout=3)
-  ```
 
 ---
 
-### Function: `is_user_logged_in(browser)`
+### `parse_price(price_str)`
 
-**Purpose:** Check if user is currently authenticated
-
-**Why it exists:**
-- Multiple tests need to verify login state
-- Centralized logic for consistency
+**Purpose:** Extract numeric price from string
 
 **How it works:**
-
-**Logic:**
-If "Log out" button exists → User is logged in  
-If "Log out" button doesn't exist → User is logged out
-
-**Implementation:**
 ```python
-try:
-    browser.find_element(By.ID, LOGOUT_BUTTON)
-    return True  # Element found = logged in
-except:
-    return False  # Element not found = logged out
+match = re.search(r'\d+', price_str)  # Find first number
+if match:
+    return int(match.group(0))        # Return as integer
+return 0                               # Default to 0
 ```
 
-**Why this approach?**
-- Simple and reliable
-- "Log out" button only visible when logged in
-- Single source of truth for login state
-
-**Alternative approaches (not used):**
-1. Check for "Log in" button absence (opposite logic, confusing)
-2. Check for welcome message (more complex)
-3. Check cookies (less reliable, more code)
-
-**Usage in tests:**
-
-**Positive test:**
+**Examples:**
 ```python
-perform_login(browser, valid_user, valid_pass)
-assert is_user_logged_in(browser), "User should be logged in"
+parse_price("$790")                 # Returns 790
+parse_price("790 *includes tax")    # Returns 790
+parse_price("Amount: 790 USD")      # Returns 790
+parse_price("No price")             # Returns 0
 ```
 
-**Negative test:**
+**Why needed:**
+- Prices displayed in different formats
+- Need consistent numeric comparison
+- Centralized parsing logic
+
+---
+
+### `add_product_to_cart(browser, product_locator)`
+
+**Purpose:** Complete flow to add product and return price
+
+**What it does:**
+1. Click product link (wait until clickable)
+2. Get product price from detail page
+3. Parse price to integer
+4. Click "Add to cart" button (wait until clickable)
+5. Accept confirmation alert
+6. Click Home link
+7. Wait for home page to load
+8. Return price
+
+**Why it returns price:**
+- Tests need to verify cart totals
+- Capture price at time of adding
+- Use for later assertions
+
+**Usage:**
 ```python
-perform_login(browser, invalid_user, invalid_pass)
-assert not is_user_logged_in(browser), "User should NOT be logged in"
+price1 = add_product_to_cart(browser, FIRST_PRODUCT_LINK)
+price2 = add_product_to_cart(browser, SECOND_PRODUCT_LINK)
+expected_total = price1 + price2
 ```
 
-**Return type:** Boolean (True/False)
+---
+
+### `perform_login(browser, username, password)`
+
+**Purpose:** Login helper for TC-PURCH-012
+
+Same logic as login module but duplicated here for independence.
+
+---
+
+### `wait_for_cart_total_update(browser, timeout)`
+
+**Purpose:** Wait for asynchronous cart total calculation
+
+**Why needed:**
+DemoBlaze calculates cart total via JavaScript after page load:
+- Total element exists immediately (displays empty)
+- JavaScript populates it after ~1 second
+- Direct read may get empty string or "0"
+
+**What it does:**
+1. Wait for total element to be visible
+2. Wait until text is not empty
+3. Parse and return total
+
+**Usage:**
+```python
+browser.find_element(*CART_NAV_LINK).click()
+total = wait_for_cart_total_update(browser)
+assert total == expected_total
+```
+
+**Replaces:**
+```python
+# Bad approach (old code)
+time.sleep(2)  # Arbitrary wait
+total = parse_price(browser.find_element(*CART_TOTAL_PRICE).text)
+```
 
 ---
 
 <a name="tests"></a>
 ## 9. Test Functions Breakdown
 
-### Test: `test_login_valid_credentials(login_page)`
+### `test_successful_purchase_and_price_verification(order_modal_page)`
 
-**Test ID:** TC-LOGIN-001  
-**Type:** Positive test  
-**Priority:** Critical
+**Flow:**
+1. Get cart total before purchase
+2. Verify total is not 0
+3. Fill order form with valid data
+4. Click "Purchase"
+5. Wait for confirmation modal
+6. Verify "Thank you" message
+7. Extract "Amount: X USD" from confirmation
+8. Verify amount matches cart total
+9. Click OK to close modal
 
-**What it tests:**
-Successful login with correct username and password
+**Key Assertions:**
+- `assert "Thank you for your purchase!" in confirm_text`
+- `assert confirmed_price == expected_price`
 
-**Step-by-step flow:**
-
-1. **Arrange (Setup):**
-   ```python
-   # login_page fixture already opened modal
-   # No explicit setup needed
-   ```
-
-2. **Act (Perform action):**
-   ```python
-   perform_login(login_page, TEST_USERNAME, TEST_PASSWORD)
-   ```
-   - Enters valid credentials
-   - Clicks submit
-
-3. **Wait for processing:**
-   ```python
-   time.sleep(2)
-   ```
-   - Allows time for login to complete
-   - DemoBlaze may take a moment to process
-
-4. **Assert (Verify results):**
-   
-   **Assertion 1: User is logged in**
-   ```python
-   assert is_user_logged_in(login_page), "User should be logged in after valid credentials"
-   ```
-   - Checks if "Log out" button exists
-   - Fails if user not logged in
-
-   **Assertion 2: Username displayed**
-   ```python
-   welcome_element = login_page.find_element(By.ID, WELCOME_USER_TEXT)
-   assert TEST_USERNAME in welcome_element.text, f"Welcome message should contain username '{TEST_USERNAME}'"
-   ```
-   - Finds welcome message element
-   - Verifies it contains the username
-   - Example: "Welcome testuser_qa_2024"
-
-**Why two assertions?**
-- Tests two distinct aspects:
-  1. Authentication succeeded (logout button)
-  2. Correct user authenticated (username display)
-- More thorough validation
-
-**Success criteria:**
-- ✅ Both assertions pass
-- ✅ No exceptions thrown
-- ✅ Test marked as PASSED
+**Why price verification matters:**
+- Ensures no price manipulation
+- Confirms accurate checkout
+- Critical for financial integrity
 
 ---
 
-### Test: `test_login_invalid_password(login_page)`
+### `test_multiple_items_total(browser)`
 
-**Test ID:** TC-LOGIN-002  
-**Type:** Negative test  
-**Priority:** High
+**Flow:**
+1. Add first product → capture price1
+2. Add second product → capture price2
+3. Navigate to cart
+4. Wait for total calculation
+5. Verify total = price1 + price2
 
-**What it tests:**
-Correct error handling when password is wrong
-
-**Step-by-step flow:**
-
-1. **Act:**
-   ```python
-   perform_login(login_page, TEST_USERNAME, "wrongpassword123")
-   ```
-   - Valid username (exists in system)
-   - Invalid password (incorrect)
-
-2. **Capture error:**
-   ```python
-   alert_text = wait_for_alert_and_get_text(login_page)
-   ```
-   - Waits for error alert
-   - Gets message text
-   - Closes alert
-
-3. **Assert:**
-   
-   **Assertion 1: Correct error message**
-   ```python
-   assert alert_text == "Wrong password.", f"Expected 'Wrong password.' but got '{alert_text}'"
-   ```
-   - Exact match required
-   - Case-sensitive
-   - Includes period
-
-   **Assertion 2: Login failed**
-   ```python
-   assert not is_user_logged_in(login_page), "User should NOT be logged in with wrong password"
-   ```
-   - Verifies "Log out" button absent
-   - Confirms authentication rejected
-
-**Why this test matters:**
-- Validates error handling
-- Ensures system doesn't grant access with wrong password
-- Checks user feedback (error message)
-
-**Possible failures:**
-- ❌ Wrong error message text
-- ❌ User somehow logged in (security issue)
-- ❌ No alert appeared (broken error handling)
-
----
-
-### Test: `test_login_nonexistent_user(login_page)`
-
-**Test ID:** TC-LOGIN-003  
-**Type:** Negative test  
-**Priority:** High
-
-**What it tests:**
-Error handling when username doesn't exist
-
-**Step-by-step flow:**
-
-1. **Act:**
-   ```python
-   perform_login(login_page, "nonexistent_user_xyz_999", "anypassword")
-   ```
-   - Username that definitely doesn't exist
-   - Random password (doesn't matter)
-
-2. **Capture error:**
-   ```python
-   alert_text = wait_for_alert_and_get_text(login_page)
-   ```
-
-3. **Assert:**
-   
-   **Assertion 1: Correct error message**
-   ```python
-   assert alert_text == "User does not exist.", f"Expected 'User does not exist.' but got '{alert_text}'"
-   ```
-
-   **Assertion 2: Login failed**
-   ```python
-   assert not is_user_logged_in(login_page), "User should NOT be logged in with invalid username"
-   ```
-
-**Security note:**
-This test documents Bug #10 (username enumeration). Different error messages for "wrong password" vs "user doesn't exist" allow attackers to discover valid usernames.
-
-**Expected behavior after bug fix:**
-Both scenarios should return generic message:
-- "Invalid username or password."
-
----
-
-### Test: `test_login_empty_fields(login_page)`
-
-**Test ID:** TC-LOGIN-004  
-**Type:** Negative test  
-**Priority:** Medium
-
-**What it tests:**
-Client-side validation when fields are empty
-
-**Step-by-step flow:**
-
-1. **Act:**
-   ```python
-   perform_login(login_page, "", "")
-   ```
-   - Both fields empty strings
-   - Tests form validation
-
-2. **Capture validation message:**
-   ```python
-   alert_text = wait_for_alert_and_get_text(login_page)
-   ```
-
-3. **Assert:**
-   ```python
-   assert alert_text == "Please fill out Username and Password.", \
-       f"Expected validation message but got '{alert_text}'"
-   ```
-
-**Why this test matters:**
-- Validates client-side validation exists
-- Prevents unnecessary server requests
-- Improves user experience (immediate feedback)
-
-**Expected behavior:**
-- Form not submitted to server
-- JavaScript alert appears
-- User remains on page
-
----
-
-### Test: `test_login_weak_password_vulnerability(browser)`
-
-**Test ID:** TC-LOGIN-005  
-**Type:** Security test  
-**Priority:** Critical  
-**Status:** Expected to fail (Bug #11)
-
-**What it tests:**
-Documents that system accepts dangerously weak passwords
-
-**Marked as xfail:**
+**Key Wait:**
 ```python
-@pytest.mark.xfail(reason="Bug #11: System accepts weak passwords")
+total_price = wait_for_cart_total_update(browser)
 ```
 
-**Why xfail?**
-- Bug is known and documented
-- Test will fail until bug is fixed
-- When bug is fixed, test will start passing
-- Serves as regression test
-
-**Step-by-step flow:**
-
-1. **Generate unique username:**
-   ```python
-   timestamp = str(int(time.time()))
-   test_user = f"weakpass_test_{timestamp}"
-   ```
-   - Prevents "username exists" errors
-   - Each test run uses different username
-
-2. **Define weak password:**
-   ```python
-   weak_password = "123"
-   ```
-   - Obviously insecure
-   - Should be rejected
-
-3. **Navigate to registration:**
-   ```python
-   browser.get(BASE_URL)
-   signup_btn = browser.find_element(By.ID, "signin2")
-   signup_btn.click()
-   ```
-
-4. **Wait for modal:**
-   ```python
-   WebDriverWait(browser, TIMEOUT).until(
-       EC.visibility_of_element_located((By.ID, "sign-username"))
-   )
-   ```
-
-5. **Register with weak password:**
-   ```python
-   browser.find_element(By.ID, "sign-username").send_keys(test_user)
-   browser.find_element(By.ID, "sign-password").send_keys(weak_password)
-   browser.find_element(By.XPATH, "//button[text()='Sign up']").click()
-   ```
-
-6. **Check registration result:**
-   ```python
-   alert_text = wait_for_alert_and_get_text(browser)
-   ```
-
-7. **Assert (expected to fail):**
-   ```python
-   assert "Password too weak" in alert_text or "password requirements" in alert_text.lower(), \
-       "System should reject weak passwords (Bug #11)"
-   ```
-
-**Current behavior (bug exists):**
-- Registration succeeds
-- "123" accepted as valid password
-- Test fails (as expected)
-
-**Expected behavior (after fix):**
-- Registration rejected
-- Error message about password requirements
-- Test passes
-
-**Security impact:**
-- Users can create easily guessed passwords
-- Accounts vulnerable to brute force
-- Violates security best practices
+Without this, test may read total before JavaScript calculates it.
 
 ---
 
-### Test: `test_username_enumeration_vulnerability(login_page)`
+### `test_delete_item_from_cart(cart_page)`
 
-**Test ID:** TC-LOGIN-006  
-**Type:** Security test  
-**Priority:** Critical  
-**Status:** Expected to fail (Bug #10)
+**Flow:**
+1. Verify item is visible in cart
+2. Click "Delete"
+3. Wait for element to disappear
+4. Try to find element again
+5. Expect NoSuchElementException
 
-**What it tests:**
-Documents username enumeration vulnerability through different error messages
-
-**Marked as xfail:**
+**Key Wait:**
 ```python
-@pytest.mark.xfail(reason="Bug #10: Username enumeration vulnerability")
+WebDriverWait(browser, TIMEOUT).until(
+    EC.invisibility_of_element_located(FIRST_ITEM_IN_CART_NAME)
+)
 ```
 
-**Step-by-step flow:**
-
-1. **Test existing username with wrong password:**
-   ```python
-   perform_login(login_page, TEST_USERNAME, "wrong_password_xyz")
-   error_msg_existing_user = wait_for_alert_and_get_text(login_page)
-   ```
-   - Result: "Wrong password."
-
-2. **Reopen login modal:**
-   ```python
-   login_page.find_element(By.ID, LOGIN_BUTTON_NAV).click()
-   time.sleep(1)
-   ```
-   - Necessary because modal closed after first attempt
-
-3. **Test non-existent username:**
-   ```python
-   perform_login(login_page, "definitely_not_a_real_user_xyz", "any_password")
-   error_msg_nonexistent_user = wait_for_alert_and_get_text(login_page)
-   ```
-   - Result: "User does not exist."
-
-4. **Compare error messages:**
-   ```python
-   assert error_msg_existing_user == error_msg_nonexistent_user, \
-       f"Error messages should be identical to prevent username enumeration. " \
-       f"Got: '{error_msg_existing_user}' vs '{error_msg_nonexistent_user}' (Bug #10)"
-   ```
-
-**Current behavior (bug exists):**
-- Different messages reveal username validity
-- Test fails (as expected)
-
-**Attack scenario:**
-1. Attacker tries login with username "admin"
-2. Sees "Wrong password." → "admin" exists!
-3. Attacker tries login with username "randomuser123"
-4. Sees "User does not exist." → Not a valid username
-5. Attacker builds list of valid usernames
-6. Launches targeted password attacks
-
-**Expected behavior (after fix):**
-- Same generic message for all failed logins
-- Example: "Invalid credentials."
-- Test passes
-
-**OWASP reference:**
-This vulnerability appears in OWASP Top 10 under "Broken Authentication"
+Ensures item actually removed before assertion.
 
 ---
 
-<a name="locators"></a>
-## 10. How to Obtain Locators
+### `test_delete_item_and_recalculate_total(browser)`
 
-### Tools Needed
+**Flow:**
+1. Add two products
+2. Verify initial total correct
+3. Delete first item
+4. Wait for DOM update
+5. Wait for total recalculation
+6. Verify new total = second product price
 
-**Browser DevTools (F12 or Right-click → Inspect)**
-- Chrome: Best for web automation testing
-- Firefox: Good alternative
-- Edge: Also works well
-
----
-
-### Method 1: Using Browser Inspector
-
-**Step-by-step for "Log in" button:**
-
-1. **Navigate to page:**
-   - Open https://www.demoblaze.com/
-
-2. **Open DevTools:**
-   - Press F12, or
-   - Right-click anywhere → Inspect
-
-3. **Select element picker:**
-   - Click the cursor icon (top-left of DevTools)
-   - Or press Ctrl+Shift+C
-
-4. **Click the element:**
-   - Hover over "Log in" button
-   - Click it
-
-5. **Read HTML:**
-   ```html
-   <a id="login2" data-toggle="modal" data-target="#logInModal">Log in</a>
-   ```
-
-6. **Extract locator:**
-   - See `id="login2"`
-   - Use: `By.ID, "login2"`
-
----
-
-### Method 2: Manual Search in HTML
-
-**When to use:**
-- Element is hidden
-- Element appears after interaction
-- Need to find multiple similar elements
-
-**Steps:**
-
-1. **Open DevTools (F12)**
-
-2. **Go to Elements/Inspector tab**
-
-3. **Use search (Ctrl+F in DevTools)**
-   - Search for text: "Log in"
-   - Search for attribute: `id="login`
-   - Search for class: `class="form-control"`
-
-4. **Navigate HTML tree:**
-   - Expand/collapse elements
-   - Find target element
-
-5. **Copy locator:**
-   - Right-click element in HTML
-   - Copy → Copy selector (CSS)
-   - Copy → Copy XPath
-
----
-
-### Locator Strategy Decision Tree
-
-**Question 1: Does element have a unique ID?**
-- ✅ Yes → Use ID (fastest, most reliable)
-  ```python
-  By.ID, "loginusername"
-  ```
-- ❌ No → Go to Question 2
-
-**Question 2: Does element have unique name attribute?**
-- ✅ Yes → Use NAME
-  ```python
-  By.NAME, "username"
-  ```
-- ❌ No → Go to Question 3
-
-**Question 3: Is element easily identified by class?**
-- ✅ Yes → Use CSS Selector
-  ```python
-  By.CSS_SELECTOR, ".login-button"
-  ```
-- ❌ No → Go to Question 4
-
-**Question 4: Does element have unique text?**
-- ✅ Yes → Use XPath with text
-  ```python
-  By.XPATH, "//button[text()='Log in']"
-  ```
-- ❌ No → Use complex XPath
-
----
-
-### Locator Examples from This Project
-
-#### Example 1: Login Button (ID)
-**HTML:**
-```html
-<a id="login2">Log in</a>
-```
-
-**Locator options:**
+**Why two waits:**
 ```python
-# Best (ID)
-By.ID, "login2"
+# Wait 1: Item removed from DOM
+WebDriverWait(browser, TIMEOUT).until(
+    EC.invisibility_of_element_located(FIRST_ITEM_IN_CART_NAME)
+)
 
-# Also works (CSS)
-By.CSS_SELECTOR, "#login2"
-
-# Also works (XPath)
-By.XPATH, "//a[@id='login2']"
+# Wait 2: Total recalculated
+total_after = wait_for_cart_total_update(browser)
 ```
 
-**Chosen:** ID (simplest and fastest)
+DemoBlaze updates DOM first, then recalculates total asynchronously.
 
 ---
 
-#### Example 2: Username Field (ID)
-**HTML:**
-```html
-<input type="text" id="loginusername" class="form-control" placeholder="Username">
-```
+### `test_purchase_as_logged_in_user(browser)`
 
-**Locator options:**
+**Flow:**
+1. Login
+2. Add product
+3. Navigate to cart
+4. Open order modal
+5. Verify name field is empty (DemoBlaze doesn't auto-fill)
+6. Fill form manually
+7. Complete purchase
+8. Verify confirmation
+
+**Key Assertion:**
 ```python
-# Best (ID)
-By.ID, "loginusername"
-
-# Works (CSS with attribute)
-By.CSS_SELECTOR, "input[placeholder='Username']"
-
-# Works (XPath)
-By.XPATH, "//input[@type='text' and @id='loginusername']"
+assert name_field.get_attribute("value") == "", \
+    "Name field should NOT auto-fill"
 ```
 
-**Chosen:** ID
+Documents DemoBlaze limitation.
 
 ---
 
-#### Example 3: Submit Button (XPath with text)
-**HTML:**
-```html
-<button type="button" class="btn btn-primary" onclick="logIn()">Log in</button>
-```
+### `test_order_modal_close_button(order_modal_page)`
 
-**Why not ID?** No unique ID attribute
+**Flow:**
+1. Verify modal visible
+2. Click "Close"
+3. Wait for modal to disappear
+4. Verify back on cart page
 
-**Locator options:**
-```python
-# Good (XPath text)
-By.XPATH, "//button[text()='Log in']"
-
-# Works (CSS with onclick)
-By.CSS_SELECTOR, "button[onclick='logIn()']"
-
-# Fragile (classes can change)
-By.CSS_SELECTOR, "button.btn.btn-primary"
-```
-
-**Chosen:** XPath with text (readable and distinctive)
+**Why test UI buttons:**
+- Ensures users can cancel checkout
+- Verifies modal behavior correct
+- Cart contents preserved
 
 ---
 
-### Testing Your Locators
+### `test_purchase_empty_cart(browser)` **(xfail)**
 
-**In Python console:**
+**Flow:**
+1. Navigate to cart without adding products
+2. Click "Place Order" (shouldn't be possible but is)
+3. Fill form
+4. Submit
+5. Observe confirmation appears (BUG)
+6. Verify "Amount: 0 USD"
+7. Fail with message about Bug #13
+
+**Marked xfail:**
 ```python
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-
-driver = webdriver.Chrome()
-driver.get("https://www.demoblaze.com/")
-
-# Test your locator
-element = driver.find_element(By.ID, "login2")
-print(element.text)  # Should print "Log in"
-
-driver.quit()
+@pytest.mark.xfail(reason="Bug #13: System allows purchasing with empty cart")
 ```
 
-**In Browser DevTools Console:**
-```javascript
-// Test CSS Selector
-document.querySelector("#login2")
+Test will fail as expected until bug fixed.
 
-// Test XPath
-$x("//button[text()='Log in']")
+---
+
+### `test_order_form_validation_robustness_security(...)` **(Parametrized)**
+
+**Runs 8 times** with different data:
+
+| Test ID | Data | Expected Result |
+|---------|------|-----------------|
+| TC-PURCH-004 | All empty | Alert |
+| TC-PURCH-005 | Name only | Alert |
+| TC-PURCH-006 | Card only | Alert |
+| TC-PURCH-007 | Letters in card | Purchase completes |
+| TC-PURCH-008 | Letters in month/year | Purchase completes |
+| TC-PURCH-009 | 1000 char name | Purchase completes |
+| TC-PURCH-010 | SQL injection | Purchase completes safely |
+| TC-PURCH-011 | XSS payload | Purchase completes safely |
+
+**Logic:**
+```python
+if expected_alert:
+    # Validation tests
+    alert_text = wait_for_alert_and_get_text(browser)
+    assert alert_text == expected_alert
+else:
+    # Robustness/security tests
+    assert no unexpected alert
+    assert purchase completes or fails gracefully
 ```
-
-If element is found, locator works!
 
 ---
 
 <a name="execution"></a>
-## 11. Execution Guide
+## 10. Execution Guide
 
-### Prerequisites Check
-
-Before running tests, verify:
+### Prerequisites
 
 ```bash
-# Python version (should be 3.8+)
-python --version
-
-# pip version
-pip --version
-
-# Selenium installed
-pip show selenium
-
-# pytest installed
-pip show pytest
+# Install dependencies
+pip install -r requirements.txt
 ```
-
----
 
 ### Running Tests
 
-#### Run all tests in file:
+**Run all purchase tests:**
 ```bash
-pytest tests/test_dem_login.py
+pytest tests/purchase/
 ```
 
-**Output example:**
-```
-collected 6 items
-
-test_dem_login.py::test_login_valid_credentials PASSED           [ 16%]
-test_dem_login.py::test_login_invalid_password PASSED            [ 33%]
-test_dem_login.py::test_login_nonexistent_user PASSED            [ 50%]
-test_dem_login.py::test_login_empty_fields PASSED                [ 66%]
-test_dem_login.py::test_login_weak_password_vulnerability XFAIL  [ 83%]
-test_dem_login.py::test_username_enumeration_vulnerability XFAIL [100%]
-
-====================== 4 passed, 2 xfailed in 45.23s =======================
-```
-
----
-
-#### Run specific test:
+**Run with specific browser:**
 ```bash
-pytest tests/test_dem_login.py::test_login_valid_credentials
+pytest tests/purchase/ --browser=chrome
+pytest tests/purchase/ --browser=firefox
+pytest tests/purchase/ --browser=edge
 ```
 
----
-
-#### Run with verbose output:
+**Run specific test:**
 ```bash
-pytest tests/test_dem_login.py -v
+pytest tests/purchase/test_purchase.py::test_successful_purchase_and_price_verification
 ```
 
-**Shows:**
-- Detailed test names
-- Docstring summaries
-- Progress indicators
-
----
-
-#### Run with HTML report:
+**Run with verbose output:**
 ```bash
-pytest tests/test_dem_login.py --html=reports/login_report.html --self-contained-html
+pytest tests/purchase/ -v
 ```
 
-**Generates:**
-- Professional HTML report
-- Test results summary
-- Failure details
-- Execution time
-
-**View report:**
+**Run with logging output:**
 ```bash
-# Open in browser
-reports/login_report.html
+pytest tests/purchase/ -s
 ```
 
----
-
-#### Run with custom markers:
+**Run excluding xfail tests:**
 ```bash
-# Run only xfail tests (security bugs)
-pytest tests/test_dem_login.py -m xfail
-
-# Skip xfail tests (run only stable tests)
-pytest tests/test_dem_login.py -m "not xfail"
+pytest tests/purchase/ -m "not xfail"
 ```
 
----
+### HTML Reports
 
-#### Run with print statements (for debugging):
-```bash
-pytest tests/test_dem_login.py -s
+Reports generated automatically in:
+```
+test_results/purchase/report_[browser]_[timestamp].html
 ```
 
-**Shows:**
-- `print()` output
-- Useful for debugging
-
----
-
-#### Run with last failed:
-```bash
-# Run only tests that failed last time
-pytest tests/test_dem_login.py --lf
+Example:
 ```
-
-**Use case:**
-- Fixed a bug
-- Re-run only failed tests
-- Faster iteration
-
----
-
-### Continuous Integration (CI) Command
-
-**For GitHub Actions / Jenkins / etc:**
-```bash
-pytest tests/test_dem_login.py --html=reports/report.html --self-contained-html --maxfail=1 -v
+test_results/purchase/report_chrome_2025-11-07_15-30-45.html
 ```
-
-**Flags explained:**
-- `--html=...` - Generate report
-- `--self-contained-html` - Single file (no dependencies)
-- `--maxfail=1` - Stop after first failure (fail fast)
-- `-v` - Verbose output for CI logs
 
 ---
 
 <a name="results"></a>
-## 12. Expected Results
+## 11. Expected Results
 
 ### Test Execution Summary
 
-| Test Case | ID | Expected Result | Status |
-|-----------|----|--------------------|--------|
-| Valid Login | TC-LOGIN-001 | ✅ PASS | Stable |
-| Invalid Password | TC-LOGIN-002 | ✅ PASS | Stable |
-| Non-existent User | TC-LOGIN-003 | ✅ PASS | Stable |
-| Empty Fields | TC-LOGIN-004 | ✅ PASS | Stable |
-| Weak Password | TC-LOGIN-005 | ❌ XFAIL | Bug #11 |
-| Username Enumeration | TC-LOGIN-006 | ❌ XFAIL | Bug #10 |
-
----
+| Test Category | Tests | Pass | Xfail | Total |
+|--------------|-------|------|-------|-------|
+| Purchase Flow | 1 | 1 | 0 | 1 |
+| Cart Operations | 3 | 3 | 0 | 3 |
+| User Scenarios | 1 | 1 | 0 | 1 |
+| UI Interaction | 1 | 1 | 0 | 1 |
+| Validation | 8 | 8 | 0 | 8 |
+| Known Bugs | 1 | 0 | 1 | 1 |
+| **TOTAL** | **15** | **14** | **1** | **15** |
 
 ### Success Criteria
 
-**Test suite is considered PASSED if:**
-1. ✅ 4 stable tests pass (TC-LOGIN-001 through 004)
-2. ✅ 2 xfail tests fail as expected (TC-LOGIN-005, 006)
-3. ✅ No unexpected failures
-4. ✅ No exceptions/errors in stable tests
-5. ✅ Execution time under 2 minutes
-
----
-
-### Failure Investigation
-
-**If test fails unexpectedly:**
-
-1. **Check error message:**
-   ```bash
-   pytest tests/test_dem_login.py -v
-   ```
-
-2. **Read traceback:**
-   - Which line failed?
-   - What was the assertion?
-
-3. **Common issues:**
-
-   **Timeout errors:**
-   - Site is slow
-   - Element locator changed
-   - Internet connection issue
-   
-   **Element not found:**
-   - Locator changed (site updated)
-   - Element takes longer to appear
-   - Wrong environment (dev vs prod)
-   
-   **Assertion failures:**
-   - Expected vs actual mismatch
-   - Logic error in test
-   - Application bug
-
-4. **Debug with print statements:**
-   ```python
-   # Add to test
-   print(f"Alert text: {alert_text}")
-   print(f"Logged in: {is_user_logged_in(browser)}")
-   ```
-   
-   Run with:
-   ```bash
-   pytest tests/test_dem_login.py -s
-   ```
-
----
+Test suite PASSED if:
+- 14 stable tests pass
+- 1 xfail test fails as expected (Bug #13)
+- No unexpected failures
+- Execution time under 3 minutes
 
 ### Performance Benchmarks
 
 **Expected execution times:**
-
-| Test | Avg Time | Max Acceptable |
-|------|----------|----------------|
-| test_login_valid_credentials | 8s | 15s |
-| test_login_invalid_password | 6s | 12s |
-| test_login_nonexistent_user | 6s | 12s |
-| test_login_empty_fields | 5s | 10s |
-| test_login_weak_password_vulnerability | 12s | 20s |
-| test_username_enumeration_vulnerability | 10s | 18s |
-| **Total Suite** | **47s** | **90s** |
-
-**If tests are slower:**
-- Reduce `TIMEOUT` (if site is fast)
-- Check internet connection
-- Site may be experiencing issues
+- Simple tests: 8-12 seconds each
+- Multi-item tests: 15-20 seconds
+- Parametrized tests: 5-8 seconds per iteration
+- Total suite: ~2.5 minutes
 
 ---
 
 <a name="troubleshooting"></a>
-## 13. Troubleshooting
+## 12. Troubleshooting
 
-### Common Issues and Solutions
+### Issue: Cart total shows 0
 
-#### Issue 1: ChromeDriver version mismatch
+**Cause:** Reading total before JavaScript calculates it
 
-**Error:**
-```
-selenium.common.exceptions.SessionNotCreatedException: 
-Message: session not created: This version of ChromeDriver only supports Chrome version 118
-```
-
-**Solution:**
-```bash
-# Reinstall webdriver-manager
-pip uninstall webdriver-manager
-pip install webdriver-manager
-
-# Clear cache
-rm -rf ~/.wdm
-```
-
-**Why it happens:**
-- Chrome auto-updates
-- ChromeDriver doesn't match
+**Solution:** Use `wait_for_cart_total_update()` instead of direct read
 
 ---
 
-#### Issue 2: Element not found
+### Issue: Element not found after deletion
 
-**Error:**
-```
-selenium.common.exceptions.NoSuchElementException: 
-Message: no such element: Unable to locate element: {"method":"css selector","selector":"#login2"}
-```
+**Cause:** Not waiting for DOM update
 
-**Possible causes:**
-1. Page not loaded yet
-2. Locator changed
-3. Element inside iframe
-
-**Solution 1: Add wait**
+**Solution:**
 ```python
-WebDriverWait(browser, 10).until(
-    EC.presence_of_element_located((By.ID, "login2"))
+WebDriverWait(browser, TIMEOUT).until(
+    EC.invisibility_of_element_located(LOCATOR)
 )
 ```
 
-**Solution 2: Verify locator**
-- Inspect element manually
-- Check if ID still exists
-- Try alternative locator
+---
 
-**Solution 3: Check for iframe**
-```python
-# Switch to iframe if element is inside one
-browser.switch_to.frame("iframe_name")
-element = browser.find_element(By.ID, "login2")
-```
+### Issue: Alert not found
+
+**Cause:** Alert appeared and disappeared before test checked
+
+**Solution:** Reduce timeout or check immediately after action
 
 ---
 
-#### Issue 3: Test hangs indefinitely
+### Issue: Test hangs on cart page
 
-**Symptom:**
-- Test runs but never completes
-- No error message
+**Cause:** Cart total never populates (DemoBlaze bug or network issue)
 
-**Causes:**
-- Alert not handled
-- Infinite wait
-- Modal not closed
-
-**Solution:**
-```bash
-# Kill test with Ctrl+C
-
-# Add timeout to problematic operation
-# Example:
-WebDriverWait(browser, 5).until(...)  # Reduce timeout
-```
-
----
-
-#### Issue 4: Tests pass locally but fail in CI
-
-**Possible causes:**
-1. Different environment
-2. Timing issues (CI is slower)
-3. Browser/driver version mismatch
-
-**Solutions:**
-
-**Increase timeouts for CI:**
-```python
-# In conftest.py or similar
-import os
-
-if os.getenv('CI'):
-    TIMEOUT = 20  # Double timeout in CI
-else:
-    TIMEOUT = 10
-```
-
-**Headless mode for CI:**
-```python
-options = webdriver.ChromeOptions()
-options.add_argument('--headless')
-driver = webdriver.Chrome(options=options)
-```
-
----
-
-#### Issue 5: Weak password test passes (should be xfail)
-
-**What it means:**
-- Bug #11 was fixed!
-- System now rejects weak passwords
-
-**What to do:**
-1. Remove `@pytest.mark.xfail` decorator
-2. Update test to expect password rejection
-3. Update bug status to "Fixed"
+**Solution:** Check browser console for JavaScript errors
 
 ---
 
 <a name="practices"></a>
-## 14. Best Practices Applied
+## 13. Best Practices Applied
 
 ### Code Quality
 
-#### ✅ DRY (Don't Repeat Yourself)
-**Applied in:**
-- Helper functions (`perform_login`, `wait_for_alert_and_get_text`)
-- Fixtures (browser setup/teardown)
-- Configuration constants
+**DRY Principle:**
+- `add_product_to_cart()` used in multiple tests
+- `fill_order_form()` eliminates repetition
+- Fixtures provide consistent setup
 
-**Benefit:** Change once, apply everywhere
-
----
-
-#### ✅ Single Responsibility Principle
-**Applied in:**
-- Each function does one thing
-- `perform_login()` only performs login
-- `is_user_logged_in()` only checks state
-
-**Benefit:** Easy to understand and maintain
-
----
-
-#### ✅ Explicit is Better Than Implicit
-**Applied in:**
-- Named constants instead of magic strings
+**Clean Code:**
+- No excessive comments
+- Logging for runtime feedback
 - Clear function names
-- Descriptive variable names
-
-**Example:**
-```python
-# ✅ Good
-LOGIN_BUTTON_NAV = "login2"
-browser.find_element(By.ID, LOGIN_BUTTON_NAV)
-
-# ❌ Bad
-browser.find_element(By.ID, "login2")  # What is login2?
-```
-
----
 
 ### Testing Best Practices
 
-#### ✅ Test Isolation
-**Implementation:**
-- Each test gets fresh browser
-- No shared state between tests
-- Tests can run in any order
+**Explicit Waits:**
+- `wait_for_cart_total_update()` for async operations
+- `EC.invisibility_of_element_located()` for deletions
+- No `time.sleep()` in production code
 
-**Benefit:** Reliable, reproducible results
+**Price Verification:**
+- Capture prices at source
+- Compare at every step
+- Ensures financial accuracy
 
----
-
-#### ✅ AAA Pattern (Arrange-Act-Assert)
-**Applied in all tests:**
-```python
-def test_example():
-    # Arrange
-    username = "test"
-    
-    # Act
-    perform_login(browser, username, password)
-    
-    # Assert
-    assert is_user_logged_in(browser)
-```
-
-**Benefit:** Clear test structure
-
----
-
-#### ✅ Meaningful Test Names
-**Convention:**
-```
-test_[module]_[action]_[context]
-```
-
-**Examples:**
-- `test_login_valid_credentials` ✅
-- `test_login_invalid_password` ✅
-- `test1` ❌
-
-**Benefit:** Self-documenting code
-
----
-
-#### ✅ Expected Failures (xfail)
-**For known bugs:**
-```python
-@pytest.mark.xfail(reason="Bug #11: Weak passwords")
-def test_weak_password_vulnerability():
-    # Tests known bug
-```
-
-**Benefits:**
-- Documents bugs in code
-- Regression testing ready
-- Clear distinction between expected/unexpected failures
-
----
-
-### Documentation Best Practices
-
-#### ✅ Separate Documentation File
-**This file (test_dem_login.md) provides:**
-- Comprehensive explanation
-- Clean code (no comment clutter)
-- Easy to read
-- Can be versioned separately
-
----
-
-#### ✅ Traceability
-**Links between:**
-- Test cases (TC-LOGIN-001)
-- Bug reports (Bug #10, #11)
-- Test functions
-- Documentation sections
-
-**Benefit:** Easy to navigate between artifacts
-
----
-
-#### ✅ How-To Sections
-**Includes:**
-- How to obtain locators
-- How to run tests
-- Troubleshooting guide
-
-**Benefit:** Self-service for other team members
-
----
+**Parametrization:**
+- 8 test cases in 1 function
+- Clean test data separation
+- Efficient execution
 
 ### Selenium Best Practices
 
-#### ✅ Explicit Waits
-**Used instead of:**
-```python
-# ❌ Bad
-time.sleep(5)  # Arbitrary wait
+**Wait Strategy:**
+- Wait for element clickable before clicking
+- Wait for visibility before reading text
+- Custom waits for async operations
 
-# ✅ Good
-WebDriverWait(browser, 10).until(
-    EC.visibility_of_element_located((By.ID, "element"))
-)
-```
-
-**Benefits:**
-- Faster tests (wait only as needed)
-- More reliable
-- Better error messages
+**Locator Strategy:**
+- ID when available (fastest)
+- XPath for dynamic content
+- Consistent naming
 
 ---
 
-#### ✅ WebDriver Manager
-**Auto-manages drivers:**
-```python
-ChromeDriverManager().install()
-```
-
-**Benefits:**
-- No manual driver downloads
-- Always correct version
-- Cross-platform compatible
-
----
-
-#### ✅ Locator Strategy Hierarchy
-**Priority:**
-1. ID (fastest, most reliable)
-2. Name
-3. CSS Selector
-4. XPath (last resort)
-
-**Applied:** Used IDs where available, XPath only when necessary
-
----
-
-## 15. Maintenance Guide
+## 14. Maintenance Guide
 
 ### When to Update Tests
 
-**Trigger 1: Site Redesign**
-- Locators may change
-- Update `CONFIGURATION` section
-- Re-verify all element IDs
+**Site Redesign:**
+- Update locators
+- Verify cart calculation logic still async
+- Test on all browsers
 
-**Trigger 2: Bug Fixes**
-- Remove `@pytest.mark.xfail` when bug resolved
+**Bug Fixes:**
+- Remove `@pytest.mark.xfail` from TC-PURCH-014 when Bug #13 fixed
 - Update expected behavior
-- Change assertions if needed
+- Re-verify test passes
 
-**Trigger 3: New Features**
-- Add new test cases
-- Update documentation
+**New Features:**
+- Add quantity selection tests if implemented
+- Add discount code tests if implemented
 - Maintain same structure
 
 ---
 
-### How to Add New Tests
+## 15. Version History
 
-1. **Add to documentation first:**
-   - New test case in section 2
-   - Expected results in section 12
-
-2. **Write test function:**
-   ```python
-   def test_login_[new_scenario](login_page):
-       # Follow AAA pattern
-       pass
-   ```
-
-3. **Update this file:**
-   - Add to Table of Contents
-   - Add to Test Cases section
-   - Add to Expected Results
-
----
-
-### Version History
-
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | Nov 2025 | Arévalo, Marc | Initial documentation |
+| Version | Date | Changes |
+|---------|------|---------|
+| 2.0 | Nov 2025 | Enhanced logging, improved waits, clean code |
+| 1.0 | Nov 2025 | Initial release with basic tests |
 
 ---
 
 ## 16. Related Documents
 
-- [Test Plan](../docs/test-plan.md)
-- [Test Summary Report](../docs/Test_Summary_Report.md)
-- [Bug #10: Username Enumeration](../docs/bugs/bug-010-username-enumeration.md)
-- [Bug #11: Weak Passwords](../docs/bugs/bug-011-weak-passwords.md)
-- [Bug #12: No Rate Limiting](../docs/bugs/bug-012-no-rate-limiting.md)
-
----
-
-## 17. Contact & Support
-
-**Test Suite Author:**  
-Marc Arévalo  
-GitHub: [Your GitHub Username]
-
-**Questions?**
-- Review this documentation first
-- Check Troubleshooting section
-- Examine test code
-- Open GitHub issue if problem persists
+- [Test Plan](../../docs/test-plan.md)
+- [Test Summary Report](../../docs/Test_Summary_Report.md)
+- [User Flows](../../docs/users-flow.md)
+- [DemoBlaze Test Cases](../../docs/DemoBlaze_Test_Cases.xlsx)
+- [Login Module README](../login/README.md)
+- Bug #13: Empty Cart Purchase (documented in Test Summary Report)
 
 ---
 
