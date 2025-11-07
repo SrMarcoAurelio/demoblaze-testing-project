@@ -3,12 +3,12 @@
 **Module:** `test_dem_login.py`  
 **Author:** Arévalo, Marc  
 **Created:** November 2025  
-**Version:** 1.0  
+**Version:** 3.1 - Cross-Browser Support Added  
 **Application Under Test:** DemoBlaze (https://www.demoblaze.com/)
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
 1. [Overview](#overview)
 2. [Test Cases Covered](#test-cases)
@@ -32,16 +32,26 @@
 
 ### Purpose
 
-This test suite automates the validation of DemoBlaze's authentication system, including login, registration, and session management functionalities. The primary goal is to verify both positive scenarios (successful login) and negative scenarios (failed login attempts, security vulnerabilities).
+This test suite automates comprehensive validation of DemoBlaze's authentication system, including:
+- Standard login/logout functionality
+- Security vulnerability testing (SQL injection, XSS, brute force)
+- Input validation (special characters, Unicode, boundary tests)
+- UI component interaction (modals, buttons)
 
 ### Scope
 
 **In Scope:**
 - Valid login with correct credentials
 - Invalid login scenarios (wrong password, non-existent user, empty fields)
-- Weak password acceptance (security vulnerability)
-- Username enumeration vulnerability
-- Session state verification
+- SQL Injection attempts (username and password fields)
+- Cross-Site Scripting (XSS) attacks
+- Special characters and Unicode input handling
+- Boundary tests (very long inputs, whitespace)
+- Case sensitivity validation
+- Null bytes and path traversal attempts
+- Security vulnerabilities (weak passwords, username enumeration, brute force)
+- Modal interaction and UI state verification
+- Cross-browser testing (Chrome, Firefox, Edge)
 
 **Out of Scope:**
 - Password recovery functionality
@@ -49,159 +59,404 @@ This test suite automates the validation of DemoBlaze's authentication system, i
 - Social login integrations
 - Multi-factor authentication (not implemented in DemoBlaze)
 
-### Why This Module First?
+### Version History
 
-Authentication is the foundation of any web application. Without proper login functionality:
-- Users cannot access protected features
-- E-commerce transactions cannot be completed
-- Security vulnerabilities expose user data
+**v3.1 (Current):**
+- Added cross-browser support (Chrome, Firefox, Edge)
+- Enhanced logging for real-time feedback
+- Improved helper functions for robust state verification
+- Fixed modal interaction test (TC-LOGIN-022)
 
-Testing login first ensures:
-1. Base functionality works before testing dependent modules
-2. Critical security flaws are identified early
-3. Other test suites can reuse login functions
+**v3.0:**
+- Added comprehensive security testing
+- Parametrized tests for SQL injection and XSS
+- Added special character and Unicode testing
+- Boundary and edge case tests
+
+**v1.0:**
+- Initial release with basic login tests
 
 ---
 
 <a name="test-cases"></a>
 ## 2. Test Cases Covered
 
-### TC-LOGIN-001: Valid Login
-**Objective:** Verify successful login with valid credentials  
+### Basic Authentication Tests
+
+#### TC-LOGIN-001: Valid Login
 **Priority:** Critical  
 **Type:** Positive Test  
-**Automation Status:** ✅ Automated
 
 **Test Steps:**
-1. Navigate to DemoBlaze homepage
-2. Click "Log in" button in navigation bar
-3. Enter valid username
-4. Enter valid password
-5. Click "Log in" submit button
+1. Navigate to login modal
+2. Enter valid credentials
+3. Submit form
 
 **Expected Result:**
-- User successfully authenticated
-- "Log out" button appears in navbar
-- Username displayed as "Welcome [username]"
+- User authenticated successfully
+- "Log out" button visible
+- Welcome message displays username
 - Modal closes automatically
 
 ---
 
-### TC-LOGIN-002: Invalid Password
-**Objective:** Verify error handling for incorrect password  
+#### TC-LOGIN-002: Invalid Password
 **Priority:** High  
 **Type:** Negative Test  
-**Automation Status:** ✅ Automated
 
 **Test Steps:**
-1. Navigate to login modal
-2. Enter valid username (existing user)
-3. Enter incorrect password
-4. Click submit
+1. Enter valid username + wrong password
+2. Submit form
 
 **Expected Result:**
 - Login rejected
-- JavaScript alert displays: "Wrong password."
-- User remains logged out
-- Modal remains open
-
----
-
-### TC-LOGIN-003: Non-existent User
-**Objective:** Verify error for username that doesn't exist  
-**Priority:** High  
-**Type:** Negative Test  
-**Automation Status:** ✅ Automated
-
-**Test Steps:**
-1. Navigate to login modal
-2. Enter non-existent username
-3. Enter any password
-4. Click submit
-
-**Expected Result:**
-- Login rejected
-- JavaScript alert displays: "User does not exist."
+- Alert: "Wrong password."
 - User remains logged out
 
 ---
 
-### TC-LOGIN-004: Empty Fields Validation
-**Objective:** Verify client-side validation for empty fields  
+#### TC-LOGIN-003: Non-existent User
+**Priority:** High  
+**Type:** Negative Test  
+
+**Expected Result:**
+- Alert: "User does not exist."
+- Login rejected
+
+---
+
+#### TC-LOGIN-004: Empty Fields
 **Priority:** Medium  
 **Type:** Negative Test  
-**Automation Status:** ✅ Automated
-
-**Test Steps:**
-1. Navigate to login modal
-2. Leave username field empty
-3. Leave password field empty
-4. Click submit
 
 **Expected Result:**
-- Form submission prevented
-- JavaScript alert displays: "Please fill out Username and Password."
-- No server request sent
+- Alert: "Please fill out Username and Password."
+- Form not submitted to server
 
 ---
 
-### TC-LOGIN-005: Weak Password Vulnerability
-**Objective:** Document security flaw - system accepts weak passwords  
+#### TC-LOGIN-005: Empty Username Only
+**Priority:** Medium  
+**Type:** Negative Test  
+
+**Expected Result:**
+- Validation error displayed
+- Login rejected
+
+---
+
+#### TC-LOGIN-006: Empty Password Only
+**Priority:** Medium  
+**Type:** Negative Test  
+
+**Expected Result:**
+- Validation error displayed
+- Login rejected
+
+---
+
+### Security Tests - SQL Injection
+
+#### TC-LOGIN-007: SQL Injection in Username Field
+**Priority:** Critical  
+**Type:** Security Test (Parametrized)  
+
+**Payloads tested:**
+- `' OR '1'='1`
+- `' OR 1=1--`
+- `admin'--`
+- `' OR 'a'='a`
+- `1' OR '1' = '1`
+- `' UNION SELECT NULL--`
+- `admin' OR '1'='1'--`
+
+**Expected Result:**
+- All payloads rejected
+- No unauthorized access granted
+- User remains logged out
+
+**Security Impact:**
+If any payload succeeds, the system is vulnerable to SQL injection attacks, allowing attackers to:
+- Bypass authentication
+- Access unauthorized accounts
+- Extract database information
+- Modify or delete data
+
+---
+
+#### TC-LOGIN-008: SQL Injection in Password Field
+**Priority:** Critical  
+**Type:** Security Test (Parametrized)  
+
+**Payloads tested:**
+- `' OR '1'='1`
+- `' OR 1=1--`
+- `password' OR '1'='1`
+
+**Expected Result:**
+- All payloads blocked
+- Login rejected
+- No SQL queries manipulated
+
+---
+
+### Security Tests - Cross-Site Scripting (XSS)
+
+#### TC-LOGIN-009: XSS in Username Field
+**Priority:** Critical  
+**Type:** Security Test (Parametrized)  
+
+**Payloads tested:**
+- `<script>alert('XSS')</script>`
+- `<img src=x onerror=alert('XSS')>`
+- `javascript:alert('XSS')`
+- `<svg/onload=alert('XSS')>`
+
+**Expected Result:**
+- No script execution
+- Input sanitized or rejected
+- User remains logged out
+
+**Security Impact:**
+XSS vulnerabilities allow attackers to:
+- Steal session cookies
+- Hijack user accounts
+- Deface website content
+- Redirect users to malicious sites
+
+---
+
+### Input Validation Tests
+
+#### TC-LOGIN-010: Special Characters in Username
+**Priority:** Medium  
+**Type:** Negative Test (Parametrized)  
+
+**Test inputs:**
+- `user@#$%`
+- `user!@#$%^&*()`
+- `user<>?:`
+- `user|\\`
+- `user{}[]`
+- `user'"`
+- `user\n\t\r`
+
+**Expected Result:**
+- System handles gracefully
+- No crashes or errors
+- Login rejected appropriately
+
+---
+
+#### TC-LOGIN-011: Unicode/International Characters
+**Priority:** Medium  
+**Type:** Negative Test (Parametrized)  
+
+**Test inputs:**
+- Chinese: `用户名`
+- Russian: `Пользователь`
+- French: `utilisateur`
+- Arabic: `المستخدم`
+- Japanese: `ユーザー`
+- Emojis: `😀😎🔥`
+
+**Expected Result:**
+- System handles international input
+- No encoding errors
+- Appropriate rejection or handling
+
+---
+
+### Boundary Tests
+
+#### TC-LOGIN-012: Very Long Username (1000 chars)
+**Priority:** Medium  
+**Type:** Boundary Test  
+
+**Expected Result:**
+- System handles without crashing
+- Appropriate error or truncation
+- No buffer overflow
+
+---
+
+#### TC-LOGIN-013: Very Long Password (1000 chars)
+**Priority:** Medium  
+**Type:** Boundary Test  
+
+**Expected Result:**
+- Long input handled safely
+- No memory issues
+- Login rejected appropriately
+
+---
+
+#### TC-LOGIN-014: Whitespace in Username
+**Priority:** Low  
+**Type:** Edge Case (Parametrized)  
+
+**Test inputs:**
+- `   user   ` (spaces around)
+- ` user` (leading space)
+- `user ` (trailing space)
+- `   ` (only spaces)
+
+**Expected Result:**
+- Whitespace handled consistently
+- Proper trimming or validation
+
+---
+
+#### TC-LOGIN-015: Case Sensitivity in Username
+**Priority:** Medium  
+**Type:** Negative Test (Parametrized)  
+
+**Test inputs:**
+- All uppercase
+- All lowercase
+- Title case
+
+**Expected Result:**
+- Login is case-sensitive
+- Different case = rejected
+
+---
+
+### Advanced Security Tests
+
+#### TC-LOGIN-016: Null Bytes in Input
+**Priority:** High  
+**Type:** Security Test (Parametrized)  
+
+**Test inputs:**
+- `user\x00admin`
+- `user\x00`
+- `\x00user`
+
+**Expected Result:**
+- Null bytes handled safely
+- No string truncation exploits
+- Login rejected
+
+---
+
+#### TC-LOGIN-017: Path Traversal Attempts
+**Priority:** High  
+**Type:** Security Test (Parametrized)  
+
+**Test inputs:**
+- `../../../etc/passwd`
+- `..\\..\\..\\windows\\system32`
+- `....//....//....//etc/passwd`
+
+**Expected Result:**
+- Path traversal blocked
+- No file system access
+- Login rejected
+
+---
+
+### Known Vulnerability Tests (xfail)
+
+#### TC-LOGIN-018: Weak Password Vulnerability
 **Priority:** Critical  
 **Type:** Security Test  
-**Automation Status:** ✅ Automated (xfail)  
-**Related Bug:** #11
+**Status:** Expected to fail (Bug #11)
 
-**Test Steps:**
-1. Register new user with password "123"
-2. Attempt login with that weak password
+**Test:**
+- Register user with password "123"
+- Verify system accepts it
 
 **Current Behavior (BUG):**
-- System accepts "123" as valid password
-- No password complexity requirements enforced
+- System accepts weak passwords
+- No complexity requirements
 
 **Expected Behavior (Post-Fix):**
-- System should reject weak passwords
-- Minimum requirements should include:
-  - 8+ characters
+- Reject passwords not meeting requirements:
+  - Minimum 8 characters
   - At least 1 uppercase letter
   - At least 1 lowercase letter
   - At least 1 number
   - At least 1 special character
 
-**Test Status:** Marked as `xfail` (expected to fail) until bug is resolved
+---
+
+#### TC-LOGIN-019: Username Enumeration Vulnerability
+**Priority:** Critical  
+**Type:** Security Test  
+**Status:** Expected to fail (Bug #10)
+
+**Test:**
+- Login with existing user + wrong password
+- Login with non-existent user + any password
+- Compare error messages
+
+**Current Behavior (BUG):**
+- Different messages reveal username validity:
+  - "Wrong password." = username exists
+  - "User does not exist." = username invalid
+
+**Expected Behavior (Post-Fix):**
+- Generic message for all failures: "Invalid username or password."
+
+**Security Impact:**
+- Attackers can enumerate valid usernames
+- Enables targeted password attacks
+- OWASP Top 10 vulnerability
 
 ---
 
-### TC-LOGIN-006: Username Enumeration Vulnerability
-**Objective:** Document security flaw - different error messages reveal valid usernames  
+#### TC-LOGIN-020: Brute Force Protection
 **Priority:** Critical  
 **Type:** Security Test  
-**Automation Status:** ✅ Automated (xfail)  
-**Related Bug:** #10
+**Status:** Expected to fail (Bug #12)
 
-**Test Steps:**
-1. Attempt login with existing username + wrong password
-2. Note error message: "Wrong password."
-3. Attempt login with non-existent username + any password
-4. Note error message: "User does not exist."
-5. Compare messages
+**Test:**
+- Attempt 7 consecutive failed logins
+- Verify account lockout or rate limiting
 
 **Current Behavior (BUG):**
-- Different error messages reveal whether username exists
-- Attacker can enumerate valid usernames
+- No rate limiting implemented
+- Unlimited login attempts allowed
 
 **Expected Behavior (Post-Fix):**
-- Generic error message for all failed login attempts
-- Example: "Invalid username or password."
-- Prevents username enumeration attacks
+- Account locked after N failed attempts
+- Error: "Account locked" or "Too many attempts"
 
-**Security Impact:**
-- Attackers can build list of valid usernames
-- Targeted password attacks become easier
-- OWASP Top 10 vulnerability
+---
 
-**Test Status:** Marked as `xfail` until bug is resolved
+### UI Interaction Tests
+
+#### TC-LOGIN-021: Login Modal Close Button
+**Priority:** Low  
+**Type:** Functional Test  
+
+**Test Steps:**
+1. Open login modal
+2. Click 'X' close button
+3. Verify modal closes
+
+**Expected Result:**
+- Modal closes completely
+- Can reopen modal successfully
+
+---
+
+#### TC-LOGIN-022: Sign Up and Login Modal Interaction
+**Priority:** Low  
+**Type:** Functional Test  
+
+**Test Steps:**
+1. Open Sign Up modal
+2. Verify it's visible
+3. Close it
+4. Open Login modal
+5. Verify it's visible
+
+**Expected Result:**
+- Both modals open/close independently
+- No interference between modals
+- Clean state transitions
 
 ---
 
@@ -210,17 +465,9 @@ Testing login first ensures:
 
 | Bug ID | Severity | Title | Test Case | Status |
 |--------|----------|-------|-----------|--------|
-| #10 | High | Username enumeration vulnerability | TC-LOGIN-006 | Open |
-| #11 | High | System accepts weak passwords | TC-LOGIN-005 | Open |
-| #12 | High | No rate limiting on login attempts | Not automated yet | Open |
-
-**Note on Bug #12:**
-Rate limiting tests require multiple rapid login attempts (100+ requests). This is not included in current test suite to avoid:
-- Overloading demo server
-- Extended test execution time
-- Potential IP blocking
-
-Recommendation: Test rate limiting manually or in dedicated security testing suite.
+| #10 | High | Username enumeration vulnerability | TC-LOGIN-019 | Open |
+| #11 | High | System accepts weak passwords | TC-LOGIN-018 | Open |
+| #12 | High | No rate limiting on login attempts | TC-LOGIN-020 | Open |
 
 ---
 
@@ -230,9 +477,26 @@ Recommendation: Test rate limiting manually or in dedicated security testing sui
 ### File Structure
 
 ```
-tests/
-├── test_dem_login.py          # Executable test code
-└── test_dem_login.md          # This documentation
+project_root/
+├── docs/
+│   ├── DemoBlaze_Test_Cases.xlsx
+│   ├── test-plan.md
+│   ├── Test_Summary_Report.md
+│   └── users-flow.md
+├── tests/
+│   ├── login/
+│   │   ├── __init__.py
+│   │   ├── test_dem_login.py
+│   │   └── README.md (this file)
+│   └── purchase/
+│       ├── test_dem_login_doc.md
+│       └── test_purchase.py
+├── test_results/              # Auto-generated by conftest.py
+│   └── login/                 # Reports grouped by test folder
+│       └── report_chrome_YYYY-MM-DD_HH-MM-SS.html
+├── conftest.py                # Root pytest configuration
+├── requirements.txt
+└── .gitignore
 ```
 
 ### Code Organization
@@ -240,7 +504,7 @@ tests/
 The Python file is organized into 6 sections:
 
 1. **IMPORTS** - External libraries and dependencies
-2. **CONFIGURATION** - Constants and test data
+2. **CONFIGURATION** - Constants, locators, and test data
 3. **FIXTURES** - Setup/teardown automation
 4. **HELPER FUNCTIONS** - Reusable utility functions
 5. **TEST CASES** - Actual test functions
@@ -248,455 +512,217 @@ The Python file is organized into 6 sections:
 
 ### Design Pattern: Page Object Model (Simplified)
 
-While not a full POM implementation, the code follows POM principles:
-- Locators centralized in CONFIGURATION section
+Follows POM principles:
+- Locators centralized in CONFIGURATION
 - Business logic separated from test logic
 - Helper functions encapsulate page interactions
-- Tests focus on "what to test" not "how to test"
-
-**Why Simplified POM?**
-- Single page/modal being tested
-- Reduces complexity for portfolio project
-- Easier to understand for learning purposes
-- Can be extended to full POM if needed
+- Tests focus on "what" not "how"
 
 ---
 
 <a name="imports"></a>
 ## 5. Imports Explanation
 
-### Why Each Library is Needed
+### Core Selenium Imports
 
-#### `from selenium import webdriver`
-**Purpose:** Core Selenium library - controls browser automation  
-**What it does:**
-- Opens and closes browsers
-- Provides WebDriver interface
-- Manages browser sessions
-
-**Usage in code:**
 ```python
-driver = webdriver.Chrome()  # Opens Chrome browser
+from selenium import webdriver
+```
+Controls browser automation - opens/closes browsers, manages sessions.
+
+```python
+from selenium.webdriver.common.by import By
+```
+Defines how to find elements (ID, XPath, CSS). Modern approach replacing deprecated methods.
+
+```python
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+```
+Explicit waits for dynamic content. More reliable than `time.sleep()`.
+
+```python
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
+```
+Handle errors gracefully when elements not found or waits timeout.
+
+```python
+from selenium.webdriver.chrome.service import Service
+```
+Manages ChromeDriver service process.
+
+### WebDriver Manager Imports
+
+```python
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
+from webdriver_manager.microsoft import EdgeChromiumDriverManager
 ```
 
----
+**Purpose:** Automatic driver management
+- Downloads correct driver version automatically
+- Matches browser version
+- Eliminates manual setup
 
-#### `from selenium.webdriver.common.by import By`
-**Purpose:** Locator strategy enum  
-**What it does:**
-- Defines how to find elements (ID, XPath, CSS, etc.)
-- Replaces deprecated methods like `find_element_by_id()`
-
-**Modern vs Deprecated:**
-```python
-# Modern (correct)
-element = driver.find_element(By.ID, "login2")
-
-# Deprecated (old way)
-element = driver.find_element_by_id("login2")
-```
-
-**Why modern is better:**
-- More flexible
-- Better error messages
-- Future-proof
-
----
-
-#### `from selenium.webdriver.support.ui import WebDriverWait`
-**Purpose:** Explicit waits for dynamic content  
-**What it does:**
-- Waits for specific conditions before proceeding
-- Prevents "element not found" errors
-- More reliable than `time.sleep()`
-
-**Usage example:**
-```python
-WebDriverWait(driver, 10).until(
-    EC.presence_of_element_located((By.ID, "login2"))
-)
-```
-Translation: "Wait up to 10 seconds until element with ID 'login2' appears"
-
----
-
-#### `from selenium.webdriver.support import expected_conditions as EC`
-**Purpose:** Pre-built wait conditions  
-**What it does:**
-- Provides common waiting scenarios
-- Works with WebDriverWait
-
-**Common conditions:**
-- `presence_of_element_located` - Element exists in DOM
-- `visibility_of_element_located` - Element is visible
-- `element_to_be_clickable` - Element can be clicked
-- `alert_is_present` - JavaScript alert appeared
-
----
-
-#### `from selenium.common.exceptions import TimeoutException`
-**Purpose:** Handle timeout errors gracefully  
-**What it does:**
-- Catches when WebDriverWait times out
-- Allows custom error handling
-
-**Usage:**
-```python
-try:
-    WebDriverWait(driver, 10).until(EC.alert_is_present())
-except TimeoutException:
-    return None  # No alert appeared
-```
-
----
-
-#### `from webdriver_manager.chrome import ChromeDriverManager`
-**Purpose:** Automatic ChromeDriver management  
-**What it does:**
-- Downloads correct ChromeDriver version automatically
-- Matches Chrome browser version
-- Eliminates manual driver setup
-
-**Without WebDriver Manager:**
-1. Check Chrome version
-2. Download matching ChromeDriver
-3. Add to PATH or specify location
-4. Update when Chrome updates
-
-**With WebDriver Manager:**
+**Example usage:**
 ```python
 service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service)
 ```
-Done. Automatic.
 
----
+### Testing Framework
 
-#### `from selenium.webdriver.chrome.service import Service`
-**Purpose:** Manage ChromeDriver service  
-**What it does:**
-- Interfaces with ChromeDriver process
-- Required for WebDriver Manager integration
-
----
-
-#### `import pytest`
-**Purpose:** Testing framework  
-**What it does:**
-- Discovers and runs tests
-- Provides fixtures
-- Generates reports
-- Manages test lifecycle
-
-**Key features used:**
-- `@pytest.fixture` - Setup/teardown
-- `@pytest.mark.xfail` - Expected failures
-- `pytest.main()` - Programmatic execution
-- Assertions - Test validations
-
----
-
-#### `import time`
-**Purpose:** Time-related utilities  
-**What it does:**
-- Generate timestamps for unique usernames
-- Add small delays when needed (sparingly)
-
-**Usage in code:**
 ```python
-timestamp = str(int(time.time()))  # "1699123456"
-unique_username = f"testuser_{timestamp}"
+import pytest
 ```
+Testing framework providing:
+- Test discovery and execution
+- Fixtures for setup/teardown
+- Parametrization
+- Reporting
+- Assertions
 
-**Why unique usernames?**
-- Tests can be run multiple times
-- Avoid "username already exists" errors
-- Each test run is independent
+```python
+import time
+```
+Generate timestamps for unique usernames and add delays when needed.
+
+```python
+import logging
+```
+Real-time feedback during test execution for debugging and monitoring.
 
 ---
 
 <a name="configuration"></a>
 ## 6. Configuration Variables
 
-### How These Values Were Determined
+### Base Configuration
 
-#### `BASE_URL = "https://www.demoblaze.com/"`
-**Source:** Manual - Known URL of application under test  
-**Type:** String constant  
-**Purpose:** Central point for site URL
+```python
+BASE_URL = "https://www.demoblaze.com/"
+```
+Central point for application URL. Easy to switch between environments.
 
-**Why constant?**
-- If site moves to different domain, change once
-- Easy to switch between environments:
-  ```python
-  # Development
-  BASE_URL = "https://dev.demoblaze.com/"
-  
-  # Production
-  BASE_URL = "https://www.demoblaze.com/"
-  ```
+```python
+TIMEOUT = 10
+EXPLICIT_WAIT = 5
+```
+- `TIMEOUT`: Maximum wait time for elements (industry standard: 10 seconds)
+- `EXPLICIT_WAIT`: Shorter wait for specific operations
 
----
+### Test Credentials
 
-#### `TIMEOUT = 10`
-**Source:** Industry best practice  
-**Type:** Integer (seconds)  
-**Purpose:** Maximum wait time for elements
-
-**Why 10 seconds?**
-- Standard in automation testing
-- Sufficient for slow networks
-- Not too long (tests don't hang forever)
-- Balances reliability vs speed
-
-**Used in:**
-- WebDriverWait calls
-- Implicit waits
-- Alert waiting
-
----
-
-#### `TEST_USERNAME = "testuser_qa_2024"`
-**Source:** Manually created test account  
-**Type:** String  
-**Purpose:** Valid username for positive tests
+```python
+TEST_USERNAME = "testuser_qa_2024"
+TEST_PASSWORD = "SecurePass123!"
+```
 
 **Prerequisites:**
 - Account must be pre-registered in DemoBlaze
-- Use strong password (for Bug #11 testing contrast)
+- Password demonstrates security best practices (contrast with weak password tests)
 
-**Best Practice:**
-- Use descriptive username (includes "test" and year)
-- Easy to identify as test account
-- Can be filtered in production data
+### Locators
 
----
+All element locators centralized:
 
-#### `TEST_PASSWORD = "SecurePass123!"`
-**Source:** Manually defined  
-**Type:** String  
-**Purpose:** Strong password for valid login tests
-
-**Why this password?**
-- Demonstrates contrast with weak passwords
-- Meets security best practices:
-  - 8+ characters ✅
-  - Uppercase ✅
-  - Lowercase ✅
-  - Numbers ✅
-  - Special character ✅
-
----
-
-### Locators - How They Were Found
-
-#### `LOGIN_BUTTON_NAV = "login2"`
-**Element:** "Log in" button in navigation bar  
-**Type:** ID locator  
-**How obtained:**
-
-1. Navigate to https://www.demoblaze.com/
-2. Right-click "Log in" button
-3. Select "Inspect" or press F12
-4. HTML revealed:
-   ```html
-   <a id="login2" data-toggle="modal" data-target="#logInModal">Log in</a>
-   ```
-5. Extract ID: `login2`
-
-**Why use ID?**
-- Fastest locator strategy
-- Most reliable (IDs should be unique)
-- Less likely to break with UI changes
-
----
-
-#### `LOGIN_USERNAME_FIELD = "loginusername"`
-**Element:** Username input field in login modal  
-**Type:** ID locator  
-**How obtained:**
-
-1. Click "Log in" button to open modal
-2. Right-click username field
-3. Inspect element
-4. HTML:
-   ```html
-   <input type="text" class="form-control" id="loginusername" placeholder="Username">
-   ```
-5. Extract ID: `loginusername`
-
----
-
-#### `LOGIN_PASSWORD_FIELD = "loginpassword"`
-**Element:** Password input field in login modal  
-**Type:** ID locator  
-**How obtained:**
-
-1. Same modal as username field
-2. Inspect password field
-3. HTML:
-   ```html
-   <input type="password" class="form-control" id="loginpassword" placeholder="Password">
-   ```
-4. Extract ID: `loginpassword`
-
----
-
-#### `LOGIN_SUBMIT_BUTTON = "//button[text()='Log in']"`
-**Element:** Submit button inside login modal  
-**Type:** XPath locator  
-**How obtained:**
-
-1. Inspect submit button
-2. HTML:
-   ```html
-   <button type="button" class="btn btn-primary" onclick="logIn()">Log in</button>
-   ```
-3. No unique ID present
-4. Create XPath based on button text:
-   ```xpath
-   //button[text()='Log in']
-   ```
-
-**Why XPath here?**
-- No unique ID available
-- Text is distinctive
-- Multiple "Log in" elements exist, but only one is a button
-
-**XPath breakdown:**
-- `//` - Search anywhere in document
-- `button` - Element type
-- `[text()='Log in']` - Condition: text equals "Log in"
-
-**Alternative locators (not used):**
 ```python
-# By onclick attribute
-"//button[@onclick='logIn()']"
-
-# By classes (fragile)
-"button.btn.btn-primary"
+LOGIN_BUTTON_NAV = (By.ID, "login2")
+LOGIN_USERNAME_FIELD = (By.ID, "loginusername")
+LOGIN_PASSWORD_FIELD = (By.ID, "loginpassword")
+LOGIN_SUBMIT_BUTTON = (By.XPATH, "//button[text()='Log in']")
+LOGOUT_BUTTON = (By.ID, "logout2")
+WELCOME_USER_TEXT = (By.ID, "nameofuser")
+SIGNUP_BUTTON = (By.ID, "signin2")
+SIGNUP_USERNAME_FIELD = (By.ID, "sign-username")
+SIGNUP_PASSWORD_FIELD = (By.ID, "sign-password")
+SIGNUP_SUBMIT_BUTTON = (By.XPATH, "//button[text()='Sign up']")
+LOGIN_MODAL_CLOSE_BUTTON = (By.XPATH, "//div[@id='logInModal']//button[@class='close']")
+LOGIN_MODAL = (By.ID, "logInModal")
 ```
 
-**Why text-based XPath is better:**
-- More readable
-- Less likely to break if CSS classes change
-- Self-documenting
-
----
-
-#### `LOGOUT_BUTTON = "logout2"`
-**Element:** "Log out" button in navbar  
-**Type:** ID locator  
-**How obtained:**
-
-1. Login first to make element visible
-2. Inspect "Log out" button
-3. HTML:
-   ```html
-   <a id="logout2" onclick="logOut()">Log out</a>
-   ```
-4. Extract ID: `logout2`
-
-**Usage:** Verify user is logged in by checking if this element exists
-
----
-
-#### `WELCOME_USER_TEXT = "nameofuser"`
-**Element:** Welcome message showing username  
-**Type:** ID locator  
-**How obtained:**
-
-1. Login to make element visible
-2. Inspect welcome text (e.g., "Welcome testuser_qa_2024")
-3. HTML:
-   ```html
-   <a id="nameofuser">Welcome testuser_qa_2024</a>
-   ```
-4. Extract ID: `nameofuser`
-
-**Usage:** Verify correct username is displayed after login
+**Locator Strategy:**
+1. Prefer ID (fastest, most reliable)
+2. Use XPath when no unique ID exists
+3. XPath with text for buttons (readable and distinctive)
 
 ---
 
 <a name="fixtures"></a>
 ## 7. Fixtures Deep Dive
 
-### What Are Fixtures?
+### Fixtures
 
-Fixtures are pytest's mechanism for setup and teardown code that runs before and after tests.
+Located in project root `conftest.py`, which provides:
 
-**Analogy:**
-Think of fixtures like a restaurant table setup:
-- **Setup:** Clean table, place silverware, napkins (before customer arrives)
-- **Test:** Customer eats meal
-- **Teardown:** Clear table, clean (after customer leaves)
+**1. Browser Fixture (`browser`)**
+- Parametrized cross-browser support
+- Automatic driver management
+- Clean setup/teardown
+
+**2. Automatic Report Generation (`pytest_configure` hook)**
+
+The `conftest.py` automatically generates HTML reports without manual `--html` flags:
+
+```python
+@pytest.hookimpl(tryfirst=True)
+def pytest_configure(config):
+    # Detects test folder (e.g., "login", "purchase")
+    # Creates: test_results/[folder]/report_[browser]_[timestamp].html
+    # Example: test_results/login/report_chrome_2025-11-07_14-30-45.html
+```
+
+**Report Organization:**
+- Root folder: `test_results/`
+- Subfolders by test group: `login/`, `purchase/`, etc.
+- Filenames: `report_[browser]_[YYYY-MM-DD_HH-MM-SS].html`
+- Self-contained HTML (no external dependencies)
+
+**Why this approach:**
+- No need to specify `--html` in every command
+- Reports organized automatically
+- Easy to compare results across browsers
+- Historical test data preserved
+
+---
 
 ### Fixture: `browser`
 
-**Purpose:** Provides fresh browser instance for each test
+**Purpose:** Provides browser instance based on command-line argument
 
-**Code structure:**
+**Cross-Browser Support:**
 ```python
-@pytest.fixture
-def browser():
-    # SETUP (before test)
-    driver = webdriver.Chrome()
-    
-    # HANDOFF (give to test)
-    yield driver
-    
-    # TEARDOWN (after test)
-    driver.quit()
+@pytest.fixture(scope="function")
+def browser(request):
+    browser_name = request.config.getoption("--browser").lower()
 ```
 
-**What happens:**
+**Supported browsers:**
+- Chrome (default)
+- Firefox
+- Edge
 
-1. **Before test runs:**
-   ```python
-   service = Service(ChromeDriverManager().install())
-   driver = webdriver.Chrome(service=service)
-   driver.maximize_window()
-   driver.implicitly_wait(TIMEOUT)
-   ```
-   - Downloads/verifies ChromeDriver
-   - Opens Chrome browser
-   - Maximizes window (better for element visibility)
-   - Sets implicit wait (backup if explicit waits not used)
+**What it does:**
+1. Reads `--browser` option from command line
+2. Installs appropriate driver (ChromeDriver, GeckoDriver, EdgeDriver)
+3. Initializes browser with options
+4. Maximizes window
+5. Sets implicit wait
+6. **Yields** browser to test
+7. Quits browser after test (cleanup)
 
-2. **During test:**
-   - Test receives `driver` object
-   - Test uses it to interact with browser
-
-3. **After test completes:**
-   ```python
-   driver.quit()
-   ```
-   - Closes browser
-   - Cleans up resources
-   - Happens even if test fails
-
-**Why `yield` instead of `return`?**
-
-```python
-# With return (doesn't work for teardown)
-def browser():
-    driver = webdriver.Chrome()
-    return driver
-    # Code here never runs
-
-# With yield (proper teardown)
-def browser():
-    driver = webdriver.Chrome()
-    yield driver
-    driver.quit()  # This WILL run
+**Usage:**
+```bash
+pytest test_dem_login.py --browser=chrome
+pytest test_dem_login.py --browser=firefox
+pytest test_dem_login.py --browser=edge
 ```
 
-**Test isolation benefit:**
-Each test gets a fresh browser:
-- No cookies from previous tests
-- No cached data
-- Clean state
-- Tests don't affect each other
+**Headless mode:**
+Uncomment in fixture:
+```python
+options.add_argument("--headless")
+```
 
 ---
 
@@ -704,952 +730,479 @@ Each test gets a fresh browser:
 
 **Purpose:** Opens browser AND navigates to login modal
 
-**Why separate fixture?**
-- Many tests start at login modal
-- Avoid repeating navigation code in every test
-
-**Dependencies:**
-```python
-def login_page(browser):  # Requires browser fixture
-```
-This fixture uses the `browser` fixture. Pytest handles the dependency automatically.
-
 **What it does:**
-
-1. **Navigate to homepage:**
-   ```python
-   browser.get(BASE_URL)
-   ```
-
-2. **Wait for page to load:**
-   ```python
-   WebDriverWait(browser, TIMEOUT).until(
-       EC.presence_of_element_located((By.ID, LOGIN_BUTTON_NAV))
-   )
-   ```
-   Translation: "Don't proceed until 'Log in' button appears"
-
-3. **Click login button:**
-   ```python
-   login_btn = browser.find_element(By.ID, LOGIN_BUTTON_NAV)
-   login_btn.click()
-   ```
-
-4. **Wait for modal to open:**
-   ```python
-   WebDriverWait(browser, TIMEOUT).until(
-       EC.visibility_of_element_located((By.ID, LOGIN_USERNAME_FIELD))
-   )
-   ```
-   Translation: "Don't proceed until username field is visible"
-
-5. **Return browser:**
-   ```python
-   return browser
-   ```
-   Test now has browser with login modal open and ready
+1. Navigate to homepage
+2. Wait for page load
+3. Click login button
+4. Wait for modal to open
+5. Return browser (with modal ready)
 
 **Usage in tests:**
 ```python
 def test_login_valid_credentials(login_page):
-    # login_page is browser with modal already open
-    # No need to navigate or click "Log in"
+    # Modal already open, ready to test
     perform_login(login_page, username, password)
 ```
-
-**Why this is efficient:**
-- 5 lines of setup code → 0 lines in test
-- Test focuses on what's being tested, not navigation
-- Consistent starting point for all login tests
 
 ---
 
 <a name="helpers"></a>
 ## 8. Helper Functions
 
-### Function: `perform_login(browser, username, password)`
+### `perform_login(browser, username, password)`
 
-**Purpose:** Encapsulates the login action
+Encapsulates login action:
+1. Clear and enter username
+2. Clear and enter password
+3. Click submit button
 
-**Why it exists:**
-- Login is needed in almost every test
-- Without helper:
-  ```python
-  # Repeated in EVERY test (bad)
-  def test_something():
-      browser.find_element(By.ID, "loginusername").send_keys(username)
-      browser.find_element(By.ID, "loginpassword").send_keys(password)
-      browser.find_element(By.XPATH, "//button[text()='Log in']").click()
-  ```
-- With helper:
-  ```python
-  # Clean and reusable (good)
-  def test_something():
-      perform_login(browser, username, password)
-  ```
-
-**What it does:**
-
-1. **Find username field and enter text:**
-   ```python
-   username_field = browser.find_element(By.ID, LOGIN_USERNAME_FIELD)
-   username_field.clear()  # Clear any existing text
-   username_field.send_keys(username)
-   ```
-
-2. **Find password field and enter text:**
-   ```python
-   password_field = browser.find_element(By.ID, LOGIN_PASSWORD_FIELD)
-   password_field.clear()
-   password_field.send_keys(password)
-   ```
-
-3. **Click submit button:**
-   ```python
-   submit_btn = browser.find_element(By.XPATH, LOGIN_SUBMIT_BUTTON)
-   submit_btn.click()
-   ```
-
-**Parameters explained:**
-- `browser` - WebDriver instance to use
-- `username` - String to enter in username field
-- `password` - String to enter in password field
-
-**Return value:** None (performs action, doesn't return data)
-
-**Design decision:**
-- Generic function (not specific to valid/invalid login)
-- Caller decides what credentials to pass
-- Flexible for positive and negative tests
+**Why helper function:**
+- Login action repeated in every test
+- Single point of maintenance
+- Clean, readable test code
 
 ---
 
-### Function: `wait_for_alert_and_get_text(browser, timeout=TIMEOUT)`
+### `wait_for_alert_and_get_text(browser, timeout=EXPLICIT_WAIT)`
 
-**Purpose:** Handle JavaScript alerts (error messages in DemoBlaze)
+Safely handles JavaScript alerts:
+1. Wait for alert (with timeout)
+2. Switch to alert context
+3. Get alert text
+4. Accept (close) alert
+5. Return text or `None`
 
-**Why it exists:**
-DemoBlaze uses JavaScript alerts for feedback:
-- "Wrong password."
-- "User does not exist."
-- "Please fill out Username and Password."
+**Error handling:**
+- Returns `None` if no alert appears
+- Prevents test crashes
 
-**Problem without this function:**
+**Usage:**
 ```python
-# Breaks if no alert appears
-alert = browser.switch_to.alert
-text = alert.text  # Error: no alert present
-```
-
-**Solution: Safe alert handling**
-
-**What it does:**
-
-1. **Wait for alert to appear:**
-   ```python
-   try:
-       WebDriverWait(browser, timeout).until(EC.alert_is_present())
-   ```
-   - Waits up to `timeout` seconds
-   - Returns when alert detected
-   - Raises `TimeoutException` if no alert
-
-2. **Switch to alert context:**
-   ```python
-   alert = browser.switch_to.alert
-   ```
-   Browser focus moves from page to alert popup
-
-3. **Get alert text:**
-   ```python
-   alert_text = alert.text
-   ```
-   Extracts message like "Wrong password."
-
-4. **Close alert:**
-   ```python
-   alert.accept()
-   ```
-   Clicks "OK" button programmatically
-
-5. **Return text:**
-   ```python
-   return alert_text
-   ```
-
-6. **Handle no alert scenario:**
-   ```python
-   except TimeoutException:
-       return None
-   ```
-   If no alert appears, return `None` instead of crashing
-
-**Usage in tests:**
-```python
-perform_login(browser, "wrong", "credentials")
 alert_text = wait_for_alert_and_get_text(browser)
-
 if alert_text:
     assert "Wrong password" in alert_text
-else:
-    # No alert appeared (unexpected)
-    pytest.fail("Expected error alert but none appeared")
 ```
-
-**Why `timeout` is a parameter:**
-- Default: Use global `TIMEOUT` (10 seconds)
-- Flexibility: Can override if needed
-  ```python
-  # Wait only 3 seconds for alert
-  text = wait_for_alert_and_get_text(browser, timeout=3)
-  ```
 
 ---
 
-### Function: `is_user_logged_in(browser)`
+### `check_user_is_logged_in(browser, timeout=EXPLICIT_WAIT)`
 
-**Purpose:** Check if user is currently authenticated
+**Robust verification** that user is authenticated:
 
-**Why it exists:**
-- Multiple tests need to verify login state
-- Centralized logic for consistency
+1. Wait for login modal to disappear
+2. Wait for "Log out" button to become **visible**
+3. Return `True` if logged in, `False` otherwise
 
-**How it works:**
+**Why "visibility" check:**
+- Element may exist in DOM but be hidden
+- Visibility confirms user sees the button
+- More reliable than simple presence check
 
-**Logic:**
-If "Log out" button exists → User is logged in  
-If "Log out" button doesn't exist → User is logged out
-
-**Implementation:**
+**Usage:**
 ```python
-try:
-    browser.find_element(By.ID, LOGOUT_BUTTON)
-    return True  # Element found = logged in
-except:
-    return False  # Element not found = logged out
+assert check_user_is_logged_in(browser), "User should be logged in"
 ```
 
-**Why this approach?**
-- Simple and reliable
-- "Log out" button only visible when logged in
-- Single source of truth for login state
+---
 
-**Alternative approaches (not used):**
-1. Check for "Log in" button absence (opposite logic, confusing)
-2. Check for welcome message (more complex)
-3. Check cookies (less reliable, more code)
+### `check_user_is_logged_out(browser, timeout=EXPLICIT_WAIT)`
 
-**Usage in tests:**
+**Inverse verification** - confirms user is NOT authenticated:
 
-**Positive test:**
+1. Wait until "Log out" button is **NOT visible**
+2. Return `True` if logged out, `False` if still logged in
+
+**Usage:**
 ```python
-perform_login(browser, valid_user, valid_pass)
-assert is_user_logged_in(browser), "User should be logged in"
+assert check_user_is_logged_out(browser), "User should NOT be logged in"
 ```
-
-**Negative test:**
-```python
-perform_login(browser, invalid_user, invalid_pass)
-assert not is_user_logged_in(browser), "User should NOT be logged in"
-```
-
-**Return type:** Boolean (True/False)
 
 ---
 
 <a name="tests"></a>
 ## 9. Test Functions Breakdown
 
-### Test: `test_login_valid_credentials(login_page)`
+### Basic Login Tests
 
-**Test ID:** TC-LOGIN-001  
-**Type:** Positive test  
-**Priority:** Critical
+#### `test_login_valid_credentials(login_page)`
 
-**What it tests:**
-Successful login with correct username and password
+**Flow:**
+1. Perform login with valid credentials
+2. Assert user is logged in (logout button visible)
+3. Assert welcome message contains username
 
-**Step-by-step flow:**
-
-1. **Arrange (Setup):**
-   ```python
-   # login_page fixture already opened modal
-   # No explicit setup needed
-   ```
-
-2. **Act (Perform action):**
-   ```python
-   perform_login(login_page, TEST_USERNAME, TEST_PASSWORD)
-   ```
-   - Enters valid credentials
-   - Clicks submit
-
-3. **Wait for processing:**
-   ```python
-   time.sleep(2)
-   ```
-   - Allows time for login to complete
-   - DemoBlaze may take a moment to process
-
-4. **Assert (Verify results):**
-   
-   **Assertion 1: User is logged in**
-   ```python
-   assert is_user_logged_in(login_page), "User should be logged in after valid credentials"
-   ```
-   - Checks if "Log out" button exists
-   - Fails if user not logged in
-
-   **Assertion 2: Username displayed**
-   ```python
-   welcome_element = login_page.find_element(By.ID, WELCOME_USER_TEXT)
-   assert TEST_USERNAME in welcome_element.text, f"Welcome message should contain username '{TEST_USERNAME}'"
-   ```
-   - Finds welcome message element
-   - Verifies it contains the username
-   - Example: "Welcome testuser_qa_2024"
-
-**Why two assertions?**
-- Tests two distinct aspects:
-  1. Authentication succeeded (logout button)
-  2. Correct user authenticated (username display)
-- More thorough validation
-
-**Success criteria:**
-- ✅ Both assertions pass
-- ✅ No exceptions thrown
-- ✅ Test marked as PASSED
+**Key assertions:**
+- `check_user_is_logged_in()` returns `True`
+- Welcome text contains `TEST_USERNAME`
 
 ---
 
-### Test: `test_login_invalid_password(login_page)`
+#### `test_login_invalid_password(login_page)`
 
-**Test ID:** TC-LOGIN-002  
-**Type:** Negative test  
-**Priority:** High
-
-**What it tests:**
-Correct error handling when password is wrong
-
-**Step-by-step flow:**
-
-1. **Act:**
-   ```python
-   perform_login(login_page, TEST_USERNAME, "wrongpassword123")
-   ```
-   - Valid username (exists in system)
-   - Invalid password (incorrect)
-
-2. **Capture error:**
-   ```python
-   alert_text = wait_for_alert_and_get_text(login_page)
-   ```
-   - Waits for error alert
-   - Gets message text
-   - Closes alert
-
-3. **Assert:**
-   
-   **Assertion 1: Correct error message**
-   ```python
-   assert alert_text == "Wrong password.", f"Expected 'Wrong password.' but got '{alert_text}'"
-   ```
-   - Exact match required
-   - Case-sensitive
-   - Includes period
-
-   **Assertion 2: Login failed**
-   ```python
-   assert not is_user_logged_in(login_page), "User should NOT be logged in with wrong password"
-   ```
-   - Verifies "Log out" button absent
-   - Confirms authentication rejected
-
-**Why this test matters:**
-- Validates error handling
-- Ensures system doesn't grant access with wrong password
-- Checks user feedback (error message)
-
-**Possible failures:**
-- ❌ Wrong error message text
-- ❌ User somehow logged in (security issue)
-- ❌ No alert appeared (broken error handling)
+**Flow:**
+1. Login with valid username + wrong password
+2. Capture alert text
+3. Assert error message is "Wrong password."
+4. Assert user remains logged out
 
 ---
 
-### Test: `test_login_nonexistent_user(login_page)`
+#### `test_login_nonexistent_user(login_page)`
 
-**Test ID:** TC-LOGIN-003  
-**Type:** Negative test  
-**Priority:** High
-
-**What it tests:**
-Error handling when username doesn't exist
-
-**Step-by-step flow:**
-
-1. **Act:**
-   ```python
-   perform_login(login_page, "nonexistent_user_xyz_999", "anypassword")
-   ```
-   - Username that definitely doesn't exist
-   - Random password (doesn't matter)
-
-2. **Capture error:**
-   ```python
-   alert_text = wait_for_alert_and_get_text(login_page)
-   ```
-
-3. **Assert:**
-   
-   **Assertion 1: Correct error message**
-   ```python
-   assert alert_text == "User does not exist.", f"Expected 'User does not exist.' but got '{alert_text}'"
-   ```
-
-   **Assertion 2: Login failed**
-   ```python
-   assert not is_user_logged_in(login_page), "User should NOT be logged in with invalid username"
-   ```
-
-**Security note:**
-This test documents Bug #10 (username enumeration). Different error messages for "wrong password" vs "user doesn't exist" allow attackers to discover valid usernames.
-
-**Expected behavior after bug fix:**
-Both scenarios should return generic message:
-- "Invalid username or password."
+**Flow:**
+1. Login with non-existent username
+2. Capture alert text
+3. Assert error message is "User does not exist."
+4. Assert user remains logged out
 
 ---
 
-### Test: `test_login_empty_fields(login_page)`
+#### `test_login_empty_fields(login_page)`
 
-**Test ID:** TC-LOGIN-004  
-**Type:** Negative test  
-**Priority:** Medium
-
-**What it tests:**
-Client-side validation when fields are empty
-
-**Step-by-step flow:**
-
-1. **Act:**
-   ```python
-   perform_login(login_page, "", "")
-   ```
-   - Both fields empty strings
-   - Tests form validation
-
-2. **Capture validation message:**
-   ```python
-   alert_text = wait_for_alert_and_get_text(login_page)
-   ```
-
-3. **Assert:**
-   ```python
-   assert alert_text == "Please fill out Username and Password.", \
-       f"Expected validation message but got '{alert_text}'"
-   ```
-
-**Why this test matters:**
-- Validates client-side validation exists
-- Prevents unnecessary server requests
-- Improves user experience (immediate feedback)
-
-**Expected behavior:**
-- Form not submitted to server
-- JavaScript alert appears
-- User remains on page
+**Flow:**
+1. Submit login form with empty fields
+2. Capture validation message
+3. Assert message is "Please fill out Username and Password."
 
 ---
 
-### Test: `test_login_weak_password_vulnerability(browser)`
+### Security Tests - SQL Injection
 
-**Test ID:** TC-LOGIN-005  
-**Type:** Security test  
-**Priority:** Critical  
-**Status:** Expected to fail (Bug #11)
+#### `test_login_sql_injection_username(login_page, payload)`
 
-**What it tests:**
-Documents that system accepts dangerously weak passwords
+**Parametrized test** - runs once for each payload:
+
+```python
+@pytest.mark.parametrize("payload", [
+    "' OR '1'='1",
+    "' OR 1=1--",
+    # ... 7 different SQL injection payloads
+])
+```
+
+**Flow:**
+1. Attempt login with SQL injection payload in username
+2. Wait for alert (if any)
+3. **Critical check:** If user is logged in → FAIL with security warning
+4. Assert user remains logged out
+
+**Security logging:**
+If payload succeeds, logs critical warning:
+```
+🚨🚨🚨 VULNERABILIDAD DETECTADA 🚨🚨🚨
+El login fue EXITOSO con el payload de SQLi: [payload]
+```
+
+---
+
+#### `test_login_sql_injection_password(login_page, payload)`
+
+Same logic as username injection, but tests password field.
+
+---
+
+### Security Tests - XSS
+
+#### `test_login_xss_username(login_page, payload)`
+
+**Parametrized test** with XSS payloads:
+
+```python
+@pytest.mark.parametrize("payload", [
+    "<script>alert('XSS')</script>",
+    "<img src=x onerror=alert('XSS')>",
+    "javascript:alert('XSS')",
+    "<svg/onload=alert('XSS')>",
+])
+```
+
+**Flow:**
+1. Enter XSS payload in username
+2. Wait for alert
+3. **If alert contains 'XSS'** → XSS vulnerability detected
+4. Assert user not logged in
+
+---
+
+### Input Validation Tests
+
+#### `test_login_special_characters_username(login_page, test_input)`
+
+Tests special characters: `@#$%^&*()`, `<>?:`, `|\`, etc.
+
+**Expected:** System handles gracefully without crashing.
+
+---
+
+#### `test_login_unicode_characters(login_page, test_input)`
+
+Tests international characters and emojis.
+
+**Expected:** Proper encoding handling, appropriate rejection.
+
+---
+
+### Boundary Tests
+
+#### `test_login_very_long_username(login_page)`
+#### `test_login_very_long_password(login_page)`
+
+Tests 1000-character inputs.
+
+**Expected:** No buffer overflow, system handles safely.
+
+---
+
+#### `test_login_whitespace_username(login_page, test_input)`
+
+Tests leading/trailing spaces, spaces-only input.
+
+---
+
+#### `test_login_case_sensitivity_username(login_page, username_variant)`
+
+Tests if login is case-sensitive (UPPER, lower, Title).
+
+**Expected:** Login rejected with different case.
+
+---
+
+### Advanced Security Tests
+
+#### `test_login_null_bytes(login_page, test_input)`
+
+Tests null byte injection: `user\x00admin`
+
+**Expected:** No string truncation exploits.
+
+---
+
+#### `test_login_path_traversal(login_page, test_input)`
+
+Tests path traversal: `../../../etc/passwd`
+
+**Expected:** No file system access.
+
+---
+
+### Known Vulnerability Tests (xfail)
+
+#### `test_login_weak_password_vulnerability(browser)`
 
 **Marked as xfail:**
 ```python
 @pytest.mark.xfail(reason="Bug #11: System accepts weak passwords")
 ```
 
-**Why xfail?**
-- Bug is known and documented
-- Test will fail until bug is fixed
-- When bug is fixed, test will start passing
-- Serves as regression test
+**Test:**
+1. Register new user with password "123"
+2. Check if system rejects it
 
-**Step-by-step flow:**
+**Current behavior:** Accepts weak password (test fails as expected)
 
-1. **Generate unique username:**
-   ```python
-   timestamp = str(int(time.time()))
-   test_user = f"weakpass_test_{timestamp}"
-   ```
-   - Prevents "username exists" errors
-   - Each test run uses different username
-
-2. **Define weak password:**
-   ```python
-   weak_password = "123"
-   ```
-   - Obviously insecure
-   - Should be rejected
-
-3. **Navigate to registration:**
-   ```python
-   browser.get(BASE_URL)
-   signup_btn = browser.find_element(By.ID, "signin2")
-   signup_btn.click()
-   ```
-
-4. **Wait for modal:**
-   ```python
-   WebDriverWait(browser, TIMEOUT).until(
-       EC.visibility_of_element_located((By.ID, "sign-username"))
-   )
-   ```
-
-5. **Register with weak password:**
-   ```python
-   browser.find_element(By.ID, "sign-username").send_keys(test_user)
-   browser.find_element(By.ID, "sign-password").send_keys(weak_password)
-   browser.find_element(By.XPATH, "//button[text()='Sign up']").click()
-   ```
-
-6. **Check registration result:**
-   ```python
-   alert_text = wait_for_alert_and_get_text(browser)
-   ```
-
-7. **Assert (expected to fail):**
-   ```python
-   assert "Password too weak" in alert_text or "password requirements" in alert_text.lower(), \
-       "System should reject weak passwords (Bug #11)"
-   ```
-
-**Current behavior (bug exists):**
-- Registration succeeds
-- "123" accepted as valid password
-- Test fails (as expected)
-
-**Expected behavior (after fix):**
-- Registration rejected
-- Error message about password requirements
-- Test passes
-
-**Security impact:**
-- Users can create easily guessed passwords
-- Accounts vulnerable to brute force
-- Violates security best practices
+**When fixed:** Test will pass, remove `@pytest.mark.xfail`
 
 ---
 
-### Test: `test_username_enumeration_vulnerability(login_page)`
+#### `test_username_enumeration_vulnerability(login_page)`
 
-**Test ID:** TC-LOGIN-006  
-**Type:** Security test  
-**Priority:** Critical  
-**Status:** Expected to fail (Bug #10)
+**Marked as xfail (Bug #10)**
 
-**What it tests:**
-Documents username enumeration vulnerability through different error messages
+**Test:**
+1. Login with existing user + wrong password
+2. Note error: "Wrong password."
+3. Login with non-existent user
+4. Note error: "User does not exist."
+5. Assert messages should be identical
 
-**Marked as xfail:**
-```python
-@pytest.mark.xfail(reason="Bug #10: Username enumeration vulnerability")
-```
+**Current behavior:** Different messages (test fails as expected)
 
-**Step-by-step flow:**
+---
 
-1. **Test existing username with wrong password:**
-   ```python
-   perform_login(login_page, TEST_USERNAME, "wrong_password_xyz")
-   error_msg_existing_user = wait_for_alert_and_get_text(login_page)
-   ```
-   - Result: "Wrong password."
+#### `test_login_brute_force_lockout(browser)`
 
-2. **Reopen login modal:**
-   ```python
-   login_page.find_element(By.ID, LOGIN_BUTTON_NAV).click()
-   time.sleep(1)
-   ```
-   - Necessary because modal closed after first attempt
+**Marked as xfail (Bug #12)**
 
-3. **Test non-existent username:**
-   ```python
-   perform_login(login_page, "definitely_not_a_real_user_xyz", "any_password")
-   error_msg_nonexistent_user = wait_for_alert_and_get_text(login_page)
-   ```
-   - Result: "User does not exist."
+**Test:**
+1. Attempt 7 consecutive failed logins
+2. Check for account lockout or rate limiting
 
-4. **Compare error messages:**
-   ```python
-   assert error_msg_existing_user == error_msg_nonexistent_user, \
-       f"Error messages should be identical to prevent username enumeration. " \
-       f"Got: '{error_msg_existing_user}' vs '{error_msg_nonexistent_user}' (Bug #10)"
-   ```
+**Current behavior:** No protection (test fails as expected)
 
-**Current behavior (bug exists):**
-- Different messages reveal username validity
-- Test fails (as expected)
+---
 
-**Attack scenario:**
-1. Attacker tries login with username "admin"
-2. Sees "Wrong password." → "admin" exists!
-3. Attacker tries login with username "randomuser123"
-4. Sees "User does not exist." → Not a valid username
-5. Attacker builds list of valid usernames
-6. Launches targeted password attacks
+### UI Interaction Tests
 
-**Expected behavior (after fix):**
-- Same generic message for all failed logins
-- Example: "Invalid credentials."
-- Test passes
+#### `test_login_modal_close_button(login_page)`
 
-**OWASP reference:**
-This vulnerability appears in OWASP Top 10 under "Broken Authentication"
+**Test:**
+1. Verify modal is open
+2. Click close button
+3. Wait for modal to disappear
+4. Assert modal is closed
+
+---
+
+#### `test_login_modal_interaction_signup_login(browser)`
+
+**Test:**
+1. Open Sign Up modal
+2. Verify visibility
+3. Close it
+4. Open Login modal
+5. Verify visibility
+
+**Expected:** Modals don't interfere with each other.
 
 ---
 
 <a name="locators"></a>
 ## 10. How to Obtain Locators
 
-### Tools Needed
+### Using Browser DevTools
 
-**Browser DevTools (F12 or Right-click → Inspect)**
-- Chrome: Best for web automation testing
-- Firefox: Good alternative
-- Edge: Also works well
+**Step 1:** Navigate to https://www.demoblaze.com/
 
----
+**Step 2:** Open DevTools
+- Press F12, or
+- Right-click → Inspect
 
-### Method 1: Using Browser Inspector
+**Step 3:** Use element picker
+- Click cursor icon in DevTools
+- Or press Ctrl+Shift+C
 
-**Step-by-step for "Log in" button:**
+**Step 4:** Click target element
 
-1. **Navigate to page:**
-   - Open https://www.demoblaze.com/
+**Step 5:** Read HTML and extract locator
 
-2. **Open DevTools:**
-   - Press F12, or
-   - Right-click anywhere → Inspect
+**Example - Login Button:**
+```html
+<a id="login2" data-toggle="modal" data-target="#logInModal">Log in</a>
+```
 
-3. **Select element picker:**
-   - Click the cursor icon (top-left of DevTools)
-   - Or press Ctrl+Shift+C
-
-4. **Click the element:**
-   - Hover over "Log in" button
-   - Click it
-
-5. **Read HTML:**
-   ```html
-   <a id="login2" data-toggle="modal" data-target="#logInModal">Log in</a>
-   ```
-
-6. **Extract locator:**
-   - See `id="login2"`
-   - Use: `By.ID, "login2"`
-
----
-
-### Method 2: Manual Search in HTML
-
-**When to use:**
-- Element is hidden
-- Element appears after interaction
-- Need to find multiple similar elements
-
-**Steps:**
-
-1. **Open DevTools (F12)**
-
-2. **Go to Elements/Inspector tab**
-
-3. **Use search (Ctrl+F in DevTools)**
-   - Search for text: "Log in"
-   - Search for attribute: `id="login`
-   - Search for class: `class="form-control"`
-
-4. **Navigate HTML tree:**
-   - Expand/collapse elements
-   - Find target element
-
-5. **Copy locator:**
-   - Right-click element in HTML
-   - Copy → Copy selector (CSS)
-   - Copy → Copy XPath
-
----
+Extract: `By.ID, "login2"`
 
 ### Locator Strategy Decision Tree
 
-**Question 1: Does element have a unique ID?**
-- ✅ Yes → Use ID (fastest, most reliable)
-  ```python
-  By.ID, "loginusername"
-  ```
-- ❌ No → Go to Question 2
+**Has unique ID?** → Use ID (best option)
 
-**Question 2: Does element have unique name attribute?**
-- ✅ Yes → Use NAME
-  ```python
-  By.NAME, "username"
-  ```
-- ❌ No → Go to Question 3
+**Has unique name?** → Use NAME
 
-**Question 3: Is element easily identified by class?**
-- ✅ Yes → Use CSS Selector
-  ```python
-  By.CSS_SELECTOR, ".login-button"
-  ```
-- ❌ No → Go to Question 4
+**Has distinctive class?** → Use CSS Selector
 
-**Question 4: Does element have unique text?**
-- ✅ Yes → Use XPath with text
-  ```python
-  By.XPATH, "//button[text()='Log in']"
-  ```
-- ❌ No → Use complex XPath
+**Has unique text?** → Use XPath with text
 
----
-
-### Locator Examples from This Project
-
-#### Example 1: Login Button (ID)
-**HTML:**
-```html
-<a id="login2">Log in</a>
-```
-
-**Locator options:**
+**Example XPath:**
 ```python
-# Best (ID)
-By.ID, "login2"
-
-# Also works (CSS)
-By.CSS_SELECTOR, "#login2"
-
-# Also works (XPath)
-By.XPATH, "//a[@id='login2']"
-```
-
-**Chosen:** ID (simplest and fastest)
-
----
-
-#### Example 2: Username Field (ID)
-**HTML:**
-```html
-<input type="text" id="loginusername" class="form-control" placeholder="Username">
-```
-
-**Locator options:**
-```python
-# Best (ID)
-By.ID, "loginusername"
-
-# Works (CSS with attribute)
-By.CSS_SELECTOR, "input[placeholder='Username']"
-
-# Works (XPath)
-By.XPATH, "//input[@type='text' and @id='loginusername']"
-```
-
-**Chosen:** ID
-
----
-
-#### Example 3: Submit Button (XPath with text)
-**HTML:**
-```html
-<button type="button" class="btn btn-primary" onclick="logIn()">Log in</button>
-```
-
-**Why not ID?** No unique ID attribute
-
-**Locator options:**
-```python
-# Good (XPath text)
 By.XPATH, "//button[text()='Log in']"
-
-# Works (CSS with onclick)
-By.CSS_SELECTOR, "button[onclick='logIn()']"
-
-# Fragile (classes can change)
-By.CSS_SELECTOR, "button.btn.btn-primary"
 ```
 
-**Chosen:** XPath with text (readable and distinctive)
-
----
-
-### Testing Your Locators
-
-**In Python console:**
-```python
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-
-driver = webdriver.Chrome()
-driver.get("https://www.demoblaze.com/")
-
-# Test your locator
-element = driver.find_element(By.ID, "login2")
-print(element.text)  # Should print "Log in"
-
-driver.quit()
-```
-
-**In Browser DevTools Console:**
-```javascript
-// Test CSS Selector
-document.querySelector("#login2")
-
-// Test XPath
-$x("//button[text()='Log in']")
-```
-
-If element is found, locator works!
+Breakdown:
+- `//button` - Any button element
+- `[text()='Log in']` - With text "Log in"
 
 ---
 
 <a name="execution"></a>
 ## 11. Execution Guide
 
-### Prerequisites Check
-
-Before running tests, verify:
+### Prerequisites
 
 ```bash
-# Python version (should be 3.8+)
+# Verify Python 3.8+
 python --version
 
-# pip version
-pip --version
-
-# Selenium installed
-pip show selenium
-
-# pytest installed
-pip show pytest
+# Install dependencies from requirements.txt
+pip install -r requirements.txt
 ```
 
----
+**requirements.txt includes:**
+- selenium
+- pytest
+- pytest-html
+- webdriver-manager
 
 ### Running Tests
 
-#### Run all tests in file:
+**Run all login tests (Chrome default):**
 ```bash
-pytest tests/test_dem_login.py
+pytest tests/login/
 ```
 
-**Output example:**
-```
-collected 6 items
-
-test_dem_login.py::test_login_valid_credentials PASSED           [ 16%]
-test_dem_login.py::test_login_invalid_password PASSED            [ 33%]
-test_dem_login.py::test_login_nonexistent_user PASSED            [ 50%]
-test_dem_login.py::test_login_empty_fields PASSED                [ 66%]
-test_dem_login.py::test_login_weak_password_vulnerability XFAIL  [ 83%]
-test_dem_login.py::test_username_enumeration_vulnerability XFAIL [100%]
-
-====================== 4 passed, 2 xfailed in 45.23s =======================
-```
-
----
-
-#### Run specific test:
+**Run with specific browser:**
 ```bash
-pytest tests/test_dem_login.py::test_login_valid_credentials
+pytest tests/login/ --browser=chrome
+pytest tests/login/ --browser=firefox
+pytest tests/login/ --browser=edge
 ```
 
----
-
-#### Run with verbose output:
+**Run specific test:**
 ```bash
-pytest tests/test_dem_login.py -v
+pytest tests/login/test_dem_login.py::test_login_valid_credentials
 ```
 
-**Shows:**
-- Detailed test names
-- Docstring summaries
-- Progress indicators
-
----
-
-#### Run with HTML report:
+**Run with verbose output:**
 ```bash
-pytest tests/test_dem_login.py --html=reports/login_report.html --self-contained-html
+pytest tests/login/ -v
 ```
 
-**Generates:**
-- Professional HTML report
-- Test results summary
-- Failure details
-- Execution time
-
-**View report:**
+**Run with print statements (debugging):**
 ```bash
-# Open in browser
-reports/login_report.html
+pytest tests/login/ -s
 ```
 
----
-
-#### Run with custom markers:
+**Run only xfail tests:**
 ```bash
-# Run only xfail tests (security bugs)
-pytest tests/test_dem_login.py -m xfail
-
-# Skip xfail tests (run only stable tests)
-pytest tests/test_dem_login.py -m "not xfail"
+pytest tests/login/ -m xfail
 ```
 
----
-
-#### Run with print statements (for debugging):
+**Run excluding xfail tests:**
 ```bash
-pytest tests/test_dem_login.py -s
+pytest tests/login/ -m "not xfail"
 ```
 
-**Shows:**
-- `print()` output
-- Useful for debugging
-
----
-
-#### Run with last failed:
+**CI/CD Command (with fail-fast):**
 ```bash
-# Run only tests that failed last time
-pytest tests/test_dem_login.py --lf
+pytest tests/login/ --browser=chrome --maxfail=1 -v
+```
+Note: HTML report is generated automatically by `conftest.py`
+
+### HTML Reports
+
+Reports are **automatically generated** by `conftest.py` in the root directory.
+
+**Report location:**
+```
+test_results/login/report_[browser]_[timestamp].html
 ```
 
-**Use case:**
-- Fixed a bug
-- Re-run only failed tests
-- Faster iteration
+**Example:**
+```
+test_results/login/report_chrome_2025-11-07_14-30-45.html
+test_results/login/report_firefox_2025-11-07_14-35-20.html
+```
 
----
+**Features:**
+- Automatic report generation (no need to specify `--html`)
+- Reports grouped by test folder (`login`, `purchase`, etc.)
+- Self-contained HTML (includes CSS/JS)
+- Timestamped filenames with browser name
+- `test_results/` folder created automatically
 
-### Continuous Integration (CI) Command
+### Cross-Browser Testing
 
-**For GitHub Actions / Jenkins / etc:**
+**Test on all browsers:**
 ```bash
-pytest tests/test_dem_login.py --html=reports/report.html --self-contained-html --maxfail=1 -v
+pytest tests/login/ --browser=chrome
+pytest tests/login/ --browser=firefox
+pytest tests/login/ --browser=edge
 ```
 
-**Flags explained:**
-- `--html=...` - Generate report
-- `--self-contained-html` - Single file (no dependencies)
-- `--maxfail=1` - Stop after first failure (fail fast)
-- `-v` - Verbose output for CI logs
+**Note:** The `conftest.py` in the project root handles:
+- Browser selection via `--browser` parameter
+- Automatic HTML report generation
+- Report organization by test folder
+- Timestamp and browser name in filename
 
 ---
 
@@ -1658,161 +1211,70 @@ pytest tests/test_dem_login.py --html=reports/report.html --self-contained-html 
 
 ### Test Execution Summary
 
-| Test Case | ID | Expected Result | Status |
-|-----------|----|--------------------|--------|
-| Valid Login | TC-LOGIN-001 | ✅ PASS | Stable |
-| Invalid Password | TC-LOGIN-002 | ✅ PASS | Stable |
-| Non-existent User | TC-LOGIN-003 | ✅ PASS | Stable |
-| Empty Fields | TC-LOGIN-004 | ✅ PASS | Stable |
-| Weak Password | TC-LOGIN-005 | ❌ XFAIL | Bug #11 |
-| Username Enumeration | TC-LOGIN-006 | ❌ XFAIL | Bug #10 |
-
----
+| Test Category | Tests | Pass | Xfail | Total |
+|--------------|-------|------|-------|-------|
+| Basic Login | 6 | 6 | 0 | 6 |
+| SQL Injection | 10 | 10 | 0 | 10 |
+| XSS | 4 | 4 | 0 | 4 |
+| Input Validation | 2 | 2 | 0 | 2 |
+| Boundary | 4 | 4 | 0 | 4 |
+| Advanced Security | 2 | 2 | 0 | 2 |
+| Known Vulnerabilities | 3 | 0 | 3 | 3 |
+| UI Interaction | 2 | 2 | 0 | 2 |
+| **TOTAL** | **33** | **30** | **3** | **33** |
 
 ### Success Criteria
 
-**Test suite is considered PASSED if:**
-1. ✅ 4 stable tests pass (TC-LOGIN-001 through 004)
-2. ✅ 2 xfail tests fail as expected (TC-LOGIN-005, 006)
-3. ✅ No unexpected failures
-4. ✅ No exceptions/errors in stable tests
-5. ✅ Execution time under 2 minutes
-
----
-
-### Failure Investigation
-
-**If test fails unexpectedly:**
-
-1. **Check error message:**
-   ```bash
-   pytest tests/test_dem_login.py -v
-   ```
-
-2. **Read traceback:**
-   - Which line failed?
-   - What was the assertion?
-
-3. **Common issues:**
-
-   **Timeout errors:**
-   - Site is slow
-   - Element locator changed
-   - Internet connection issue
-   
-   **Element not found:**
-   - Locator changed (site updated)
-   - Element takes longer to appear
-   - Wrong environment (dev vs prod)
-   
-   **Assertion failures:**
-   - Expected vs actual mismatch
-   - Logic error in test
-   - Application bug
-
-4. **Debug with print statements:**
-   ```python
-   # Add to test
-   print(f"Alert text: {alert_text}")
-   print(f"Logged in: {is_user_logged_in(browser)}")
-   ```
-   
-   Run with:
-   ```bash
-   pytest tests/test_dem_login.py -s
-   ```
-
----
+Test suite PASSED if:
+- 30 stable tests pass
+- 3 xfail tests fail as expected (Bugs #10, #11, #12)
+- No unexpected failures
+- Execution time under 5 minutes
 
 ### Performance Benchmarks
 
 **Expected execution times:**
-
-| Test | Avg Time | Max Acceptable |
-|------|----------|----------------|
-| test_login_valid_credentials | 8s | 15s |
-| test_login_invalid_password | 6s | 12s |
-| test_login_nonexistent_user | 6s | 12s |
-| test_login_empty_fields | 5s | 10s |
-| test_login_weak_password_vulnerability | 12s | 20s |
-| test_username_enumeration_vulnerability | 10s | 18s |
-| **Total Suite** | **47s** | **90s** |
-
-**If tests are slower:**
-- Reduce `TIMEOUT` (if site is fast)
-- Check internet connection
-- Site may be experiencing issues
+- Basic tests: 5-8 seconds each
+- Parametrized tests: 3-5 seconds per iteration
+- Security tests: 6-10 seconds each
+- Total suite: ~4 minutes (varies by browser)
 
 ---
 
 <a name="troubleshooting"></a>
 ## 13. Troubleshooting
 
-### Common Issues and Solutions
-
-#### Issue 1: ChromeDriver version mismatch
+### Issue: ChromeDriver version mismatch
 
 **Error:**
 ```
-selenium.common.exceptions.SessionNotCreatedException: 
-Message: session not created: This version of ChromeDriver only supports Chrome version 118
+SessionNotCreatedException: This version of ChromeDriver only supports Chrome version XX
 ```
 
 **Solution:**
 ```bash
-# Reinstall webdriver-manager
 pip uninstall webdriver-manager
 pip install webdriver-manager
-
-# Clear cache
-rm -rf ~/.wdm
+rm -rf ~/.wdm  # Clear cache
 ```
-
-**Why it happens:**
-- Chrome auto-updates
-- ChromeDriver doesn't match
 
 ---
 
-#### Issue 2: Element not found
+### Issue: Element not found
 
 **Error:**
 ```
-selenium.common.exceptions.NoSuchElementException: 
-Message: no such element: Unable to locate element: {"method":"css selector","selector":"#login2"}
+NoSuchElementException: Unable to locate element
 ```
 
-**Possible causes:**
-1. Page not loaded yet
-2. Locator changed
-3. Element inside iframe
-
-**Solution 1: Add wait**
-```python
-WebDriverWait(browser, 10).until(
-    EC.presence_of_element_located((By.ID, "login2"))
-)
-```
-
-**Solution 2: Verify locator**
-- Inspect element manually
-- Check if ID still exists
-- Try alternative locator
-
-**Solution 3: Check for iframe**
-```python
-# Switch to iframe if element is inside one
-browser.switch_to.frame("iframe_name")
-element = browser.find_element(By.ID, "login2")
-```
+**Solutions:**
+1. Add explicit wait
+2. Verify locator still valid (inspect element)
+3. Check if element inside iframe
 
 ---
 
-#### Issue 3: Test hangs indefinitely
-
-**Symptom:**
-- Test runs but never completes
-- No error message
+### Issue: Test hangs
 
 **Causes:**
 - Alert not handled
@@ -1820,55 +1282,17 @@ element = browser.find_element(By.ID, "login2")
 - Modal not closed
 
 **Solution:**
-```bash
-# Kill test with Ctrl+C
-
-# Add timeout to problematic operation
-# Example:
-WebDriverWait(browser, 5).until(...)  # Reduce timeout
-```
+- Add timeout to operations
+- Check logging output for clues
 
 ---
 
-#### Issue 4: Tests pass locally but fail in CI
-
-**Possible causes:**
-1. Different environment
-2. Timing issues (CI is slower)
-3. Browser/driver version mismatch
+### Issue: Tests pass locally but fail in CI
 
 **Solutions:**
-
-**Increase timeouts for CI:**
-```python
-# In conftest.py or similar
-import os
-
-if os.getenv('CI'):
-    TIMEOUT = 20  # Double timeout in CI
-else:
-    TIMEOUT = 10
-```
-
-**Headless mode for CI:**
-```python
-options = webdriver.ChromeOptions()
-options.add_argument('--headless')
-driver = webdriver.Chrome(options=options)
-```
-
----
-
-#### Issue 5: Weak password test passes (should be xfail)
-
-**What it means:**
-- Bug #11 was fixed!
-- System now rejects weak passwords
-
-**What to do:**
-1. Remove `@pytest.mark.xfail` decorator
-2. Update test to expect password rejection
-3. Update bug status to "Fixed"
+1. Increase timeouts for CI
+2. Use headless mode
+3. Check browser/driver versions match
 
 ---
 
@@ -1877,178 +1301,70 @@ driver = webdriver.Chrome(options=options)
 
 ### Code Quality
 
-#### ✅ DRY (Don't Repeat Yourself)
-**Applied in:**
-- Helper functions (`perform_login`, `wait_for_alert_and_get_text`)
-- Fixtures (browser setup/teardown)
-- Configuration constants
+**DRY (Don't Repeat Yourself)**
+- Helper functions for repeated actions
+- Fixtures for setup/teardown
+- Centralized configuration
 
-**Benefit:** Change once, apply everywhere
-
----
-
-#### ✅ Single Responsibility Principle
-**Applied in:**
+**Single Responsibility Principle**
 - Each function does one thing
-- `perform_login()` only performs login
-- `is_user_logged_in()` only checks state
+- Clear, focused purpose
 
-**Benefit:** Easy to understand and maintain
-
----
-
-#### ✅ Explicit is Better Than Implicit
-**Applied in:**
+**Explicit is Better Than Implicit**
 - Named constants instead of magic strings
-- Clear function names
 - Descriptive variable names
-
-**Example:**
-```python
-# ✅ Good
-LOGIN_BUTTON_NAV = "login2"
-browser.find_element(By.ID, LOGIN_BUTTON_NAV)
-
-# ❌ Bad
-browser.find_element(By.ID, "login2")  # What is login2?
-```
-
----
+- Clear function names
 
 ### Testing Best Practices
 
-#### ✅ Test Isolation
-**Implementation:**
+**Test Isolation**
 - Each test gets fresh browser
-- No shared state between tests
-- Tests can run in any order
+- No shared state
+- Tests run in any order
 
-**Benefit:** Reliable, reproducible results
-
----
-
-#### ✅ AAA Pattern (Arrange-Act-Assert)
-**Applied in all tests:**
+**AAA Pattern (Arrange-Act-Assert)**
 ```python
 def test_example():
-    # Arrange
+    # Arrange (setup)
     username = "test"
     
-    # Act
+    # Act (perform action)
     perform_login(browser, username, password)
     
-    # Assert
-    assert is_user_logged_in(browser)
+    # Assert (verify)
+    assert check_user_is_logged_in(browser)
 ```
 
-**Benefit:** Clear test structure
+**Parametrization**
+- Test multiple inputs efficiently
+- Single test function, multiple scenarios
+- Clear test data separation
 
----
-
-#### ✅ Meaningful Test Names
-**Convention:**
-```
-test_[module]_[action]_[context]
-```
-
-**Examples:**
-- `test_login_valid_credentials` ✅
-- `test_login_invalid_password` ✅
-- `test1` ❌
-
-**Benefit:** Self-documenting code
-
----
-
-#### ✅ Expected Failures (xfail)
-**For known bugs:**
-```python
-@pytest.mark.xfail(reason="Bug #11: Weak passwords")
-def test_weak_password_vulnerability():
-    # Tests known bug
-```
-
-**Benefits:**
-- Documents bugs in code
+**Expected Failures (xfail)**
+- Documents known bugs
 - Regression testing ready
-- Clear distinction between expected/unexpected failures
-
----
-
-### Documentation Best Practices
-
-#### ✅ Separate Documentation File
-**This file (test_dem_login.md) provides:**
-- Comprehensive explanation
-- Clean code (no comment clutter)
-- Easy to read
-- Can be versioned separately
-
----
-
-#### ✅ Traceability
-**Links between:**
-- Test cases (TC-LOGIN-001)
-- Bug reports (Bug #10, #11)
-- Test functions
-- Documentation sections
-
-**Benefit:** Easy to navigate between artifacts
-
----
-
-#### ✅ How-To Sections
-**Includes:**
-- How to obtain locators
-- How to run tests
-- Troubleshooting guide
-
-**Benefit:** Self-service for other team members
-
----
+- Clear status distinction
 
 ### Selenium Best Practices
 
-#### ✅ Explicit Waits
-**Used instead of:**
-```python
-# ❌ Bad
-time.sleep(5)  # Arbitrary wait
+**Explicit Waits**
+- Use `WebDriverWait` instead of `time.sleep()`
+- Faster and more reliable
 
-# ✅ Good
-WebDriverWait(browser, 10).until(
-    EC.visibility_of_element_located((By.ID, "element"))
-)
-```
-
-**Benefits:**
-- Faster tests (wait only as needed)
-- More reliable
-- Better error messages
-
----
-
-#### ✅ WebDriver Manager
-**Auto-manages drivers:**
-```python
-ChromeDriverManager().install()
-```
-
-**Benefits:**
-- No manual driver downloads
-- Always correct version
+**WebDriver Manager**
+- Auto-manages driver versions
+- No manual downloads
 - Cross-platform compatible
 
----
-
-#### ✅ Locator Strategy Hierarchy
-**Priority:**
-1. ID (fastest, most reliable)
+**Locator Strategy Hierarchy**
+1. ID (best)
 2. Name
 3. CSS Selector
-4. XPath (last resort)
+4. XPath (when necessary)
 
-**Applied:** Used IDs where available, XPath only when necessary
+**Cross-Browser Testing**
+- Test on multiple browsers
+- Catch browser-specific issues early
 
 ---
 
@@ -2056,72 +1372,49 @@ ChromeDriverManager().install()
 
 ### When to Update Tests
 
-**Trigger 1: Site Redesign**
-- Locators may change
-- Update `CONFIGURATION` section
-- Re-verify all element IDs
+**Site Redesign:**
+- Update locators
+- Re-verify element IDs
+- Test all scenarios
 
-**Trigger 2: Bug Fixes**
-- Remove `@pytest.mark.xfail` when bug resolved
+**Bug Fixes:**
+- Remove `@pytest.mark.xfail`
 - Update expected behavior
-- Change assertions if needed
+- Re-run regression tests
 
-**Trigger 3: New Features**
+**New Features:**
 - Add new test cases
 - Update documentation
-- Maintain same structure
+- Maintain structure
+
+### Adding New Tests
+
+1. Add test case to documentation
+2. Write test function following AAA pattern
+3. Update this README
+4. Run full test suite to verify
 
 ---
 
-### How to Add New Tests
+## 16. Version History
 
-1. **Add to documentation first:**
-   - New test case in section 2
-   - Expected results in section 12
-
-2. **Write test function:**
-   ```python
-   def test_login_[new_scenario](login_page):
-       # Follow AAA pattern
-       pass
-   ```
-
-3. **Update this file:**
-   - Add to Table of Contents
-   - Add to Test Cases section
-   - Add to Expected Results
+| Version | Date | Changes |
+|---------|------|---------|
+| 3.1 | Nov 2025 | Cross-browser support, enhanced logging, improved helpers |
+| 3.0 | Nov 2025 | Security tests (SQL injection, XSS), parametrization |
+| 1.0 | Nov 2025 | Initial release with basic tests |
 
 ---
 
-### Version History
+## 17. Related Documents
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | Nov 2025 | Arévalo, Marc | Initial documentation |
-
----
-
-## 16. Related Documents
-
-- [Test Plan](../docs/test-plan.md)
-- [Test Summary Report](../docs/Test_Summary_Report.md)
-- [Bug #10: Username Enumeration](../docs/bugs/bug-010-username-enumeration.md)
-- [Bug #11: Weak Passwords](../docs/bugs/bug-011-weak-passwords.md)
-- [Bug #12: No Rate Limiting](../docs/bugs/bug-012-no-rate-limiting.md)
-
----
-
-## 17. Contact & Support
-
-**Test Suite Author:**  
-Marc Arévalo  
-GitHub: [Your GitHub Username]
-
-**Questions?**
-- Review this documentation first
-- Check Troubleshooting section
-- Examine test code
-- Open GitHub issue if problem persists
+- [Test Plan](../../docs/test-plan.md)
+- [Test Summary Report](../../docs/Test_Summary_Report.md)
+- [User Flows](../../docs/users-flow.md)
+- [DemoBlaze Test Cases](../../docs/DemoBlaze_Test_Cases.xlsx)
+- Bug #10: Username Enumeration (documented in Test Summary Report)
+- Bug #11: Weak Passwords (documented in Test Summary Report)
+- Bug #12: No Rate Limiting (documented in Test Summary Report)
 
 ---
 
