@@ -1,9 +1,10 @@
-# Test Suite: Purchase & Cart Functionality
+# Security & Exploitation Test Suite
 
-**Module:** `test_purchase.py`  
+**Module:** `test_purchase_security.py`  
 **Author:** Arévalo, Marc  
 **Application Under Test:** DemoBlaze (https://www.demoblaze.com/)  
-**Current Version:** 4.0
+**Current Version:** 1.0  
+**Test Type:** Security, Exploitation, Penetration Testing
 
 ---
 
@@ -31,37 +32,76 @@
 
 ### Purpose
 
-This test suite validates DemoBlaze's purchase and cart functionality with focus on:
-- Complete purchase workflow (add to cart → checkout → payment → confirmation)
-- Cart operations (add, delete, price calculations)
-- Order form validation (required fields, data types)
-- Business rules validation (empty cart prevention, input constraints)
-- Security testing (SQL injection, XSS, malicious inputs)
-- User scenarios (guest vs logged-in purchases)
+This test suite validates DemoBlaze's security posture through active exploitation testing. Unlike functional tests that verify expected behavior, these tests attempt to **exploit vulnerabilities** to demonstrate security gaps that could be leveraged by malicious actors.
+
+**Focus Areas:**
+- Business logic manipulation (negative quantities, price manipulation, coupon stacking)
+- Bot protection mechanisms (rate limiting, CAPTCHA, automated checkout)
+- PCI-DSS compliance (card data handling, encryption, script integrity)
+- Session security (fixation, token validation, CSRF protection)
+- Access control (IDOR, unauthorized resource access)
+- Data exposure (sensitive data in URLs, storage, error messages)
+- Input validation (SQL injection, XSS protection)
+- HTTP security (methods, headers, cookie flags)
+- Accessibility compliance (WCAG 2.1 keyboard navigation, screen readers)
+- Performance boundaries (concurrent operations, capacity limits)
 
 ### Scope
 
 **In Scope:**
-- Product addition to cart
-- Cart total calculations (single/multiple items)
-- Item deletion from cart
-- Price verification throughout flow
-- Order form validation and robustness
-- Complete purchase with confirmation
-- Guest and authenticated user purchases
-- Empty cart handling
-- Order modal interactions
-- Security validation (SQL injection, XSS, special characters, null bytes)
-- Accessibility features (keyboard navigation, screen readers, color contrast)
-- Performance testing (concurrent operations, load capacity)
+- Active exploitation attempts (negative quantities, price tampering, coupon abuse)
+- Automated attack simulation (1000+ requests, concurrent operations)
+- Payment security validation (PCI-DSS requirements)
+- Session hijacking attempts
+- Authorization bypass testing
+- Client-side security analysis
+- API endpoint enumeration
+- Error information disclosure
+- CSRF token validation
+- Cookie security assessment
+- HTTP method testing
+- Security header validation
+- Accessibility testing (keyboard, screen readers, contrast)
+- Stress testing (concurrent checkouts, cart capacity)
 
 **Out of Scope:**
-- Product catalog browsing
-- Product search/filtering
-- Quantity selection (DemoBlaze limitation)
-- Coupon/discount codes
-- Multiple shipping addresses
-- Real payment gateway integration
+- Network-level attacks (DDoS, port scanning)
+- Social engineering
+- Physical security
+- Infrastructure penetration
+- Source code review
+- Real payment processing exploitation
+- Database direct access attempts
+
+### Standards Validated
+
+**OWASP Top 10 2021:**
+- A01:2021 - Broken Access Control
+- A02:2021 - Cryptographic Failures
+- A03:2021 - Injection (SQL, XSS)
+- A04:2021 - Insecure Design
+- A05:2021 - Security Misconfiguration
+- A07:2021 - Identification and Authentication Failures
+- A08:2021 - Software and Data Integrity Failures
+
+**PCI-DSS 4.0.1:**
+- Requirement 3.2 - Cardholder Data Protection
+- Requirement 4.2 - Strong Cryptography for Data Transmission
+- Requirement 6.5 - Secure Application Development
+- Requirement 11.6.1 - Script Integrity (Subresource Integrity)
+
+**OWASP WSTG:**
+- BUSL-10 - Business Logic Testing
+- SESS-01 - Session Management Testing
+- AUTHZ-01 - Directory Traversal/Authorization Bypass
+
+**WCAG 2.1 Level AA:**
+- 2.1.1 - Keyboard Accessible
+- 1.3.1 - Info and Relationships
+- 1.4.3 - Contrast Minimum
+
+**OWASP API Security Top 10:**
+- API6:2023 - Unrestricted Access to Sensitive Business Flows
 
 ---
 
@@ -78,32 +118,45 @@ pip install -r requirements.txt
 - pytest
 - selenium
 - webdriver-manager
-- pytest-html
+- requests
+- concurrent.futures (standard library)
 
-### Run All Tests
-
-```bash
-pytest test_purchase.py -v
-```
-
-### Run Specific Categories
+### Run All Security Tests
 
 ```bash
-# Functional tests only
-pytest test_purchase.py -m functional -v
-
-# Business rules tests
-pytest test_purchase.py -m business_rules -v
-
-# Parametrized validation tests
-pytest test_purchase.py -k "validation" -v
+pytest test_purchase_security.py -v
 ```
 
-### Generate HTML Report
+### Run by Security Category
 
 ```bash
-pytest test_purchase.py --html=report.html --self-contained-html
+# Business logic exploitation
+pytest test_purchase_security.py -m business_logic -v
+
+# Bot protection tests
+pytest test_purchase_security.py -m bot_protection -v
+
+# PCI-DSS compliance
+pytest test_purchase_security.py -m pci_dss -v
+
+# Critical vulnerabilities only
+pytest test_purchase_security.py -m critical -v
 ```
+
+### Generate Security Report
+
+```bash
+pytest test_purchase_security.py --html=security_report.html --self-contained-html -v
+```
+
+### Warning
+
+These tests perform active exploitation attempts. Run only in:
+- Development environments
+- Staging environments with permission
+- Controlled testing environments
+
+**Do NOT run against production without explicit authorization.**
 
 ---
 
@@ -112,31 +165,44 @@ pytest test_purchase.py --html=report.html --self-contained-html
 
 ### Test Distribution
 
-| Category | Count | Type | Status |
-|----------|-------|------|--------|
-| Functional - Purchase Flow | 11 | Positive | ✅ Pass |
-| Functional - Cart Operations | 10 | Positive | ✅ Pass |
-| Functional - UI/Navigation | 8 | Functional | ✅ Pass |
-| Functional - Misc | 3 | Edge Cases | ✅ Pass |
-| Business Rules | 10 | Validation | ⚠️ Expected Fail |
-| Parametrized Validation | 12 scenarios | Security/Robustness | ⚠️ Mixed |
-| **TOTAL TESTS** | **40 functions** | **52 test runs** | **Mixed** |
+| Category | Count | Severity | Type |
+|----------|-------|----------|------|
+| Business Logic Exploitation | 6 | Critical/High | Manipulation |
+| Bot Protection | 5 | Critical/Medium | Automation |
+| PCI-DSS Compliance | 4 | Critical/High | Payment Security |
+| Session & Authentication | 1 | High | Session Management |
+| Access Control | 1 | Critical | Authorization |
+| Data Exposure | 1 | Medium | Information Disclosure |
+| Error Handling | 1 | Low | Information Leakage |
+| CSRF Protection | 1 | High | Token Validation |
+| Cookie Security | 1 | Medium | Storage Security |
+| HTTP Security | 2 | Medium/High | Protocol Security |
+| Accessibility | 3 | Medium/Low | WCAG Compliance |
+| Performance | 2 | High/Medium | Load Testing |
+| **TOTAL TESTS** | **28** | **Mixed** | **Exploitation** |
 
-### Critical Test Cases
+### Critical Vulnerabilities Tested
 
-**Must Pass:**
-- TC-PURCH-001: Successful purchase with price verification
-- TC-PURCH-002: Multiple items total calculation
-- TC-PURCH-003: Delete item from cart
-- TC-PURCH-017: Cart empty after purchase
+**Financial Impact:**
+- TC-SEC-BL-001: Negative quantity exploit
+- TC-SEC-BL-004: Zero price manipulation
+- TC-SEC-BL-005: Multiple coupon stacking
+- TC-SEC-BL-006: Race condition discount abuse
 
-**Expected to Fail (Business Rules):**
-- TC-PURCH-BR-001: Empty cart purchase prevention
-- TC-PURCH-BR-002: Credit card format validation
-- TC-PURCH-BR-003: Card length validation
-- TC-PURCH-BR-004: Expired card rejection
-- TC-PURCH-BR-006: SQL injection protection
-- TC-PURCH-BR-007: XSS protection
+**Security Compliance:**
+- TC-SEC-PCI-001: Payment script integrity
+- TC-SEC-PCI-002: Card data client-side exposure
+- TC-SEC-PCI-003: CVV storage prohibition
+- TC-SEC-PCI-004: TLS version validation
+
+**Bot & Automation:**
+- TC-SEC-BOT-001: No rate limiting (1000 requests/sec)
+- TC-SEC-BOT-002: No CAPTCHA on checkout
+- TC-SEC-BOT-003: Contact form spam
+
+**Access Control:**
+- TC-SEC-AUTHZ-001: IDOR order access
+- TC-SEC-AUTH-001: Session fixation
 
 ---
 
@@ -150,31 +216,41 @@ project_root/
 ├── tests/
 │   └── purchase/
 │       ├── test_purchase.py (functional tests)
-│       ├── test_purchase_security.py (exploitation tests)
-│       ├── README_purchase.md (this file)
-│       └── README_security.md (security tests doc)
+│       ├── test_purchase_security.py (THIS FILE - exploitation)
+│       ├── README_purchase.md (functional doc)
+│       └── README_security.md (this file)
 ├── conftest.py
 └── requirements.txt
 ```
 
 ### Code Organization
 
-**test_purchase.py structure:**
+**test_purchase_security.py structure:**
 
 1. **Module Documentation** - Purpose and standards
-2. **Imports** - Required libraries
-3. **Configuration** - URLs, timeouts, test data
-4. **Locators** - Page element identifiers
-5. **Helper Functions** - Reusable utilities
-6. **Fixtures** - Test setup/teardown
-7. **Test Functions** - Actual test cases
+2. **Imports** - Required libraries (selenium, requests, concurrent.futures)
+3. **Logging Configuration** - Error-level logging for exploitation attempts
+4. **Configuration Constants** - BASE_URL, TIMEOUT
+5. **Locators** - Element identifiers for exploitation
+6. **Helper Functions** - wait_for_alert(), parse_price(), add_to_cart_simple(), fill_checkout_form()
+7. **Exploitation Tests** - 28 security tests organized by category
 
 ### Standards Validated
 
-- **OWASP Top 10 2021** - SQL Injection (A03), XSS (A03)
-- **PCI-DSS 4.0.1** - Card validation, format requirements
-- **ISO 25010** - Functional suitability, usability
-- **WCAG 2.1** - Keyboard navigation, screen readers
+- **OWASP Top 10 2021** - Injection, Access Control, Cryptographic Failures
+- **PCI-DSS 4.0.1** - Card data protection, encryption, script integrity
+- **OWASP WSTG** - Business logic, session management, authorization
+- **WCAG 2.1 Level AA** - Accessibility compliance
+- **OWASP API Security** - Unrestricted access, endpoint enumeration
+
+### Test Philosophy
+
+Unlike functional tests, these tests:
+- **Actively attempt exploitation** rather than validating expected behavior
+- **Use malicious payloads** (SQL injection, XSS, negative numbers)
+- **Simulate attacker behavior** (automated scripts, concurrent requests)
+- **Test boundaries** (10,000 items, integer overflow)
+- **Document vulnerabilities** through failed assertions and logging
 
 ---
 
@@ -186,60 +262,39 @@ project_root/
 ```python
 BASE_URL = "https://www.demoblaze.com/"
 TIMEOUT = 10
-EXPLICIT_WAIT = 5
 ```
 
-### Test Credentials
+### Logging Configuration
 
 ```python
-TEST_USERNAME = "testuser_qa_2024"
-TEST_PASSWORD = "SecurePass123!"
+logging.basicConfig(level=logging.ERROR)
 ```
 
-Used for authenticated user purchase tests.
+Logs only errors and exploitation findings to avoid verbose output during automated attack simulation.
 
 ### Locator Strategy
 
-Locators organized by functionality:
+Locators identical to functional tests, reused for exploitation:
 
 **Product Locators:**
-- `FIRST_PRODUCT_LINK` - First product on homepage
-- `SECOND_PRODUCT_LINK` - Second product
-- `PRODUCT_PRICE_HEADER` - Price display on detail page
-- `ADD_TO_CART_BUTTON` - Add to cart action
+- `FIRST_PRODUCT_LINK` - Target for automated additions
+- `ADD_TO_CART_BUTTON` - Exploited in rate limiting tests
+- `PRODUCT_PRICE_HEADER` - Used in price manipulation tests
 
-**Navigation:**
-- `HOME_NAV_LINK` - Return to homepage
-- `CART_NAV_LINK` - Navigate to cart
-- `CONTACT_NAV_LINK` - Contact form
-- `ABOUT_US_NAV_LINK` - About us modal
+**Cart & Checkout:**
+- `CART_NAV_LINK` - Navigation for exploitation verification
+- `PLACE_ORDER_BUTTON` - Tested in empty cart exploit
+- Cart total element (By.ID, "totalp") - Used in negative quantity tests
 
-**Cart Page:**
-- `PLACE_ORDER_BUTTON` - Initiate checkout
-- `DELETE_ITEM_LINK` - Remove cart item
-- `CART_TOTAL_PRICE` - Total price display
-- `FIRST_ITEM_IN_CART_NAME` - First item name
+**Order Form:**
+- `ORDER_NAME_FIELD` through `ORDER_YEAR_FIELD` - SQL/XSS injection targets
+- `PURCHASE_BUTTON` - Final submission for exploits
 
-**Order Modal:**
-- `ORDER_NAME_FIELD` - Customer name input
-- `ORDER_COUNTRY_FIELD` - Country input
-- `ORDER_CITY_FIELD` - City input
-- `ORDER_CARD_FIELD` - Credit card number
-- `ORDER_MONTH_FIELD` - Expiration month
-- `ORDER_YEAR_FIELD` - Expiration year
-- `PURCHASE_BUTTON` - Submit purchase
-- `CLOSE_ORDER_MODAL_BUTTON` - Cancel checkout
-
-**Confirmation:**
-- `PURCHASE_CONFIRM_MODAL` - Success modal
-- `PURCHASE_CONFIRM_MSG` - Thank you message
-- `CONFIRM_OK_BUTTON` - Close confirmation
+**Login Elements:**
+- `LOGIN_BUTTON_NAV`, `LOGIN_USERNAME_FIELD`, `LOGIN_PASSWORD_FIELD` - Session fixation tests
 
 **Contact Form:**
-- `CONTACT_EMAIL_FIELD` - Email input
-- `CONTACT_NAME_FIELD` - Name input
-- `CONTACT_MESSAGE_FIELD` - Message textarea
-- `CONTACT_SEND_BUTTON` - Submit message
+- `CONTACT_EMAIL_FIELD`, `CONTACT_NAME_FIELD`, `CONTACT_MESSAGE_FIELD` - Spam testing targets
 
 ---
 
@@ -249,215 +304,120 @@ Locators organized by functionality:
 ### `browser` (from conftest.py)
 
 **Scope:** Function-level  
-**Purpose:** Provides browser instance with cross-browser support
-
-**Configuration:**
-- Chrome (default)
-- Firefox
-- Edge
-- Headless options
+**Purpose:** Provides browser instance for exploitation tests
 
 **Usage:**
 ```python
-def test_example(browser):
-    browser.get(BASE_URL)
+def test_negative_quantity_exploit(browser):
+    browser.execute_script("...")  # Direct JavaScript exploitation
 ```
 
-### `cart_page`
+**Why Important:**
+- Each test gets clean browser instance
+- No test contamination from previous exploits
+- Isolation prevents false positives/negatives
 
-**Purpose:** Navigate to cart with one product already added
+### No Custom Fixtures
 
-**Flow:**
-1. Navigate to homepage
-2. Add first product to cart
-3. Navigate to cart page
-4. Wait for "Place Order" button
-5. Return browser
-
-**Dependencies:** `browser` fixture
-
-**Usage:**
-```python
-def test_delete_item(cart_page):
-    cart_page.find_element(*DELETE_ITEM_LINK).click()
-```
-
-**Why useful:**
-- Many tests start with item in cart
-- Eliminates repetitive setup
-- Ensures consistent state
-
-### `order_modal_page`
-
-**Purpose:** Open order form with cart ready
-
-**Flow:**
-1. Use `cart_page` fixture
-2. Click "Place Order"
-3. Wait for form to appear
-4. Return browser
-
-**Dependencies:** `cart_page` fixture (composition)
-
-**Usage:**
-```python
-def test_purchase(order_modal_page):
-    fill_order_form(order_modal_page, ...)
-    order_modal_page.find_element(*PURCHASE_BUTTON).click()
-```
-
-**Why useful:**
-- Skip navigation steps
-- Test focuses on purchase logic
-- Consistent starting point
+Unlike functional tests, security tests don't use `cart_page` or `order_modal_page` fixtures because:
+- Exploitation tests often bypass normal flow
+- Direct JavaScript execution is used
+- Tests simulate attacker behavior (not user flow)
+- Maximum flexibility needed for creative exploits
 
 ---
 
 <a name="helpers"></a>
 ## 7. Helper Functions
 
-### `wait_for_alert_and_get_text(browser, timeout=5)`
+### `wait_for_alert(browser, timeout=5)`
 
-**Purpose:** Handle JavaScript alerts gracefully
+**Purpose:** Handle JavaScript alerts during exploitation
 
 **Returns:** Alert text or None
 
-**Usage:**
+**Usage in Security Tests:**
 ```python
-alert_text = wait_for_alert_and_get_text(browser)
-if alert_text:
-    assert alert_text == "Product added."
+browser.execute_script("malicious_code()")
+alert_text = wait_for_alert(browser)
+# Verify system responded (or didn't) to exploit
 ```
 
-**Why needed:**
-- DemoBlaze uses alerts for feedback
-- Alerts must be accepted to continue
-- Centralized error handling
+**Why Needed:**
+- Exploits may trigger unexpected alerts
+- Need to clear alerts to continue testing
+- Captures system responses to malicious input
 
 ---
 
 ### `parse_price(price_str)`
 
-**Purpose:** Extract numeric price from string
+**Purpose:** Extract numeric price for manipulation verification
 
-**Examples:**
+**Usage in Exploitation:**
 ```python
-parse_price("$790")                 # Returns 790
-parse_price("790 *includes tax")    # Returns 790
-parse_price("Amount: 790 USD")      # Returns 790
+# After negative quantity exploit
+total = browser.find_element(By.ID, "totalp").text
+numeric_total = parse_price(total)
+# Check if total went negative or to zero
 ```
 
-**Implementation:**
-```python
-match = re.search(r'\d+', price_str)
-return int(match.group(0)) if match else 0
-```
-
-**Why needed:**
-- Prices displayed in various formats
-- Need consistent numeric comparison
-- Single source of truth for parsing
+**Why Needed:**
+- Verify financial manipulation succeeded
+- Detect if system allows negative totals
+- Confirm price tampering worked
 
 ---
 
-### `add_product_to_cart(browser, product_locator)`
+### `add_to_cart_simple(browser)`
 
-**Purpose:** Complete product addition flow and return price
+**Purpose:** Quick product addition for exploitation setup
 
 **Flow:**
-1. Click product link
-2. Capture product price
-3. Click "Add to cart"
-4. Accept confirmation alert
-5. Return to homepage
-6. Return price (integer)
+1. Navigate to first product
+2. Click add to cart
+3. Accept alert
+4. Return home
 
-**Returns:** Product price as integer
-
-**Usage:**
+**Usage in Security Tests:**
 ```python
-price1 = add_product_to_cart(browser, FIRST_PRODUCT_LINK)
-price2 = add_product_to_cart(browser, SECOND_PRODUCT_LINK)
-expected_total = price1 + price2
+add_to_cart_simple(browser)
+# Now cart has item for exploitation
+browser.execute_script("price manipulation code")
 ```
 
-**Why returns price:**
-- Tests need price for assertions
-- Capture at time of adding
-- Avoid re-reading from cart
+**Why Simplified:**
+- Security tests don't care about price tracking
+- Speed matters for automated testing (1000+ requests)
+- Minimal steps to reach exploitation point
 
 ---
 
-### `fill_order_form(browser, name, country, city, card, month, year)`
+### `fill_checkout_form(browser, ...)`
 
-**Purpose:** Fill all order form fields
+**Purpose:** Populate order form with test or malicious data
 
-**Parameters:** All optional (default to empty strings)
+**Parameters:**
+- `name`, `country`, `city`, `card`, `month`, `year`
+- All default to safe test values
+- Can override with exploit payloads
 
-**Usage:**
+**Usage Examples:**
+
+**SQL Injection:**
 ```python
-fill_order_form(browser, 
-    name="John Doe",
-    country="USA", 
-    city="NYC",
-    card="4111111111111111",
-    month="12",
-    year="2025"
-)
+fill_checkout_form(browser, name="' OR '1'='1")
 ```
 
-**Why needed:**
-- Order form has 6 fields
-- Without helper: 6 lines per test
-- With helper: 1 line per test
-- Consistent field population
-
----
-
-### `perform_login(browser, username, password)`
-
-**Purpose:** Login helper for authenticated tests
-
-**Flow:**
-1. Click login button
-2. Wait for modal
-3. Enter credentials
-4. Submit form
-5. Wait for welcome message
-
-**Usage:**
+**XSS:**
 ```python
-perform_login(browser, TEST_USERNAME, TEST_PASSWORD)
+fill_checkout_form(browser, city="<script>alert(1)</script>")
 ```
 
----
-
-### `wait_for_cart_total_update(browser, timeout=10)`
-
-**Purpose:** Wait for asynchronous cart total calculation
-
-**Why needed:**
-- DemoBlaze calculates total via JavaScript
-- Total element exists immediately but empty
-- Must wait for JavaScript to populate
-
-**Flow:**
-1. Wait for total element visibility
-2. Wait for text to be non-empty
-3. Parse and return total
-
-**Usage:**
+**PCI Testing:**
 ```python
-browser.find_element(*CART_NAV_LINK).click()
-total = wait_for_cart_total_update(browser)
-assert total == expected_total
-```
-
-**Replaces:**
-```python
-# Bad (old approach)
-time.sleep(2)
-total = browser.find_element(*CART_TOTAL_PRICE).text
+fill_checkout_form(browser, card="4111111111111111")
+# Then check if card stored client-side
 ```
 
 ---
@@ -465,730 +425,1245 @@ total = browser.find_element(*CART_TOTAL_PRICE).text
 <a name="test-details"></a>
 ## 8. Test Cases Details
 
-### Functional Tests - Purchase Flow
+### Business Logic Exploitation Tests
 
-#### TC-PURCH-001: Successful Purchase with Price Verification
+#### TC-SEC-BL-001: Negative Quantity Exploit
 
-**Priority:** Critical  
-**Type:** End-to-End Positive Test
+**Severity:** CRITICAL  
+**CVSS Score:** 9.1 (Critical)  
+**Standard:** OWASP WSTG-BUSL-10
 
-**Purpose:**
-Validates complete purchase flow with price integrity throughout.
+**Vulnerability:**
+Application may accept negative quantities in cart, allowing attackers to create discounts or free products by adding item with quantity -5.
 
-**Test Steps:**
-1. Add product to cart (fixture)
+**Exploitation Method:**
+```python
+browser.execute_script("""
+    var productId = 1;
+    var quantity = -5;  // NEGATIVE QUANTITY
+    fetch('/addtocart', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({id: productId, quantity: quantity})
+    });
+""")
+```
+
+**Test Flow:**
+1. Execute JavaScript to send API request with negative quantity
 2. Navigate to cart
-3. Click "Place Order"
-4. Capture cart total
-5. Fill valid order data
-6. Submit purchase
-7. Verify confirmation modal
-8. Extract amount from confirmation
-9. Compare with cart total
-
-**Key Assertions:**
-```python
-assert "Thank you for your purchase!" in confirm_msg.text
-assert confirmed_price == expected_price
-```
-
-**Why Critical:**
-- Validates entire purchase workflow
-- Ensures price accuracy
-- Financial integrity check
-- Customer trust verification
-
-**Expected Result:** ✅ Pass
-
----
-
-#### TC-PURCH-002: Multiple Items Total Calculation
-
-**Priority:** High  
-**Type:** Calculation Validation
-
-**Purpose:**
-Verify cart correctly sums multiple product prices.
-
-**Test Steps:**
-1. Add first product → capture price1
-2. Add second product → capture price2
-3. Navigate to cart
-4. Wait for total calculation
-5. Verify total = price1 + price2
-
-**Key Wait:**
-```python
-total_price = wait_for_cart_total_update(browser)
-```
-
-**Why Important:**
-- Cart math must be accurate
-- Multiple items common scenario
-- Asynchronous calculation test
-
-**Expected Result:** ✅ Pass
-
----
-
-#### TC-PURCH-012: Purchase as Logged-In User
-
-**Priority:** Medium  
-**Type:** User Scenario Test
-
-**Purpose:**
-Verify authenticated users can complete purchase.
-
-**Test Steps:**
-1. Login with test credentials
-2. Add product to cart
-3. Open order modal
-4. Verify form NOT auto-filled (DemoBlaze limitation)
-5. Fill form manually
-6. Complete purchase
-7. Verify confirmation
-
-**Key Assertion:**
-```python
-assert name_field.get_attribute("value") == ""
-```
-
-**Documents:** DemoBlaze doesn't store/auto-fill user data
-
-**Expected Result:** ✅ Pass
-
----
-
-### Functional Tests - Cart Operations
-
-#### TC-PURCH-003: Delete Item from Cart
-
-**Priority:** High  
-**Type:** Basic Cart Operation
-
-**Test Steps:**
-1. Add item to cart (fixture)
-2. Verify item visible
-3. Click "Delete"
-4. Wait for removal
-5. Verify item gone
-
-**Key Wait:**
-```python
-WebDriverWait(browser, TIMEOUT).until(
-    EC.invisibility_of_element_located(FIRST_ITEM_IN_CART_NAME)
-)
-```
-
-**Expected Result:** ✅ Pass
-
----
-
-#### TC-PURCH-003B: Delete Item and Recalculate Total
-
-**Priority:** High  
-**Type:** Dynamic Calculation Test
-
-**Purpose:**
-Verify cart total recalculates after deletion.
-
-**Test Steps:**
-1. Add two products
-2. Verify initial total correct
-3. Delete first item
-4. Wait for DOM update
-5. Wait for total recalculation
-6. Verify new total = remaining item price
-
-**Why Two Waits:**
-```python
-# Wait 1: Item removed from DOM
-WebDriverWait(browser, TIMEOUT).until(
-    EC.invisibility_of_element_located(FIRST_ITEM_IN_CART_NAME)
-)
-
-# Wait 2: Total recalculated (async)
-total_after = wait_for_cart_total_update(browser)
-```
-
-**Expected Result:** ✅ Pass
-
----
-
-#### TC-PURCH-015: Add Same Product Multiple Times
-
-**Priority:** High  
-**Type:** Quantity Handling Test
-
-**Purpose:**
-Verify system handles duplicate product additions.
-
-**Test Steps:**
-1. Add product → get price
-2. Add same product again
-3. Navigate to cart
-4. Count items
-5. Verify 2 separate items
-6. Verify total = price × 2
-
-**Note:**
-DemoBlaze has no quantity selector - creates duplicate cart entries.
-
-**Expected Result:** ✅ Pass
-
----
-
-#### TC-PURCH-017: Cart Empty After Purchase
-
-**Priority:** High  
-**Type:** Session Management Test
-
-**Purpose:**
-Ensure cart clears after successful purchase.
-
-**Test Steps:**
-1. Add product
-2. Complete purchase
-3. Navigate to cart
-4. Verify 0 items
-
-**Why Important:**
-- Proper session cleanup
-- Prevents confusion
-- Clean state for next purchase
-
-**Expected Result:** ✅ Pass
-
----
-
-#### TC-PURCH-018: Add Many Products to Cart
-
-**Priority:** Medium  
-**Type:** Boundary Test
-
-**Purpose:**
-Validate cart handles multiple items (10 products).
-
-**Test Steps:**
-1. Add 10 products
-2. Navigate to cart
-3. Verify 10 items present
-4. Verify total = price × 10
-
-**Why 10 not 100:**
-- Realistic boundary
-- Reasonable execution time
-- Validates bulk operations
-
-**Expected Result:** ✅ Pass
-
----
-
-#### TC-PURCH-019: Delete All Items From Cart
-
-**Priority:** Medium  
-**Type:** Bulk Operation Test
-
-**Purpose:**
-Verify all items can be removed sequentially.
-
-**Test Steps:**
-1. Add 2 products
-2. Delete first item
-3. Delete second item
-4. Verify cart empty
-
-**Expected Result:** ✅ Pass
-
----
-
-### Functional Tests - UI/Navigation
-
-#### TC-PURCH-013: Order Modal Close Button
-
-**Priority:** Low  
-**Type:** UI Interaction Test
-
-**Test Steps:**
-1. Open order modal
-2. Click "Close"
-3. Verify modal closes
-4. Verify returned to cart
-
-**Expected Result:** ✅ Pass
-
----
-
-#### TC-PURCH-016: Navigation After Purchase
-
-**Priority:** Medium  
-**Type:** Navigation Test
-
-**Purpose:**
-Verify no unexpected redirects after purchase.
-
-**Test Steps:**
-1. Complete purchase
-2. Click OK
-3. Check current URL
-4. Verify still on DemoBlaze
-
-**Expected Result:** ✅ Pass
-
----
-
-#### TC-PURCH-020: Open/Close Modal Multiple Times
-
-**Priority:** Low  
-**Type:** Robustness Test
-
-**Purpose:**
-Ensure modal can be toggled without issues.
-
-**Test Steps:**
-1. Open modal
-2. Close modal
-3. Repeat 3 times
-4. Verify no errors
-
-**Expected Result:** ✅ Pass
-
----
-
-#### TC-PURCH-021: Access Empty Cart
-
-**Priority:** Medium  
-**Type:** Edge Case Test
-
-**Purpose:**
-Verify empty cart page accessible.
-
-**Test Steps:**
-1. Navigate to cart (no products added)
-2. Verify page loads
-3. Verify "Place Order" visible (Bug #13)
-
-**Documents:** Bug #13 - "Place Order" always visible
-
-**Expected Result:** ✅ Pass
-
----
-
-#### TC-PURCH-026: Cart Persistence Across Navigation
-
-**Priority:** High  
-**Type:** Session Management
-
-**Purpose:**
-Verify cart contents persist during navigation.
-
-**Test Steps:**
-1. Add product
-2. Navigate away from cart
-3. Browse product details
-4. Return to cart
-5. Verify item still present
-6. Verify price unchanged
-
-**Expected Result:** ✅ Pass
-
----
-
-#### TC-PURCH-031: Close Modal with ESC Key
-
-**Priority:** Low  
-**Type:** Keyboard Navigation
-
-**Purpose:**
-Test ESC key functionality on modal.
-
-**Test Steps:**
-1. Open order modal
-2. Press ESC key
-3. Observe if modal closes
-
-**Note:**
-May not work (DemoBlaze limitation) - test documents behavior.
-
-**Expected Result:** ✅ Pass (documents actual behavior)
-
----
-
-#### TC-PURCH-032: Browser Refresh on Modal
-
-**Priority:** Medium  
-**Type:** State Management
-
-**Purpose:**
-Verify modal state after browser refresh.
-
-**Test Steps:**
-1. Open order modal
-2. Browser.refresh()
-3. Verify page state
-
-**Expected Result:** ✅ Pass
-
----
-
-#### TC-PURCH-039: Homepage Pagination
-
-**Priority:** Medium  
-**Type:** Navigation
-
-**Purpose:**
-Verify pagination next/previous buttons work.
-
-**Test Steps:**
-1. Capture first product name
-2. Click Next
-3. Verify different products
-4. Click Previous
-5. Verify original products
-
-**Expected Result:** ✅ Pass
-
----
-
-### Functional Tests - Additional Features
-
-#### TC-PURCH-027: Rapid Add to Cart Clicks
-
-**Priority:** Medium  
-**Type:** Race Condition Test
-
-**Purpose:**
-Test rapid clicking "Add to cart".
-
-**Test Steps:**
-1. Navigate to product
-2. Click "Add to cart" 3 times rapidly
-3. Check cart count
-4. Verify 1-3 items added
-
-**Expected Result:** ✅ Pass (handles gracefully)
-
----
-
-#### TC-PURCH-033: Cart After Logout
-
-**Priority:** Medium  
-**Type:** Session Test
-
-**Purpose:**
-Verify cart behavior after logout.
-
-**Test Steps:**
-1. Login
-2. Add product
-3. Logout
-4. Check cart
-
-**Documents:** Whether cart persists or clears
-
-**Expected Result:** ✅ Pass (documents behavior)
-
----
-
-#### TC-PURCH-038: Add Product from Category
-
-**Priority:** Medium  
-**Type:** Navigation Flow
-
-**Purpose:**
-Verify adding product from category page.
-
-**Test Steps:**
-1. Click "Laptops" category
-2. Select product
-3. Add to cart
-4. Verify in cart
-
-**Expected Result:** ✅ Pass
-
----
-
-### Business Rules Tests
-
-#### TC-PURCH-BR-001: Empty Cart Purchase Prevention
-
-**Priority:** CRITICAL  
-**Standard:** ISO 25010  
-**Status:** ⚠️ Expected Fail (Bug #13)
-
-**Business Rule:**
-E-commerce systems must prevent checkout with empty cart.
-
-**Test Steps:**
-1. Navigate to cart (no products)
-2. Click "Place Order" (should be blocked)
-3. Fill form
-4. Submit
-
-**Current Behavior (BUG):**
-Purchase completes with $0 total
+3. Check if cart total displays negative amount or "-" symbol
+4. Assert no negative values accepted
+
+**Business Impact:**
+- Direct financial loss
+- Attackers get discounts or free products
+- Can combine positive/negative items to manipulate final price
 
 **Expected Behavior:**
-- "Place Order" button disabled
-- OR alert: "Cart is empty"
+- System rejects quantity < 1
+- Error message: "Quantity must be positive"
+- No cart manipulation allowed
+
+**Actual Behavior (if vulnerable):**
+Cart accepts negative quantity, total becomes negative or zero
+
+---
+
+#### TC-SEC-BL-002: Decimal Quantity Exploit
+
+**Severity:** CRITICAL  
+**CVSS Score:** 8.7  
+**Standard:** OWASP WSTG-BUSL-10
+
+**Vulnerability:**
+System may accept decimal quantities (0.1, 0.5) to pay fractional prices.
+
+**Exploitation Method:**
+```python
+browser.execute_script("""
+    fetch('/addtocart', {
+        method: 'POST',
+        body: JSON.stringify({id: 1, quantity: 0.1})  // 10% of price
+    });
+""")
+```
+
+**Test Flow:**
+1. Send API request with decimal quantity
+2. Navigate to cart
+3. Verify if price calculated correctly (or fractionally)
+
+**Business Impact:**
+- Pay $50 for $500 product (using 0.1 quantity)
+- Massive revenue loss
+- Easy to automate
+
+**Expected Behavior:**
+- Only integer quantities allowed
+- Validation error for decimals
+
+---
+
+#### TC-SEC-BL-003: Integer Overflow Quantity
+
+**Severity:** CRITICAL  
+**CVSS Score:** 8.9  
+**Standard:** OWASP WSTG-BUSL-10
+
+**Vulnerability:**
+Sending max integer values (2147483647) may cause overflow, wrapping to negative values.
+
+**Exploitation Method:**
+```python
+overflow_values = [2147483647, 2147483648, 9999999999]
+
+for val in overflow_values:
+    browser.execute_script(f"""
+        fetch('/addtocart', {{
+            method: 'POST',
+            body: JSON.stringify({{id: 1, quantity: {val}}})
+        }});
+    """)
+```
+
+**Test Flow:**
+1. Send quantities at integer boundaries
+2. Check if system overflows to negative
+3. Verify cart total behavior
+
+**Technical Impact:**
+- Integer overflow → negative quantity
+- Negative quantity → free products
+- System crash or undefined behavior
+
+---
+
+#### TC-SEC-BL-004: Zero Price Manipulation
+
+**Severity:** CRITICAL  
+**CVSS Score:** 9.8 (Critical)  
+**Standard:** OWASP WSTG-BUSL-10
+
+**Vulnerability:**
+Client-side price manipulation by injecting hidden form field with price=0.
+
+**Exploitation Method:**
+```python
+# Add product normally
+add_to_cart_simple(browser)
+# Open checkout
+browser.find_element(*PLACE_ORDER_BUTTON).click()
+# Inject hidden field with price=0
+browser.execute_script("""
+    var forms = document.querySelectorAll('form');
+    forms.forEach(f => {
+        var priceInput = document.createElement('input');
+        priceInput.type = 'hidden';
+        priceInput.name = 'price';
+        priceInput.value = '0';  // ZERO PRICE
+        f.appendChild(priceInput);
+    });
+""")
+# Submit purchase
+browser.find_element(*PURCHASE_BUTTON).click()
+```
+
+**Test Flow:**
+1. Add product to cart
+2. Open order modal
+3. Inject hidden input with price=0 via JavaScript
+4. Submit purchase
+5. Check if purchase completes with $0 total
+
+**Business Impact:**
+- Get any product for free
+- No payment validation
+- Trivial to exploit (basic JavaScript)
+
+**Expected Behavior:**
+- Server validates price from database
+- Ignore client-side price data
+- Reject mismatched prices
+
+---
+
+#### TC-SEC-BL-005: Multiple Coupon Stacking
+
+**Severity:** CRITICAL  
+**CVSS Score:** 8.2  
+**Standard:** OWASP WSTG-BUSL-10
+
+**Vulnerability:**
+Apply same coupon code multiple times to stack discounts.
+
+**Exploitation Method:**
+```python
+coupon_codes = ["SAVE10", "DISCOUNT", "PROMO2024"]
+
+for code in coupon_codes:
+    for i in range(5):  # Apply same coupon 5 times
+        browser.execute_script(f"""
+            fetch('/applycoupon', {{
+                method: 'POST',
+                body: JSON.stringify({{code: '{code}'}})
+            }});
+        """)
+        time.sleep(0.1)
+```
+
+**Test Flow:**
+1. Add product to cart
+2. Send multiple API requests with same coupon
+3. Verify if discount applies multiple times
+4. Check final price
+
+**Business Impact:**
+- 50% coupon applied 5 times = free product
+- Revenue loss from stacked discounts
+- Can automate for all products
+
+**Expected Behavior:**
+- Coupon applied once per order
+- "Coupon already applied" error
+
+---
+
+#### TC-SEC-BL-006: Race Condition Double Discount
+
+**Severity:** CRITICAL  
+**CVSS Score:** 8.5  
+**Standard:** OWASP WSTG-BUSL-10
+
+**Vulnerability:**
+Send 50 simultaneous coupon requests to exploit race condition in discount application.
+
+**Exploitation Method:**
+```python
+from concurrent.futures import ThreadPoolExecutor
+
+def apply_discount():
+    browser.execute_script("""
+        fetch('/applydiscount', {
+            method: 'POST',
+            body: JSON.stringify({discount: 'SAVE50'})
+        });
+    """)
+
+# Send 50 parallel requests
+with ThreadPoolExecutor(max_workers=50) as executor:
+    futures = [executor.submit(apply_discount) for _ in range(50)]
+    for future in as_completed(futures):
+        future.result()
+```
+
+**Test Flow:**
+1. Add product to cart
+2. Send 50 simultaneous discount requests
+3. Check if multiple discounts applied due to race condition
+
+**Technical Explanation:**
+- Race condition occurs when multiple threads access shared resource
+- Server may not lock discount during application
+- Multiple discounts applied before first one completes
+
+**Business Impact:**
+- 50% discount applied 50 times = massive loss
+- Requires database transaction locking
+- Common in high-traffic systems
+
+---
+
+### Bot Protection Tests
+
+#### TC-SEC-BOT-001: No Rate Limiting on Add-to-Cart
+
+**Severity:** CRITICAL  
+**CVSS Score:** 8.9  
+**Standard:** OWASP API6:2023
+
+**Vulnerability:**
+No rate limiting allows 1000+ add-to-cart requests per second.
+
+**Exploitation Method:**
+```python
+start = time.time()
+requests_sent = 0
+
+for i in range(1000):
+    browser.execute_script("""
+        fetch('/addtocart', {
+            method: 'POST',
+            body: JSON.stringify({id: 1})
+        });
+    """)
+    requests_sent += 1
+    
+    if time.time() - start > 1:  # Stop after 1 second
+        break
+
+assert requests_sent > 100  # If >100 requests/sec, no rate limit
+```
+
+**Test Flow:**
+1. Send add-to-cart requests as fast as possible
+2. Count requests in 1 second
+3. If >100 requests accepted, no rate limit detected
+
+**Business Impact:**
+- Bot can add 10,000 items to cart instantly
+- Server resource exhaustion
+- Legitimate users experience slowness
+- Can be used for inventory manipulation
+
+**Expected Behavior:**
+- Max 10-20 requests per second per IP
+- HTTP 429 "Too Many Requests" after threshold
+- Temporary IP ban after abuse
+
+---
+
+#### TC-SEC-BOT-002: No CAPTCHA on Checkout
+
+**Severity:** CRITICAL  
+**CVSS Score:** 8.7  
+**Standard:** OWASP API6:2023
+
+**Vulnerability:**
+Automated script can complete 100 purchases without CAPTCHA challenge.
+
+**Exploitation Method:**
+```python
+successful_purchases = 0
+
+for i in range(100):
+    browser.get(BASE_URL)
+    add_to_cart_simple(browser)
+    browser.find_element(*CART_NAV_LINK).click()
+    browser.find_element(*PLACE_ORDER_BUTTON).click()
+    
+    # Check if CAPTCHA present
+    try:
+        browser.find_element(By.XPATH, "//*[contains(text(), 'CAPTCHA')]")
+        captcha_present = True
+    except:
+        captcha_present = False
+    
+    if not captcha_present:
+        successful_purchases += 1
+```
+
+**Test Flow:**
+1. Loop 100 times (or until CAPTCHA appears)
+2. Complete purchase flow
+3. Check for CAPTCHA challenge
+4. Count successful automated purchases
+
+**Business Impact:**
+- Bots can buy limited stock instantly
+- Scalper bots for high-demand products
+- Credit card testing with stolen cards
+- No human verification
+
+**Expected Behavior:**
+- CAPTCHA after 3-5 purchases from same IP
+- Challenge on suspicious patterns
+- reCAPTCHA v3 invisible check
+
+---
+
+#### TC-SEC-BOT-003: Contact Form Spam (No CAPTCHA)
+
+**Severity:** HIGH  
+**CVSS Score:** 7.2  
+**Standard:** OWASP API6:2023
+
+**Vulnerability:**
+Send 1000+ contact form submissions without CAPTCHA.
+
+**Exploitation Method:**
+```python
+for i in range(1000):
+    browser.execute_script("""
+        fetch('/sendmessage', {
+            method: 'POST',
+            body: JSON.stringify({
+                email: 'spam@test.com',
+                name: 'Spammer',
+                message: 'SPAM'
+            })
+        });
+    """)
+    
+    if i > 100:  # Stop after 100 for testing
+        break
+```
+
+**Test Flow:**
+1. Send automated contact form submissions
+2. No CAPTCHA interruption expected
+3. Verify 100+ submissions succeed
+
+**Business Impact:**
+- Customer service overwhelmed with spam
+- Database bloat with fake submissions
+- Email inbox flooding
+- Resources wasted on fake tickets
+
+**Expected Behavior:**
+- CAPTCHA after 1-2 submissions
+- Rate limit on contact endpoint
+
+---
+
+#### TC-SEC-BOT-004: No Bot Detection Mechanisms
+
+**Severity:** HIGH  
+**CVSS Score:** 7.5  
+**Standard:** OWASP API6:2023
+
+**Vulnerability:**
+Headless browsers (Selenium) not detected, enabling bot automation.
+
+**Exploitation Method:**
+```python
+# Check if browser is detectable as automation
+is_headless = browser.execute_script("""
+    return navigator.webdriver || 
+           window.navigator.webdriver ||
+           !navigator.plugins.length ||
+           navigator.languages == '';
+""")
+
+# Even if detected, explicitly set webdriver flag
+browser.execute_script("""
+    Object.defineProperty(navigator, 'webdriver', {get: () => true});
+""")
+
+# Still able to add to cart despite obvious bot indicators
+add_to_cart_simple(browser)
+```
+
+**Test Flow:**
+1. Check JavaScript bot detection properties
+2. Set `navigator.webdriver = true` (obvious bot)
+3. Verify site still allows actions
+
+**Technical Explanation:**
+Bot detection checks for:
+- `navigator.webdriver` property (Selenium sets this)
+- Missing browser plugins
+- Empty language list
+- Headless browser characteristics
+
+**Business Impact:**
+- Bots operate undetected
+- Scalping, inventory manipulation
+- Automated account creation/abuse
+
+**Expected Behavior:**
+- Detect headless browsers
+- Challenge suspicious activity
+- Use fingerprinting (Canvas, WebGL)
+
+---
+
+#### TC-SEC-BOT-005: API Endpoint Enumeration
+
+**Severity:** MEDIUM  
+**CVSS Score:** 6.5  
+**Standard:** OWASP API6:2023
+
+**Vulnerability:**
+Discover unprotected API endpoints through enumeration.
+
+**Exploitation Method:**
+```python
+endpoints = [
+    '/api/cart',
+    '/api/orders',
+    '/api/admin',  # Admin endpoint
+    '/api/users',  # User data
+    '/api/products',
+    '/api/config',  # Configuration
+    '/admin/orders',
+    '/admin/users'
+]
+
+for endpoint in endpoints:
+    response = requests.get(BASE_URL + endpoint, timeout=2)
+    if response.status_code != 404:
+        logging.error(f"Exposed: {endpoint} - Status: {response.status_code}")
+```
+
+**Test Flow:**
+1. Try common API endpoint paths
+2. Record non-404 responses
+3. Identify exposed endpoints
+4. Log potential security issues
+
+**Business Impact:**
+- Exposed admin endpoints
+- Unauthorized data access
+- API documentation leakage
+- Attack surface expansion
+
+**Expected Behavior:**
+- 404 for non-existent endpoints
+- 401/403 for protected endpoints
+- No admin endpoints exposed
+
+---
+
+### PCI-DSS Compliance Tests
+
+#### TC-SEC-PCI-001: Payment Script Integrity (SRI)
+
+**Severity:** CRITICAL  
+**CVSS Score:** 9.3  
+**Standard:** PCI-DSS 11.6.1
+
+**Vulnerability:**
+External JavaScript files loaded without Subresource Integrity (SRI) hashes.
+
+**Exploitation Method:**
+```python
+scripts = browser.find_elements(By.TAG_NAME, "script")
+
+vulnerable_scripts = 0
+for script in scripts:
+    src = script.get_attribute("src")
+    integrity = script.get_attribute("integrity")
+    
+    if src and not integrity:
+        vulnerable_scripts += 1
+        logging.error(f"No SRI: {src}")
+
+assert vulnerable_scripts == 0, f"Found {vulnerable_scripts} scripts without SRI"
+```
+
+**Test Flow:**
+1. Find all `<script src="...">` tags
+2. Check for `integrity` attribute
+3. Count scripts missing SRI
+4. Assert all external scripts have SRI
+
+**Technical Explanation:**
+SRI prevents:
+- CDN compromise attacks
+- Man-in-the-middle script injection
+- Malicious code injection if CDN hacked
+
+**Example Secure Script:**
+```html
+<script src="https://cdn.com/lib.js"
+        integrity="sha384-abc123..."
+        crossorigin="anonymous"></script>
+```
+
+**Business Impact:**
+- Payment form hijacking
+- Card number theft via injected code
+- PCI-DSS compliance failure
+- Financial liability
+
+**PCI-DSS 11.6.1:**
+"Ensure that Web pages that accept sensitive authentication data have a script integrity check implemented"
+
+---
+
+#### TC-SEC-PCI-002: Client-Side Card Data Exposure
+
+**Severity:** CRITICAL  
+**CVSS Score:** 10.0 (Critical)  
+**Standard:** PCI-DSS 3.2
+
+**Vulnerability:**
+Credit card data stored in localStorage, sessionStorage, or cookies.
+
+**Exploitation Method:**
+```python
+# Fill form with test card
+fill_checkout_form(browser, card="4111111111111111")
+
+# Check client-side storage
+local_storage = browser.execute_script("return JSON.stringify(localStorage);")
+session_storage = browser.execute_script("return JSON.stringify(sessionStorage);")
+cookies = browser.get_cookies()
+
+# Search for card patterns
+sensitive_patterns = ["4111", "card", "cvv", "creditcard"]
+
+for pattern in sensitive_patterns:
+    assert pattern not in local_storage.lower()
+    assert pattern not in session_storage.lower()
+```
+
+**Test Flow:**
+1. Enter credit card number in form
+2. Capture localStorage contents
+3. Capture sessionStorage contents
+4. Get all cookies
+5. Search for card number patterns
+6. Assert no card data found in client storage
+
+**Business Impact:**
+- XSS can steal stored card numbers
+- Browser extensions can read storage
+- Violates PCI-DSS requirement 3.2
+- Massive fines, loss of merchant account
+
+**PCI-DSS 3.2:**
+"Do not store sensitive authentication data after authorization"
+
+**Expected Behavior:**
+- Card data never stored client-side
+- Immediate submission to server
+- No caching of payment data
+
+---
+
+#### TC-SEC-PCI-003: CVV Storage Prohibition
+
+**Severity:** CRITICAL  
+**CVSS Score:** 10.0  
+**Standard:** PCI-DSS 3.2
+
+**Vulnerability:**
+System stores CVV (Card Verification Value) anywhere.
+
+**Exploitation Method:**
+```python
+# Attempt to store CVV in all storage mechanisms
+browser.execute_script("""
+    document.cookie = 'cvv=123; path=/';
+    localStorage.setItem('cvv', '123');
+    sessionStorage.setItem('cvv', '123');
+""")
+
+time.sleep(1)
+
+# Verify CVV was NOT stored (system should reject)
+cookies = browser.get_cookies()
+local = browser.execute_script("return localStorage.getItem('cvv');")
+session = browser.execute_script("return sessionStorage.getItem('cvv');")
+
+# Test documents whether CVV storage occurs
+```
+
+**Test Flow:**
+1. Inject CVV into cookies, localStorage, sessionStorage via JavaScript
+2. Verify if system accepts/stores CVV
+3. Document if CVV persists
+
+**PCI-DSS Requirement:**
+CVV must NEVER be stored after authorization, even if encrypted.
+
+**Business Impact:**
+- Automatic PCI-DSS failure
+- Card fraud with stolen CVV
+- Merchant account termination
+- Legal liability
+
+---
+
+#### TC-SEC-PCI-004: TLS Version Requirement
+
+**Severity:** HIGH  
+**CVSS Score:** 8.1  
+**Standard:** PCI-DSS 4.2
+
+**Vulnerability:**
+Site uses TLS version < 1.2 for payment data transmission.
+
+**Exploitation Method:**
+```python
+response = requests.get(BASE_URL, timeout=5)
+
+if hasattr(response, 'raw') and hasattr(response.raw, 'version'):
+    ssl_version = response.raw.version
+    assert ssl_version >= 771, f"TLS too old: {ssl_version}"
+    # 771 = TLS 1.2, 772 = TLS 1.3
+```
+
+**Test Flow:**
+1. Make HTTPS request to site
+2. Extract SSL/TLS version from response
+3. Verify TLS 1.2 minimum (value >= 771)
+
+**Technical Explanation:**
+- SSL 3.0 = Insecure (POODLE attack)
+- TLS 1.0 = Insecure
+- TLS 1.1 = Deprecated
+- TLS 1.2 = Minimum for PCI-DSS
+- TLS 1.3 = Recommended
+
+**PCI-DSS 4.2:**
+"Strong cryptography and security protocols must be used... TLS 1.2 or higher"
+
+---
+
+### Session & Authentication Tests
+
+#### TC-SEC-AUTH-001: Session Fixation Vulnerability
+
+**Severity:** HIGH  
+**CVSS Score:** 8.2  
+**Standard:** OWASP A07:2021
+
+**Vulnerability:**
+Session ID doesn't change after login, allowing session fixation attacks.
+
+**Exploitation Method:**
+```python
+# Capture cookies before login
+browser.find_element(*LOGIN_BUTTON_NAV).click()
+WebDriverWait(browser, TIMEOUT).until(EC.visibility_of_element_located(LOGIN_USERNAME_FIELD))
+
+cookies_before = browser.get_cookies()
+session_before = [c for c in cookies_before if 'session' in c['name'].lower()]
+
+# Login
+browser.find_element(*LOGIN_USERNAME_FIELD).send_keys("testuser")
+browser.find_element(*LOGIN_PASSWORD_FIELD).send_keys("testpass")
+browser.find_element(*LOGIN_SUBMIT_BUTTON).click()
+time.sleep(2)
+
+# Capture cookies after login
+cookies_after = browser.get_cookies()
+session_after = [c for c in cookies_after if 'session' in c['name'].lower()]
+
+# Compare session IDs (should be different)
+```
+
+**Test Flow:**
+1. Capture session cookies before login
+2. Perform login
+3. Capture session cookies after login
+4. Compare session IDs
+5. Assert session ID changed (regenerated)
+
+**Attack Scenario:**
+1. Attacker gets victim to click link with fixed session ID
+2. Victim logs in with that session
+3. Attacker uses same session ID to hijack account
+
+**Expected Behavior:**
+- New session ID generated on login
+- Old session invalidated
+
+---
+
+### Access Control Tests
+
+#### TC-SEC-AUTHZ-001: IDOR - Insecure Direct Object Reference
+
+**Severity:** CRITICAL  
+**CVSS Score:** 9.1  
+**Standard:** OWASP A01:2021
+
+**Vulnerability:**
+Access other users' orders by changing order ID in URL.
+
+**Exploitation Method:**
+```python
+order_ids = [1, 100, 1000, 9999, 12345]
+
+for order_id in order_ids:
+    response = requests.get(f"{BASE_URL}/orders/{order_id}", timeout=2)
+    if response.status_code == 200:
+        logging.error(f"IDOR: Accessed order {order_id} without auth")
+```
+
+**Test Flow:**
+1. Try accessing orders 1, 100, 1000, etc.
+2. Check HTTP status codes
+3. If 200 OK, order data exposed without authorization
+4. Log IDOR vulnerability
+
+**Business Impact:**
+- View any customer's order details
+- Name, address, purchase history
+- Privacy violation (GDPR, CCPA)
+- Competitive intelligence theft
+
+**Expected Behavior:**
+- 401 Unauthorized without login
+- 403 Forbidden for other users' orders
+- Never expose order data by sequential ID
+
+---
+
+### Data Exposure Tests
+
+#### TC-SEC-DATA-001: Sensitive Data in URL
+
+**Severity:** MEDIUM  
+**CVSS Score:** 6.5  
+**Standard:** OWASP A02:2021
+
+**Vulnerability:**
+Credit card numbers or passwords appear in URL parameters.
+
+**Exploitation Method:**
+```python
+fill_checkout_form(browser, card="4111111111111111")
+
+current_url = browser.current_url
+
+# Check if sensitive data leaked to URL
+sensitive_patterns = ["card", "4111", "password", "cvv"]
+for pattern in sensitive_patterns:
+    assert pattern not in current_url.lower()
+```
+
+**Test Flow:**
+1. Fill form with card number
+2. Capture current URL
+3. Search for card patterns in URL
+4. Assert no sensitive data in URL
+
+**Why Dangerous:**
+- URLs logged in browser history
+- Logged in proxy/server logs
+- Visible to network admins
+- Sent in HTTP Referer header
+
+---
+
+### Error Handling Tests
+
+#### TC-SEC-INFO-001: Verbose Error Messages
+
+**Severity:** LOW  
+**CVSS Score:** 5.3  
+**Standard:** OWASP A05:2021
+
+**Vulnerability:**
+Error pages expose stack traces, database info, or debug details.
+
+**Exploitation Method:**
+```python
+browser.get(BASE_URL + "/nonexistent-page-12345")
+
+page_source = browser.page_source.lower()
+
+dangerous_patterns = [
+    "stack trace",
+    "exception",
+    "sql",
+    "database error",
+    "debug",
+    "traceback"
+]
+
+for pattern in dangerous_patterns:
+    if pattern in page_source:
+        logging.error(f"Info disclosure: {pattern}")
+```
+
+**Test Flow:**
+1. Navigate to non-existent page
+2. Capture page source
+3. Search for technical error details
+4. Log any sensitive information found
+
+**Information Leaked:**
+- Technology stack (Django, PHP, etc.)
+- Database type
+- File paths
+- Internal IPs
+
+---
+
+### CSRF Protection Tests
+
+#### TC-SEC-CSRF-001: CSRF Token Validation
+
+**Severity:** HIGH  
+**CVSS Score:** 7.5  
+**Standard:** OWASP A01:2021
+
+**Vulnerability:**
+Forms submit without CSRF token validation.
+
+**Exploitation Method:**
+```python
+fill_checkout_form(browser)
+
+# Remove all CSRF tokens from forms
+browser.execute_script("""
+    var forms = document.querySelectorAll('form');
+    forms.forEach(f => {
+        var csrfInputs = f.querySelectorAll('input[name*="csrf"], input[name*="token"]');
+        csrfInputs.forEach(i => i.remove());
+    });
+""")
+
+# Submit without CSRF token
+browser.find_element(*PURCHASE_BUTTON).click()
+
+# If purchase succeeds, CSRF vulnerability confirmed
+```
+
+**Test Flow:**
+1. Open checkout form
+2. Remove CSRF token fields via JavaScript
+3. Submit form
+4. If successful, CSRF protection missing
+
+**Attack Scenario:**
+1. Attacker creates malicious site
+2. Victim visits while logged into DemoBlaze
+3. Malicious site submits purchase form
+4. Purchase made without victim's knowledge
+
+---
+
+### Cookie Security Tests
+
+#### TC-SEC-COOKIE-001: Cookie Security Flags
+
+**Severity:** MEDIUM  
+**CVSS Score:** 6.1  
+**Standard:** OWASP A05:2021
+
+**Vulnerability:**
+Session cookies missing HttpOnly and Secure flags.
+
+**Exploitation Method:**
+```python
+cookies = browser.get_cookies()
+
+for cookie in cookies:
+    if 'session' in cookie.get('name', '').lower():
+        assert cookie.get('httpOnly', False), f"{cookie['name']} missing HttpOnly"
+        assert cookie.get('secure', False), f"{cookie['name']} missing Secure"
+```
+
+**Test Flow:**
+1. Get all cookies from browser
+2. Find session cookies
+3. Check for HttpOnly flag (prevents JavaScript access)
+4. Check for Secure flag (HTTPS only)
+
+**Impact of Missing Flags:**
+- **No HttpOnly:** XSS can steal session cookie
+- **No Secure:** Cookie sent over HTTP (cleartext)
+
+---
+
+### HTTP Security Tests
+
+#### TC-SEC-HTTP-001: Dangerous HTTP Methods
+
+**Severity:** MEDIUM  
+**CVSS Score:** 5.8  
+**Standard:** OWASP A05:2021
+
+**Vulnerability:**
+Server accepts PUT, DELETE, TRACE methods.
+
+**Exploitation Method:**
+```python
+dangerous_methods = ['PUT', 'DELETE', 'TRACE', 'OPTIONS']
+
+for method in dangerous_methods:
+    response = requests.request(method, BASE_URL, timeout=2)
+    if response.status_code not in [405, 501]:
+        logging.error(f"Method {method} allowed: {response.status_code}")
+```
+
+**Test Flow:**
+1. Send PUT, DELETE, TRACE requests
+2. Check status codes
+3. If not 405 (Method Not Allowed), vulnerability exists
+
+**Why Dangerous:**
+- PUT: Upload files
+- DELETE: Delete resources
+- TRACE: Information disclosure
+
+---
+
+#### TC-SEC-HEADERS-001: Security Headers
+
+**Severity:** HIGH  
+**CVSS Score:** 7.4  
+**Standard:** OWASP A05:2021
+
+**Vulnerability:**
+Missing security headers (X-Frame-Options, CSP, HSTS, etc.).
+
+**Exploitation Method:**
+```python
+response = requests.get(BASE_URL, timeout=5)
+headers = response.headers
+
+required_headers = {
+    'X-Frame-Options': ['DENY', 'SAMEORIGIN'],
+    'X-Content-Type-Options': ['nosniff'],
+    'Strict-Transport-Security': None,
+    'Content-Security-Policy': None
+}
+
+for header, expected_values in required_headers.items():
+    assert header in headers, f"Missing: {header}"
+```
+
+**Test Flow:**
+1. Make HTTP request
+2. Check response headers
+3. Verify security headers present
+4. Assert proper values
+
+**Header Purpose:**
+- **X-Frame-Options:** Prevents clickjacking
+- **X-Content-Type-Options:** Prevents MIME sniffing
+- **Strict-Transport-Security (HSTS):** Forces HTTPS
+- **Content-Security-Policy (CSP):** Prevents XSS
+
+---
+
+### Accessibility Tests (WCAG 2.1)
+
+#### TC-SEC-ACC-001: Keyboard-Only Checkout
+
+**Severity:** MEDIUM  
+**WCAG:** 2.1.1 Keyboard  
+**Level:** A
+
+**Vulnerability:**
+Checkout impossible using only keyboard (no mouse).
+
+**Exploitation Method:**
+```python
+actions = ActionChains(browser)
+
+# Navigate using TAB key only
+for i in range(20):
+    actions.send_keys(Keys.TAB).perform()
+    time.sleep(0.1)
+
+# Try to submit with ENTER
+actions.send_keys(Keys.ENTER).perform()
+```
+
+**Test Flow:**
+1. Navigate page using only TAB key
+2. Attempt to add to cart with keyboard
+3. Try checkout using ENTER/SPACE
+4. Document if impossible
+
+**Accessibility Impact:**
+- Users with motor disabilities
+- Screen reader users
+- Keyboard-only users excluded
+
+---
+
+#### TC-SEC-ACC-002: Form Labels for Screen Readers
+
+**Severity:** MEDIUM  
+**WCAG:** 1.3.1 Info and Relationships  
+**Level:** A
+
+**Vulnerability:**
+Form inputs lack proper labels for screen readers.
+
+**Exploitation Method:**
+```python
+form_inputs = browser.find_elements(By.TAG_NAME, "input")
+
+unlabeled_inputs = 0
+for input_elem in form_inputs:
+    input_id = input_elem.get_attribute("id")
+    aria_label = input_elem.get_attribute("aria-label")
+    
+    if input_id:
+        try:
+            browser.find_element(By.XPATH, f"//label[@for='{input_id}']")
+        except:
+            if not aria_label:
+                unlabeled_inputs += 1
+```
+
+**Test Flow:**
+1. Find all form inputs
+2. Check for associated `<label>` tag
+3. Check for `aria-label` attribute
+4. Count unlabeled inputs
 
 **Impact:**
-- Invalid orders
-- Wasted resources
-- Poor UX
-
-**Expected Result:** ❌ Fail (until fixed)
+Screen reader users can't identify fields
 
 ---
 
-#### TC-PURCH-BR-002: Credit Card Format Validation
+#### TC-SEC-ACC-003: Color Contrast Validation
 
-**Priority:** CRITICAL  
-**Standard:** PCI-DSS 3.2.1
+**Severity:** LOW  
+**WCAG:** 1.4.3 Contrast (Minimum)  
+**Level:** AA
 
-**Business Rule:**
-Credit cards must be numeric only.
+**Vulnerability:**
+Text doesn't meet 4.5:1 contrast ratio with background.
 
-**Test:** Input "ABCD-1234" as card number
+**Exploitation Method:**
+```python
+elements = browser.find_elements(By.XPATH, "//*[normalize-space(text())]")
 
-**Expected:** Rejection or validation error
+for elem in elements[:20]:
+    color = browser.execute_script(
+        "return window.getComputedStyle(arguments[0]).color;", elem
+    )
+    bg_color = browser.execute_script(
+        "return window.getComputedStyle(arguments[0]).backgroundColor;", elem
+    )
+    # Would need color contrast calculation library
+```
 
-**Current:** Accepts any input
-
-**Impact:** PCI-DSS compliance violation
-
-**Expected Result:** ❌ Fail
-
----
-
-#### TC-PURCH-BR-003: Card Length Validation
-
-**Priority:** CRITICAL  
-**Standard:** PCI-DSS
-
-**Business Rule:**
-Credit cards must be 16 digits.
-
-**Test:** Input "123" as card
-
-**Expected:** "Invalid card length"
-
-**Current:** Accepts
-
-**Expected Result:** ❌ Fail
+**Test Flow:**
+1. Find text elements
+2. Get text color
+3. Get background color
+4. Calculate contrast ratio
+5. Assert >= 4.5:1 for normal text
 
 ---
 
-#### TC-PURCH-BR-004: Expired Card Rejection
+### Performance Tests
 
-**Priority:** CRITICAL  
-**Standard:** PCI-DSS
+#### TC-SEC-PERF-001: Concurrent Checkout Stress
 
-**Business Rule:**
-System must reject expired cards.
+**Severity:** HIGH  
+**Type:** Load Testing
 
-**Test:** Input last year as expiration
+**Vulnerability:**
+System crashes or deadlocks under concurrent load.
 
-**Expected:** "Card expired"
+**Exploitation Method:**
+```python
+def checkout_attempt():
+    driver = webdriver.Chrome()
+    driver.get(BASE_URL)
+    add_to_cart_simple(driver)
+    driver.find_element(*CART_NAV_LINK).click()
+    driver.quit()
+    return True
 
-**Current:** Accepts
+with ThreadPoolExecutor(max_workers=10) as executor:
+    futures = [executor.submit(checkout_attempt) for _ in range(10)]
+    results = [f.result() for f in as_completed(futures)]
+```
 
-**Expected Result:** ❌ Fail
+**Test Flow:**
+1. Spawn 10 browser instances
+2. Each attempts checkout simultaneously
+3. Check for crashes, errors, deadlocks
 
----
-
-#### TC-PURCH-BR-005: Month Range Validation
-
-**Priority:** HIGH  
-**Standard:** ISO 8601
-
-**Business Rule:**
-Month must be 01-12.
-
-**Test:** Input "13" as month
-
-**Expected:** "Invalid month"
-
-**Current:** Accepts
-
-**Expected Result:** ❌ Fail
-
----
-
-#### TC-PURCH-BR-006: SQL Injection Protection
-
-**Priority:** CRITICAL  
-**Standard:** OWASP A03:2021
-
-**Business Rule:**
-System must sanitize SQL injection attempts.
-
-**Test:** Input `' OR '1'='1` in name field
-
-**Expected:** Sanitized or blocked
-
-**Current:** Likely vulnerable
-
-**Impact:** Database compromise
-
-**Expected Result:** ❌ Fail
+**Business Impact:**
+- Site crashes during sales
+- Lost revenue
+- Poor customer experience
 
 ---
 
-#### TC-PURCH-BR-007: XSS Protection
+#### TC-SEC-PERF-002: Cart Capacity Limit
 
-**Priority:** CRITICAL  
-**Standard:** OWASP A03:2021
+**Severity:** MEDIUM  
+**Type:** Boundary Testing
 
-**Business Rule:**
-System must prevent XSS attacks.
+**Vulnerability:**
+Adding 10,000 items crashes cart or server.
 
-**Test:** Input `<script>alert('XSS')</script>` in city
+**Exploitation Method:**
+```python
+for i in range(10000):
+    browser.execute_script("""
+        fetch('/addtocart', {
+            method: 'POST',
+            body: JSON.stringify({id: 1})
+        });
+    """)
+    
+    if i > 100:  # Stop after 100 for testing
+        break
+```
 
-**Expected:** Sanitized
+**Test Flow:**
+1. Send 10,000 add-to-cart requests rapidly
+2. Check for server errors
+3. Verify cart handles large quantities
 
-**Current:** Likely vulnerable
-
-**Impact:** Session hijacking
-
-**Expected Result:** ❌ Fail
-
----
-
-#### TC-PURCH-BR-008: Name Maximum Length
-
-**Priority:** MEDIUM  
-**Standard:** OWASP - Input Validation
-
-**Business Rule:**
-Name should have reasonable length limit.
-
-**Test:** Input 200 characters
-
-**Expected:** Rejection or truncation
-
-**Current:** Accepts
-
-**Expected Result:** ❌ Fail
-
----
-
-#### TC-PURCH-BR-009: Whitespace-Only Input
-
-**Priority:** MEDIUM  
-**Standard:** ISO 25010 - Data Quality
-
-**Business Rule:**
-Fields should reject whitespace-only input.
-
-**Test:** Input "     " as name
-
-**Expected:** Rejection
-
-**Current:** Accepts
-
-**Expected Result:** ❌ Fail
-
----
-
-#### TC-PURCH-BR-010: Contact Form Validation
-
-**Priority:** MEDIUM  
-**Standard:** ISO 25010 - Usability
-
-**Business Rule:**
-Contact form requires all fields.
-
-**Test:** Submit empty contact form
-
-**Expected:** Validation error
-
-**Current:** Likely no validation
-
-**Expected Result:** ❌ Fail
-
----
-
-### Parametrized Validation Tests
-
-#### TC-PURCH-004 to TC-PURCH-VAL-004 (12 scenarios)
-
-**Test Data Matrix:**
-
-| ID | Name | Card | Month | Year | Expected |
-|----|------|------|-------|------|----------|
-| 004 | "" | "" | "" | "" | Alert: Fill required |
-| 005 | "QA" | "" | "" | "" | Alert: Fill required |
-| 006 | "" | "1234" | "" | "" | Alert: Fill required |
-| 007 | "Test" | "abc" | "12" | "28" | No validation |
-| 008 | "Test" | "1234" | "abc" | "def" | No validation |
-| 009 | "a"×200 | "1234" | "12" | "28" | No validation |
-| 010 | "' OR 1=1" | "1234" | "12" | "28" | SQL test |
-| 011 | "Test" | "1234" | "12" | `<script>` | XSS test |
-| VAL-001 | "   " | "1234" | "12" | "28" | Whitespace |
-| VAL-002 | "Test" | "1234" | "12" | "2023" | Expired |
-| VAL-003 | "Test" | "123" | "12" | "28" | Short card |
-| VAL-004 | "Test" | "1234" | "13" | "28" | Invalid month |
-
-**Purpose:**
-Test various input scenarios with single parametrized function.
-
-**Expected Results:** Mixed (some alert, some no validation)
+**Expected Behavior:**
+- Cart limit (e.g., max 99 items)
+- Graceful error message
 
 ---
 
 <a name="execution"></a>
 ## 9. Execution Guide
 
-### Run All Tests
+### Run All Security Tests
 
 ```bash
-pytest test_purchase.py -v
+pytest test_purchase_security.py -v
 ```
 
-### Run by Browser
+### Run by Severity
 
 ```bash
-pytest test_purchase.py --browser=chrome -v
-pytest test_purchase.py --browser=firefox -v
-pytest test_purchase.py --browser=edge -v
+# Critical vulnerabilities only
+pytest test_purchase_security.py -m critical -v
+
+# High severity
+pytest test_purchase_security.py -m high -v
+
+# Medium severity
+pytest test_purchase_security.py -m medium -v
 ```
 
 ### Run by Category
 
 ```bash
-# Functional tests only
-pytest test_purchase.py -m functional -v
+# Business logic exploits
+pytest test_purchase_security.py -m business_logic -v
 
-# Business rules tests
-pytest test_purchase.py -m business_rules -v
+# Bot protection tests
+pytest test_purchase_security.py -m bot_protection -v
 
-# Security tests
-pytest test_purchase.py -m security -v
+# PCI-DSS compliance
+pytest test_purchase_security.py -m pci_dss -v
+
+# Session security
+pytest test_purchase_security.py -m session_management -v
+
+# Access control
+pytest test_purchase_security.py -m access_control -v
+
+# Accessibility
+pytest test_purchase_security.py -m accessibility -v
+
+# Performance
+pytest test_purchase_security.py -m performance -v
 ```
 
-### Run Specific Test
+### Generate Security Report
 
 ```bash
-pytest test_purchase.py::test_successful_purchase_and_price_verification -v
+pytest test_purchase_security.py --html=security_report.html --self-contained-html -v
 ```
 
-### Generate HTML Report
+### Show Exploitation Logs
 
 ```bash
-pytest test_purchase.py --html=report.html --self-contained-html -v
+pytest test_purchase_security.py -s -v
 ```
 
-### Show Print Statements
+### Stop on First Critical Failure
 
 ```bash
-pytest test_purchase.py -s -v
-```
-
-### Stop on First Failure
-
-```bash
-pytest test_purchase.py -x
+pytest test_purchase_security.py -m critical -x
 ```
 
 ---
@@ -1198,230 +1673,203 @@ pytest test_purchase.py -x
 
 ### Test Execution Summary
 
-| Category | Tests | Pass | Fail | Expected |
-|----------|-------|------|------|----------|
-| Functional | 32 | 32 | 0 | ✅ All pass |
-| Business Rules | 10 | 0 | 10 | ❌ All fail |
-| Parametrized | 12 | ~8 | ~4 | ⚠️ Mixed |
-| **TOTAL** | **54** | **40** | **14** | **Mixed** |
+| Category | Tests | Expected | Rationale |
+|----------|-------|----------|-----------|
+| Business Logic | 6 | Most FAIL | Sites often lack input validation |
+| Bot Protection | 5 | Most FAIL | Few sites have proper rate limiting |
+| PCI-DSS | 4 | Mixed | Basic sites skip PCI compliance |
+| Session/Auth | 1 | FAIL | Session fixation common |
+| Access Control | 1 | FAIL | IDOR widespread vulnerability |
+| Data Exposure | 1 | Mixed | Depends on framework defaults |
+| Error Handling | 1 | PASS | Most hide errors in production |
+| CSRF | 1 | FAIL | CSRF protection often missing |
+| Cookies | 1 | FAIL | HttpOnly/Secure flags forgotten |
+| HTTP Security | 2 | Mixed | Headers depend on server config |
+| Accessibility | 3 | Mixed | WCAG compliance rare |
+| Performance | 2 | PASS | Sites usually handle load |
+| **TOTAL** | **28** | **~20 FAIL** | **~8 PASS** |
+
+### Security Score Interpretation
+
+**Results indicate:**
+- Tests that PASS → Security controls present
+- Tests that FAIL → Vulnerabilities confirmed
+- Unlike functional tests, failures here are BAD
+
+**Expected Failure Rate: 60-80%**
+- Most e-commerce sites have 10+ vulnerabilities
+- DemoBlaze is demo site (not production-hardened)
+- Real sites should have <20% failure rate
 
 ### Performance Benchmarks
 
 **Expected execution times:**
-- Simple tests: 8-12 seconds
-- Multi-item tests: 15-20 seconds
-- Parametrized tests: 5-8 seconds per scenario
-- **Total suite: ~4-5 minutes**
-
-### Success Criteria
-
-Test suite PASSES if:
-- ✅ 32 functional tests pass
-- ✅ 10 business rules fail as expected
-- ✅ No unexpected failures
-- ✅ Execution time < 6 minutes
+- Business logic tests: 5-10 seconds each
+- Bot protection tests: 30-60 seconds each (many requests)
+- PCI tests: 2-5 seconds each
+- Total suite: ~8-12 minutes
 
 ---
 
 <a name="troubleshooting"></a>
 ## 11. Troubleshooting
 
-### Cart total shows 0
+### JavaScript execution fails
 
-**Cause:** Reading total before JavaScript calculates
-
-**Solution:**
-```python
-total = wait_for_cart_total_update(browser)
-```
-
----
-
-### Element not found after deletion
-
-**Cause:** Not waiting for DOM update
+**Cause:** Page hasn't fully loaded
 
 **Solution:**
 ```python
 WebDriverWait(browser, TIMEOUT).until(
-    EC.invisibility_of_element_located(ELEMENT)
+    EC.presence_of_element_located((By.TAG_NAME, "body"))
 )
+browser.execute_script("...")
 ```
 
 ---
 
-### Test hangs on cart page
+### Concurrent tests fail
 
-**Cause:** JavaScript not loading
-
-**Solution:**
-- Check browser console for errors
-- Verify network connectivity
-- Increase timeout if needed
-
----
-
-### Alert not found
-
-**Cause:** Alert appeared and disappeared
+**Cause:** Browser instance conflicts
 
 **Solution:**
 ```python
-alert_text = wait_for_alert_and_get_text(browser, timeout=2)
+# Use separate webdriver instances
+driver = webdriver.Chrome()
+# ... exploitation code ...
+driver.quit()
 ```
 
 ---
 
-### Price mismatch
+### Rate limiting test unreliable
 
-**Cause:** Async calculation not complete
+**Cause:** Network latency varies
 
-**Solution:** Use `wait_for_cart_total_update()` everywhere
+**Solution:**
+Run multiple times, average results
+
+---
+
+### fetch() API not working
+
+**Cause:** CORS or CSP blocking requests
+
+**Solution:**
+Check browser console for errors, may need XMLHttpRequest instead
+
+---
+
+### Tests hang on concurrent execution
+
+**Cause:** Too many browser instances
+
+**Solution:**
+Reduce `max_workers` from 50 to 10
 
 ---
 
 <a name="bugs"></a>
 ## 12. Related Bugs
 
-### Bug #13: Empty Cart Purchase
+### Security Vulnerabilities Likely to Be Found
 
-**Severity:** HIGH  
-**Test Case:** TC-PURCH-BR-001  
-**Status:** OPEN
+**Critical:**
+- Negative quantity acceptance (TC-SEC-BL-001)
+- Zero price manipulation (TC-SEC-BL-004)
+- No rate limiting (TC-SEC-BOT-001)
+- Card data client-side storage (TC-SEC-PCI-002)
+- IDOR on orders (TC-SEC-AUTHZ-001)
 
-**Description:**
-System allows purchasing with empty cart.
+**High:**
+- No CAPTCHA (TC-SEC-BOT-002)
+- Session fixation (TC-SEC-AUTH-001)
+- Missing security headers (TC-SEC-HEADERS-001)
 
-**Current Behavior:**
-- "Place Order" always visible
-- Can submit empty cart purchase
-- Confirmation shows $0 USD
-
-**Expected Behavior:**
-- "Place Order" disabled when cart empty
-- OR alert: "Your cart is empty"
-
-**Impact:**
-- Invalid orders in database
-- Wasted resources
-- Poor user experience
-- Potential abuse
-
-**Recommendation:**
-Add client-side validation before allowing checkout.
+**Medium:**
+- Coupon stacking (TC-SEC-BL-005)
+- API endpoint exposure (TC-SEC-BOT-005)
+- Cookie security flags (TC-SEC-COOKIE-001)
 
 ---
 
 <a name="practices"></a>
 ## 13. Best Practices Applied
 
+### Security Testing Principles
+
+**Ethical Testing:**
+- Tests run on demo site with implied permission
+- No real financial harm
+- No PII collected
+- Responsible disclosure implied
+
+**Documentation:**
+- Each exploit clearly documented
+- CVSS scores provided
+- Business impact explained
+- Remediation guidance included
+
 ### Code Quality
 
 **DRY Principle:**
 - Reusable helper functions
-- Fixtures for common setup
+- Consistent exploitation patterns
 - No code duplication
 
-**Clean Code:**
-- Minimal comments
-- Clear function names
-- Logging for feedback
-- Descriptive docstrings
-
-### Testing Best Practices
-
-**Explicit Waits:**
-- No `time.sleep()` in production
-- `wait_for_cart_total_update()` for async
-- `EC.invisibility_of_element_located()` for deletions
-
-**Price Verification:**
-- Capture at source
-- Compare at every step
-- Financial accuracy critical
-
-**Parametrization:**
-- 12 scenarios in 1 function
-- Clean data separation
-- Efficient execution
+**Clean Exploitation Code:**
+- Clear JavaScript payloads
+- Commented attack vectors
+- Logging for findings
 
 ### Selenium Best Practices
 
-**Wait Strategy:**
-- Wait for clickable before clicking
-- Wait for visibility before reading
-- Custom waits for async operations
+**JavaScript Execution:**
+- Used for direct API calls (bypass UI)
+- Simulates real attacker behavior
+- Faster than UI automation
 
-**Locator Strategy:**
-- ID preferred (fastest)
-- XPath for dynamic content
-- Consistent naming
+**Wait Strategy:**
+- Minimal waits (speed matters for automated attacks)
+- Only wait when necessary
+- `time.sleep()` used strategically in exploitation
 
 ---
 
 <a name="version-history"></a>
 ## 14. Version History
 
-### Version 4.0 - November 2025 (Current)
-
-**Major Updates:**
-- Merged functional and business rules tests
-- Added 10 business rules validation tests
-- Removed xfail markers (tests fail naturally to show gaps)
-- Added comprehensive security testing
-- Added accessibility tests (WCAG 2.1)
-- Added performance tests
-- Reorganized documentation structure
-- Enhanced logging throughout
-- Total: 52 test runs (40 functions)
-
-**Files:**
-- `test_purchase.py` - Functional + business rules (52 tests)
-- `test_purchase_security.py` - Exploitation tests (28 tests)
-- `README_purchase.md` - This file
-- `README_security.md` - Security tests documentation
-
----
-
-### Version 3.0 - November 2025
-
-**Changes:**
-- Split into two test files (functional vs business rules)
-- Added xfail markers for known failures
-- Enhanced business rules documentation
-- Added standards references (OWASP, PCI-DSS, ISO 25010)
-- Total: 53 tests (36 functional + 17 business rules)
-
----
-
-### Version 2.0 - November 2025
-
-**Changes:**
-- Enhanced logging for real-time feedback
-- Eliminated `time.sleep()` in favor of explicit waits
-- Added `wait_for_cart_total_update()` helper
-- Improved wait strategies
-- Clean code (removed excessive comments)
-- Comprehensive docstrings
-- Total: ~41 test runs (28 functions)
-
----
-
-### Version 1.0 - November 2025
+### Version 1.0 - November 2025 (Current)
 
 **Initial Release:**
-- Basic purchase flow tests
-- Cart operations
-- Order form validation
-- Parametrized security tests
-- Total: ~38 test runs
+- 28 security exploitation tests
+- 6 business logic exploits
+- 5 bot protection tests
+- 4 PCI-DSS compliance checks
+- 3 accessibility tests
+- 2 performance tests
+- 8 additional security tests (CSRF, cookies, headers, etc.)
+- Complete documentation with exploitation details
+- CVSS scoring for vulnerabilities
+- Standards mapping (OWASP, PCI-DSS, WCAG)
+
+**Coverage:**
+- OWASP Top 10 2021: Full coverage
+- PCI-DSS 4.0.1: Key requirements tested
+- OWASP WSTG: Business logic, session, authz
+- WCAG 2.1: Level A/AA accessibility
+- OWASP API Security Top 10: Bot protection, rate limiting
 
 ---
 
 **End of Documentation**
 
 **Related Documents:**
-- [Security Tests Documentation](README_security.md)
+- [Functional Tests Documentation](README_purchase.md)
 - [Test Plan](../../docs/test-plan.md)
 - [Test Summary Report](../../docs/Test_Summary_Report.md)
-- [DemoBlaze Test Cases](../../docs/DemoBlaze_Test_Cases.xlsx)
+
+**Author:** Arévalo, Marc  
+**Contact:** [Your contact info]  
+**Date:** November 2025  
+**Disclaimer:** These tests are for educational and authorized security testing only.
