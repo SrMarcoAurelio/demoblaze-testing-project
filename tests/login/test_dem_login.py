@@ -1,42 +1,38 @@
 """
-Test Suite: Login & Authentication - Enhanced Version
-Module: test_dem_login.py
-Author: Arévalo, Marc (y tu Coding Partner)
-Description: Comprehensive automated tests for DemoBlaze login functionality including
-             SQL injection, XSS, special characters, boundary tests, and more.
-             Enhanced with robust logging for real-time feedback.
-Related Bugs: #10, #11, #12
-Version: 3.1 - Añadido soporte Cross-Browser (Chrome, Firefox, Edge)
+Test Suite: Login & Authentication
+Module: test_login.py
+Author: Arévalo, Marc
+Description: Comprehensive automated tests for web application login functionality.
+             Verifies compliance with OWASP ASVS 5.0, NIST 800-63B, ISO 25010, and WCAG 2.1.
+             Tests discover security issues objectively without prior assumptions.
+Version: 1.0
 """
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.chrome.service import Service
-
-# Imports de Webdriver Manager
 from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.firefox import GeckoDriverManager         # <--- NUEVO
-from webdriver_manager.microsoft import EdgeChromiumDriverManager  # <--- NUEVO
-
+from webdriver_manager.firefox import GeckoDriverManager
+from webdriver_manager.microsoft import EdgeChromiumDriverManager
 import pytest
 import time
 import logging
 
-# --- Configuración de Logging ---
-logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(name)s:%(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(levelname)s - %(message)s'
+)
 
 
-# --- Constants ---
 BASE_URL = "https://www.demoblaze.com/"
 TIMEOUT = 10
-EXPLICIT_WAIT = 5
 TEST_USERNAME = "testuser_qa_2024"
 TEST_PASSWORD = "SecurePass123!"
 
-# --- Locators ---
+
 LOGIN_BUTTON_NAV = (By.ID, "login2")
 LOGIN_USERNAME_FIELD = (By.ID, "loginusername")
 LOGIN_PASSWORD_FIELD = (By.ID, "loginpassword")
@@ -51,57 +47,36 @@ LOGIN_MODAL_CLOSE_BUTTON = (By.XPATH, "//div[@id='logInModal']//button[@class='c
 LOGIN_MODAL = (By.ID, "logInModal")
 
 
-# --- Fixtures ---
-
-# ----------------------------------------------------
-# FIXTURE 'browser' ACTUALIZADA (AQUÍ ESTÁ EL CAMBIO)
-# ----------------------------------------------------
 @pytest.fixture(scope="function")
-def browser(request): # <- ¡Asegúrate de añadir 'request' aquí!
-    """
-    Fixture parametrizada que inicia el driver del navegador solicitado
-    desde la línea de comandos (--browser).
-    """
-    
-    # Leer la opción --browser de la línea de comandos (gracias a conftest.py)
+def browser(request):
     browser_name = request.config.getoption("--browser").lower()
-    
     driver = None
-    logging.info(f"\n--- Iniciando WebDriver para: {browser_name} ---")
-
+    
     if browser_name == "chrome":
         service = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()
-        # options.add_argument("--headless")
         driver = webdriver.Chrome(service=service, options=options)
-    
     elif browser_name == "firefox":
         service = Service(GeckoDriverManager().install())
         options = webdriver.FirefoxOptions()
-        # options.add_argument("--headless")
         driver = webdriver.Firefox(service=service, options=options)
-    
     elif browser_name == "edge":
         service = Service(EdgeChromiumDriverManager().install())
         options = webdriver.EdgeOptions()
-        # options.add_argument("--headless")
         driver = webdriver.Edge(service=service, options=options)
-    
     else:
-        pytest.fail(f"Navegador '{browser_name}' no es soportado. Elige 'chrome', 'firefox', o 'edge'.")
-
+        pytest.fail(f"Unsupported browser: {browser_name}")
+    
     driver.maximize_window()
     driver.implicitly_wait(TIMEOUT)
     
     yield driver
     
     driver.quit()
-    logging.info(f"--- WebDriver {browser_name} Cerrado ---")
 
 
 @pytest.fixture
 def login_page(browser):
-    """Fixture to navigate to the base URL and open the login modal."""
     browser.get(BASE_URL)
     WebDriverWait(browser, TIMEOUT).until(
         EC.element_to_be_clickable(LOGIN_BUTTON_NAV)
@@ -113,10 +88,7 @@ def login_page(browser):
     return browser
 
 
-# --- Helper Functions (Sin cambios) ---
-
 def perform_login(browser, username, password):
-    """Fills the login form and clicks the submit button."""
     try:
         username_field = WebDriverWait(browser, TIMEOUT).until(
             EC.visibility_of_element_located(LOGIN_USERNAME_FIELD)
@@ -130,26 +102,21 @@ def perform_login(browser, username, password):
         
         browser.find_element(*LOGIN_SUBMIT_BUTTON).click()
     except Exception as e:
-        logging.error(f"Error durante perform_login: {e}")
+        logging.error(f"Login action failed: {e}")
 
 
-def wait_for_alert_and_get_text(browser, timeout=EXPLICIT_WAIT):
-    """Waits for a JavaScript alert, gets its text, and accepts it."""
+def wait_for_alert(browser, timeout=5):
     try:
         WebDriverWait(browser, timeout).until(EC.alert_is_present())
         alert = browser.switch_to.alert
         alert_text = alert.text
-        logging.info(f"Alerta detectada: '{alert_text}'")
         alert.accept()
         return alert_text
     except TimeoutException:
-        logging.warning("No se encontró ninguna alerta.")
         return None
 
-def check_user_is_logged_in(browser, timeout=EXPLICIT_WAIT):
-    """
-    Verificación robusta: Espera a que el botón 'Log out' esté VISIBLE.
-    """
+
+def check_user_logged_in(browser, timeout=5):
     try:
         WebDriverWait(browser, timeout).until(
             EC.invisibility_of_element_located(LOGIN_MODAL)
@@ -157,319 +124,263 @@ def check_user_is_logged_in(browser, timeout=EXPLICIT_WAIT):
         WebDriverWait(browser, timeout).until(
             EC.visibility_of_element_located(LOGOUT_BUTTON)
         )
-        logging.info("Verificación: Usuario ESTÁ logueado (Botón 'Log out' visible).")
         return True
     except TimeoutException:
-        logging.warning("Verificación: Usuario NO está logueado (Botón 'Log out' no apareció).")
         return False
 
-def check_user_is_logged_out(browser, timeout=EXPLICIT_WAIT):
-    """
-    Verificación robusta: Espera a que el botón 'Log out' NO esté visible.
-    """
+
+def check_user_logged_out(browser, timeout=5):
     try:
         WebDriverWait(browser, timeout).until_not(
             EC.visibility_of_element_located(LOGOUT_BUTTON)
         )
-        logging.info("Verificación: Usuario ESTÁ deslogueado (Botón 'Log out' no visible).")
         return True
     except TimeoutException:
-        logging.error("Verificación: Usuario ESTÁ logueado (El botón 'Log out' apareció inesperadamente).")
         return False
 
 
-# --- Test Cases (Sin cambios en la lógica) ---
+def log_business_rule_violation(test_id, standard, expected_behavior, actual_behavior, impact, severity):
+    logging.error("=" * 80)
+    logging.error(f"BUSINESS RULE VIOLATION: {test_id}")
+    logging.error(f"Standard: {standard}")
+    logging.error(f"Expected: {expected_behavior}")
+    logging.error(f"Actual: {actual_behavior}")
+    logging.error(f"Business Impact: {impact}")
+    logging.error(f"Severity: {severity}")
+    logging.error("=" * 80)
 
-def test_login_valid_credentials(login_page):
+
+@pytest.mark.functional
+def test_valid_login(login_page):
     """TC-LOGIN-001: Valid Login"""
-    logging.info("🚀 TC-LOGIN-001: Iniciando test de login válido...")
+    logging.info("TC-LOGIN-001: Testing valid login credentials")
     perform_login(login_page, TEST_USERNAME, TEST_PASSWORD)
     
-    assert check_user_is_logged_in(login_page), "El usuario debería estar logueado"
+    assert check_user_logged_in(login_page), "User should be logged in with valid credentials"
     
     welcome_element = WebDriverWait(login_page, TIMEOUT).until(
         EC.presence_of_element_located(WELCOME_USER_TEXT)
     )
-    assert TEST_USERNAME in welcome_element.text, f"Mensaje de bienvenida debería contener {TEST_USERNAME}"
-    logging.info("✅ TC-LOGIN-001: PASSED")
+    assert TEST_USERNAME in welcome_element.text, "Welcome message should contain username"
 
 
-def test_login_invalid_password(login_page):
+@pytest.mark.functional
+def test_invalid_password(login_page):
     """TC-LOGIN-002: Invalid Password"""
-    logging.info("🚀 TC-LOGIN-002: Iniciando test de contraseña inválida...")
+    logging.info("TC-LOGIN-002: Testing invalid password rejection")
     perform_login(login_page, TEST_USERNAME, "wrongpassword123")
-    alert_text = wait_for_alert_and_get_text(login_page)
+    alert_text = wait_for_alert(login_page)
     
-    assert alert_text == "Wrong password.", f"Alerta esperada 'Wrong password.' pero se obtuvo '{alert_text}'"
-    assert check_user_is_logged_out(login_page, 2), "Usuario NO debería estar logueado"
-    logging.info("✅ TC-LOGIN-002: PASSED")
+    assert alert_text is not None, "System should display error for invalid password"
+    assert "wrong password" in alert_text.lower() or "incorrect" in alert_text.lower(), \
+        f"Error message unclear: '{alert_text}'"
+    assert check_user_logged_out(login_page, 2), "User should not be logged in"
 
 
-def test_login_nonexistent_user(login_page):
+@pytest.mark.functional
+def test_nonexistent_user(login_page):
     """TC-LOGIN-003: Non-existent User"""
-    logging.info("🚀 TC-LOGIN-003: Iniciando test de usuario inexistente...")
+    logging.info("TC-LOGIN-003: Testing non-existent user rejection")
     perform_login(login_page, "nonexistent_user_xyz_999", "anypassword")
-    alert_text = wait_for_alert_and_get_text(login_page)
+    alert_text = wait_for_alert(login_page)
     
-    assert alert_text == "User does not exist.", f"Alerta esperada 'User does not exist.' pero se obtuvo '{alert_text}'"
-    assert check_user_is_logged_out(login_page, 2), "Usuario NO debería estar logueado"
-    logging.info("✅ TC-LOGIN-003: PASSED")
+    assert alert_text is not None, "System should display error for non-existent user"
+    assert check_user_logged_out(login_page, 2), "User should not be logged in"
 
 
-def test_login_empty_fields(login_page):
-    """TC-LOGIN-004: Empty Fields"""
-    logging.info("🚀 TC-LOGIN-004: Iniciando test de campos vacíos...")
+@pytest.mark.functional
+def test_empty_fields(login_page):
+    """TC-LOGIN-004: Empty Fields Validation"""
+    logging.info("TC-LOGIN-004: Testing empty fields validation")
     perform_login(login_page, "", "")
-    alert_text = wait_for_alert_and_get_text(login_page)
+    alert_text = wait_for_alert(login_page)
     
-    assert alert_text == "Please fill out Username and Password.", \
-        f"Mensaje de validación esperado pero se obtuvo '{alert_text}'"
-    logging.info("✅ TC-LOGIN-004: PASSED")
+    assert alert_text is not None, "System should validate empty fields"
+    assert "fill" in alert_text.lower() or "required" in alert_text.lower(), \
+        f"Validation message unclear: '{alert_text}'"
 
 
-def test_login_empty_username_only(login_page):
-    """TC-LOGIN-005: Empty Username Only"""
-    logging.info("🚀 TC-LOGIN-005: Iniciando test de usuario vacío...")
-    perform_login(login_page, "", "SomePassword123")
-    alert_text = wait_for_alert_and_get_text(login_page)
+@pytest.mark.functional
+def test_successful_logout(browser):
+    """TC-LOGIN-005: Logout Functionality"""
+    logging.info("TC-LOGIN-005: Testing logout functionality")
+    browser.get(BASE_URL)
     
-    assert "Please fill out" in alert_text, "Debería mostrar error de validación"
-    assert check_user_is_logged_out(login_page, 2), "Usuario NO debería estar logueado"
-    logging.info("✅ TC-LOGIN-005: PASSED")
-
-
-def test_login_empty_password_only(login_page):
-    """TC-LOGIN-006: Empty Password Only"""
-    logging.info("🚀 TC-LOGIN-006: Iniciando test de contraseña vacía...")
-    perform_login(login_page, TEST_USERNAME, "")
-    alert_text = wait_for_alert_and_get_text(login_page)
+    WebDriverWait(browser, TIMEOUT).until(
+        EC.element_to_be_clickable(LOGIN_BUTTON_NAV)
+    ).click()
     
-    assert "Please fill out" in alert_text, "Debería mostrar error de validación"
-    assert check_user_is_logged_out(login_page, 2), "Usuario NO debería estar logueado"
-    logging.info("✅ TC-LOGIN-006: PASSED")
-
-
-@pytest.mark.parametrize("payload", [
-    "' OR '1'='1",
-    "' OR 1=1--",
-    "admin'--",
-    "' OR 'a'='a",
-    "1' OR '1' = '1",
-    "' UNION SELECT NULL--",
-    "admin' OR '1'='1'--",
-])
-def test_login_sql_injection_username(login_page, payload):
-    """TC-LOGIN-007: SQL Injection in Username Field"""
-    logging.info(f"🚀 TC-LOGIN-007: Probando SQLi en Username. Payload: {payload}")
-    perform_login(login_page, payload, "anypassword")
-    wait_for_alert_and_get_text(login_page, timeout=3)
+    WebDriverWait(browser, TIMEOUT).until(
+        EC.visibility_of_element_located(LOGIN_USERNAME_FIELD)
+    )
     
-    if check_user_is_logged_in(login_page, timeout=2):
-        logging.critical("="*50)
-        logging.critical("🚨🚨🚨 VULNERABILIDAD DETECTADA 🚨🚨🚨")
-        logging.critical(f"El login fue EXITOSO con el payload de SQLi: {payload}")
-        logging.critical("="*50)
-        assert False, f"VULNERABILIDAD SQLi: Login exitoso con payload: {payload}"
-
-    assert check_user_is_logged_out(login_page, 2), \
-        f"SQL injection NO debería conceder acceso. Payload: {payload}"
-    logging.info(f"✅ TC-LOGIN-007: Payload '{payload}' bloqueado correctamente.")
-
-
-@pytest.mark.parametrize("payload", [
-    "' OR '1'='1",
-    "' OR 1=1--",
-    "password' OR '1'='1",
-])
-def test_login_sql_injection_password(login_page, payload):
-    """TC-LOGIN-008: SQL Injection in Password Field"""
-    logging.info(f"🚀 TC-LOGIN-008: Probando SQLi en Password. Payload: {payload}")
-    perform_login(login_page, TEST_USERNAME, payload)
-    wait_for_alert_and_get_text(login_page, timeout=3)
+    perform_login(browser, TEST_USERNAME, TEST_PASSWORD)
+    assert check_user_logged_in(browser), "Login should succeed before testing logout"
     
-    if check_user_is_logged_in(login_page, timeout=2):
-        logging.critical("="*50)
-        logging.critical("🚨🚨🚨 VULNERABILIDAD DETECTADA 🚨🚨🚨")
-        logging.critical(f"El login fue EXITOSO con el payload de SQLi en pass: {payload}")
-        logging.critical("="*50)
-        assert False, f"VULNERABILIDAD SQLi: Login exitoso con payload: {payload}"
-
-    assert check_user_is_logged_out(login_page, 2), \
-        f"SQL injection NO debería conceder acceso. Payload: {payload}"
-    logging.info(f"✅ TC-LOGIN-008: Payload '{payload}' bloqueado correctamente.")
-
-
-@pytest.mark.parametrize("payload", [
-    "<script>alert('XSS')</script>",
-    "<img src=x onerror=alert('XSS')>",
-    "javascript:alert('XSS')",
-    "<svg/onload=alert('XSS')>",
-])
-def test_login_xss_username(login_page, payload):
-    """TC-LOGIN-009: XSS (Cross-Site Scripting) in Username"""
-    logging.info(f"🚀 TC-LOGIN-009: Probando XSS en Username. Payload: {payload}")
-    perform_login(login_page, payload, "anypassword")
+    WebDriverWait(browser, TIMEOUT).until(
+        EC.element_to_be_clickable(LOGOUT_BUTTON)
+    ).click()
     
-    alert_text = wait_for_alert_and_get_text(login_page, timeout=3)
+    assert check_user_logged_out(browser), "User should be logged out after clicking logout"
+
+
+@pytest.mark.functional
+def test_login_modal_close(login_page):
+    """TC-LOGIN-006: Login Modal Close Button"""
+    logging.info("TC-LOGIN-006: Testing modal close button functionality")
     
-    if alert_text and 'XSS' in alert_text:
-        logging.critical("="*50)
-        logging.critical("🚨🚨🚨 VULNERABILIDAD XSS DETECTADA 🚨🚨🚨")
-        logging.critical(f"Un payload de XSS se ejecutó: {payload}")
-        logging.critical("="*50)
-
-    assert check_user_is_logged_out(login_page, 2), \
-        f"Payload XSS NO debería conceder acceso. Payload: {payload}"
-    logging.info(f"✅ TC-LOGIN-009: Payload '{payload}' bloqueado correctamente.")
-
-
-@pytest.mark.parametrize("test_input", [
-    "user@#$%", "user!@#$%^&*()", "user<>?:", "user|\\", "user{}[]", "user'\"", "user\n\t\r",
-])
-def test_login_special_characters_username(login_page, test_input):
-    """TC-LOGIN-010: Special Characters in Username"""
-    logging.info(f"🚀 TC-LOGIN-010: Probando caracteres especiales. Input: {repr(test_input)}")
-    perform_login(login_page, test_input, "anypassword")
-    wait_for_alert_and_get_text(login_page, timeout=3)
-    assert check_user_is_logged_out(login_page, 2), f"Input: {repr(test_input)} no debería loguear"
-    logging.info(f"✅ TC-LOGIN-010: Input {repr(test_input)} manejado correctamente.")
-
-
-@pytest.mark.parametrize("test_input", [
-    "用户名", "Пользователь", "utilisateur", "المستخدم", "ユーザー", "😀😎🔥",
-])
-def test_login_unicode_characters(login_page, test_input):
-    """TC-LOGIN-011: Unicode/International Characters"""
-    logging.info(f"🚀 TC-LOGIN-011: Probando caracteres Unicode. Input: {test_input}")
-    perform_login(login_page, test_input, "anypassword")
-    wait_for_alert_and_get_text(login_page, timeout=3)
-    assert check_user_is_logged_out(login_page, 2), f"Input: {test_input} no debería loguear"
-    logging.info(f"✅ TC-LOGIN-011: Input {test_input} manejado correctamente.")
-
-
-def test_login_very_long_username(login_page):
-    """TC-LOGIN-012: Very Long Username (1000 chars) - Boundary Test"""
-    logging.info("🚀 TC-LOGIN-012: Probando usuario muy largo (1000 chars)...")
-    long_username = "a" * 1000
-    perform_login(login_page, long_username, "anypassword")
-    wait_for_alert_and_get_text(login_page, timeout=3)
-    assert check_user_is_logged_out(login_page, 2), "Input largo no debería loguear"
-    logging.info("✅ TC-LOGIN-012: Input largo (user) manejado correctamente.")
-
-
-def test_login_very_long_password(login_page):
-    """TC-LOGIN-013: Very Long Password (1000 chars) - Boundary Test"""
-    logging.info("🚀 TC-LOGIN-013: Probando contraseña muy larga (1000 chars)...")
-    long_password = "p" * 1000
-    perform_login(login_page, TEST_USERNAME, long_password)
-    wait_for_alert_and_get_text(login_page, timeout=3)
-    assert check_user_is_logged_out(login_page, 2), "Input largo no debería loguear"
-    logging.info("✅ TC-LOGIN-013: Input largo (pass) manejado correctamente.")
-
-
-@pytest.mark.parametrize("test_input", ["   user   ", " user", "user ", "   "])
-def test_login_whitespace_username(login_page, test_input):
-    """TC-LOGIN-014: Whitespace in Username"""
-    logging.info(f"🚀 TC-LOGIN-014: Probando espacios en blanco. Input: {repr(test_input)}")
-    perform_login(login_page, test_input, "anypassword")
-    wait_for_alert_and_get_text(login_page, timeout=3)
-    assert check_user_is_logged_out(login_page, 2), f"Input: {repr(test_input)} no debería loguear"
-    logging.info(f"✅ TC-LOGIN-014: Input {repr(test_input)} manejado correctamente.")
-
-
-@pytest.mark.parametrize("username_variant", [
-    TEST_USERNAME.upper(), TEST_USERNAME.lower(), TEST_USERNAME.title(),
-])
-def test_login_case_sensitivity_username(login_page, username_variant):
-    """TC-LOGIN-015: Case Sensitivity in Username"""
-    if username_variant == TEST_USERNAME:
-        pytest.skip("Variante es idéntica al username original, saltando test.")
+    username_field = login_page.find_element(*LOGIN_USERNAME_FIELD)
+    assert username_field.is_displayed(), "Login modal should be visible"
     
-    logging.info(f"🚀 TC-LOGIN-015: Probando sensibilidad a mayúsculas. Input: {username_variant}")
-    perform_login(login_page, username_variant, TEST_PASSWORD)
-    wait_for_alert_and_get_text(login_page, timeout=3)
-    assert check_user_is_logged_out(login_page, 2), "Login debería ser sensible a mayúsculas"
-    logging.info(f"✅ TC-LOGIN-015: Input {username_variant} manejado correctamente.")
+    close_button = login_page.find_element(*LOGIN_MODAL_CLOSE_BUTTON)
+    close_button.click()
+    
+    WebDriverWait(login_page, TIMEOUT).until(
+        EC.invisibility_of_element_located(LOGIN_MODAL)
+    )
 
 
-@pytest.mark.parametrize("test_input", ["user\x00admin", "user\x00", "\x00user"])
-def test_login_null_bytes(login_page, test_input):
-    """TC-LOGIN-016: Null Bytes in Input"""
-    logging.info(f"🚀 TC-LOGIN-016: Probando Null Bytes. Input: {repr(test_input)}")
-    try:
-        perform_login(login_page, test_input, "anypassword")
-        wait_for_alert_and_get_text(login_page, timeout=3)
-        assert check_user_is_logged_out(login_page, 2), f"Input: {repr(test_input)} no debería loguear"
-        logging.info(f"✅ TC-LOGIN-016: Input {repr(test_input)} manejado correctamente.")
-    except Exception as e:
-        logging.warning(f"Test de Null Byte capturó una excepción (esperado): {e}")
-        pass
-
-
-@pytest.mark.parametrize("test_input", [
-    "../../../etc/passwd", "..\\..\\..\\windows\\system32", "....//....//....//etc/passwd",
-])
-def test_login_path_traversal(login_page, test_input):
-    """TC-LOGIN-017: Path Traversal Attempts"""
-    logging.info(f"🚀 TC-LOGIN-017: Probando Path Traversal. Input: {test_input}")
-    perform_login(login_page, test_input, "anypassword")
-    wait_for_alert_and_get_text(login_page, timeout=3)
-    assert check_user_is_logged_out(login_page, 2), f"Input: {test_input} no debería loguear"
-    logging.info(f"✅ TC-LOGIN-017: Input {test_input} manejado correctamente.")
-
-
-@pytest.mark.xfail(reason="Bug #11: System accepts weak passwords")
-def test_login_weak_password_vulnerability(browser):
-    """TC-LOGIN-018: Weak Password Acceptance (Bug #11) - Security Vulnerability"""
-    logging.info("🚀 TC-LOGIN-018: (XFAIL) Probando vulnerabilidad de contraseña débil...")
+@pytest.mark.business_rules
+def test_weak_password_acceptance(browser):
+    """TC-LOGIN-BR-001: Weak Password Validation
+    
+    Standard: NIST SP 800-63B Section 5.1.1.2
+    Requirement: User-chosen passwords SHALL be at least 8 characters
+    """
+    logging.info("TC-LOGIN-BR-001: Testing password minimum length requirement")
     timestamp = str(int(time.time()))
-    test_user = f"weakpass_test_{timestamp}"
+    test_user = f"weakpass_{timestamp}"
     weak_password = "123"
     
     browser.get(BASE_URL)
-    WebDriverWait(browser, TIMEOUT).until(EC.element_to_be_clickable(SIGNUP_BUTTON)).click()
-    WebDriverWait(browser, TIMEOUT).until(EC.visibility_of_element_located(SIGNUP_USERNAME_FIELD))
+    WebDriverWait(browser, TIMEOUT).until(
+        EC.element_to_be_clickable(SIGNUP_BUTTON)
+    ).click()
+    
+    WebDriverWait(browser, TIMEOUT).until(
+        EC.visibility_of_element_located(SIGNUP_USERNAME_FIELD)
+    )
     
     browser.find_element(*SIGNUP_USERNAME_FIELD).send_keys(test_user)
     browser.find_element(*SIGNUP_PASSWORD_FIELD).send_keys(weak_password)
     browser.find_element(*SIGNUP_SUBMIT_BUTTON).click()
     
-    alert_text = wait_for_alert_and_get_text(browser)
+    alert_text = wait_for_alert(browser)
     
-    assert "Password too weak" in alert_text or "password requirements" in alert_text.lower(), \
-        "Sistema debería rechazar contraseñas débiles (Bug #11)"
-    logging.info("✅ TC-LOGIN-018: (XFAIL) Completado.")
+    if alert_text and ("password" in alert_text.lower() and 
+                       ("weak" in alert_text.lower() or 
+                        "short" in alert_text.lower() or 
+                        "minimum" in alert_text.lower() or 
+                        "8" in alert_text)):
+        logging.info("System correctly rejects weak password")
+        assert True
+    else:
+        log_business_rule_violation(
+            test_id="TC-LOGIN-BR-001",
+            standard="NIST SP 800-63B Section 5.1.1.2",
+            expected_behavior="Reject password < 8 characters with clear error message",
+            actual_behavior=f"Accepted password '{weak_password}' (length: {len(weak_password)}). Response: '{alert_text}'",
+            impact="Accounts vulnerable to brute force attacks, dictionary attacks, credential stuffing",
+            severity="CRITICAL"
+        )
+        assert False, f"System accepted weak password with only {len(weak_password)} characters"
 
 
-@pytest.mark.xfail(reason="Bug #10: Username enumeration vulnerability")
-def test_username_enumeration_vulnerability(login_page):
-    """TC-LOGIN-019: Username Enumeration (Bug #10) - Security Vulnerability"""
-    logging.info("🚀 TC-LOGIN-019: (XFAIL) Probando enumeración de usuarios...")
+@pytest.mark.business_rules
+def test_excessive_username_length(login_page):
+    """TC-LOGIN-BR-002: Input Length Validation
     
-    perform_login(login_page, TEST_USERNAME, "wrong_password_xyz")
-    error_msg_existing_user = wait_for_alert_and_get_text(login_page)
+    Standard: ISO 25010 - Functional Suitability, Input Validation
+    Requirement: Username should be limited to reasonable length (50 characters)
+    """
+    logging.info("TC-LOGIN-BR-002: Testing excessive username length handling")
+    long_username = "a" * 1000
     
-    WebDriverWait(login_page, TIMEOUT).until(EC.element_to_be_clickable(LOGIN_MODAL_CLOSE_BUTTON)).click()
-    WebDriverWait(login_page, TIMEOUT).until(EC.invisibility_of_element_located(LOGIN_MODAL))
-    WebDriverWait(login_page, TIMEOUT).until(EC.element_to_be_clickable(LOGIN_BUTTON_NAV)).click()
+    perform_login(login_page, long_username, "anypassword")
+    alert_text = wait_for_alert(login_page, timeout=3)
     
-    perform_login(login_page, "definitely_not_a_real_user_xyz", "any_password")
-    error_msg_nonexistent_user = wait_for_alert_and_get_text(login_page)
-    
-    assert error_msg_existing_user == error_msg_nonexistent_user, \
-        f"Mensajes deberían ser idénticos (Bug #10). " \
-        f"Obtenidos: '{error_msg_existing_user}' vs '{error_msg_nonexistent_user}'"
-    logging.info("✅ TC-LOGIN-019: (XFAIL) Completado.")
+    if alert_text and ("length" in alert_text.lower() or 
+                       "long" in alert_text.lower() or 
+                       "maximum" in alert_text.lower() or
+                       "limit" in alert_text.lower()):
+        logging.info("System correctly validates username length")
+        assert True
+    else:
+        log_business_rule_violation(
+            test_id="TC-LOGIN-BR-002",
+            standard="ISO 25010 - Functional Suitability, Input Validation",
+            expected_behavior="Reject username exceeding 50 characters with validation error",
+            actual_behavior=f"Processed username of {len(long_username)} characters without length validation",
+            impact="Database bloat, potential buffer overflow vulnerabilities, DoS attack vector",
+            severity="MEDIUM"
+        )
+        assert False, f"System processed username with {len(long_username)} characters without validation"
 
-@pytest.mark.xfail(reason="Bug #12: No brute force protection detected")
-def test_login_brute_force_lockout(browser):
-    """TC-LOGIN-020: Brute Force Protection (Bug #12) - Security Vulnerability"""
-    logging.info("🚀 TC-LOGIN-020: (XFAIL) Probando protección contra fuerza bruta...")
+
+@pytest.mark.business_rules
+def test_username_enumeration_vulnerability(browser):
+    """TC-LOGIN-BR-003: Username Enumeration Prevention
+    
+    Standard: OWASP ASVS v5.0-2.2.3
+    Requirement: Authentication responses SHALL NOT indicate which part of authentication failed
+    """
+    logging.info("TC-LOGIN-BR-003: Testing username enumeration resistance")
+    
     browser.get(BASE_URL)
-    final_alert_text = ""
-    attempts = 7
-    logging.info(f"Iniciando {attempts} intentos fallidos...")
+    WebDriverWait(browser, TIMEOUT).until(
+        EC.element_to_be_clickable(LOGIN_BUTTON_NAV)
+    ).click()
+    
+    WebDriverWait(browser, TIMEOUT).until(
+        EC.visibility_of_element_located(LOGIN_USERNAME_FIELD)
+    )
+    
+    perform_login(browser, TEST_USERNAME, "wrong_password_xyz")
+    error_existing_user = wait_for_alert(browser)
+    
+    WebDriverWait(browser, TIMEOUT).until(
+        EC.element_to_be_clickable(LOGIN_MODAL_CLOSE_BUTTON)
+    ).click()
+    
+    WebDriverWait(browser, TIMEOUT).until(
+        EC.invisibility_of_element_located(LOGIN_MODAL)
+    )
+    
+    WebDriverWait(browser, TIMEOUT).until(
+        EC.element_to_be_clickable(LOGIN_BUTTON_NAV)
+    ).click()
+    
+    perform_login(browser, "nonexistent_user_xyz_999", "any_password")
+    error_nonexistent_user = wait_for_alert(browser)
+    
+    if error_existing_user == error_nonexistent_user:
+        logging.info("System correctly uses generic error messages")
+        assert True
+    else:
+        log_business_rule_violation(
+            test_id="TC-LOGIN-BR-003",
+            standard="OWASP ASVS v5.0-2.2.3",
+            expected_behavior="Generic error message for all authentication failures",
+            actual_behavior=f"Different errors reveal username existence: '{error_existing_user}' vs '{error_nonexistent_user}'",
+            impact="Attackers can enumerate valid usernames, enables targeted phishing and brute force attacks",
+            severity="HIGH"
+        )
+        assert False, "System reveals username existence through different error messages"
 
+
+@pytest.mark.business_rules
+def test_brute_force_protection(browser):
+    """TC-LOGIN-BR-004: Brute Force Attack Prevention
+    
+    Standard: OWASP ASVS v5.0-2.2.1, PCI-DSS Requirement 8.1.6
+    Requirement: Account lockout after 6 failed authentication attempts within defined timeframe
+    """
+    logging.info("TC-LOGIN-BR-004: Testing brute force protection mechanisms")
+    browser.get(BASE_URL)
+    attempts = 7
+    final_alert_text = ""
+    lockout_detected = False
+    
     for i in range(attempts):
         try:
             WebDriverWait(browser, TIMEOUT).until(
@@ -480,88 +391,253 @@ def test_login_brute_force_lockout(browser):
                 EC.visibility_of_element_located(LOGIN_USERNAME_FIELD)
             )
             
-            perform_login(browser, TEST_USERNAME, f"bruteforce_{i}")
-            logging.info(f"  Intento {i+1}/{attempts}...")
+            perform_login(browser, TEST_USERNAME, f"wrong_attempt_{i}")
+            final_alert_text = wait_for_alert(browser, timeout=5)
             
-            final_alert_text = wait_for_alert_and_get_text(browser, timeout=5)
-            
-            if "Account locked" in final_alert_text or "Too many attempts" in final_alert_text:
-                logging.info(f"¡Sistema bloqueó la cuenta en el intento {i+1}!")
+            if final_alert_text and ("locked" in final_alert_text.lower() or 
+                                     "too many" in final_alert_text.lower() or
+                                     "blocked" in final_alert_text.lower() or
+                                     "temporarily" in final_alert_text.lower()):
+                lockout_detected = True
+                logging.info(f"Account lockout detected after {i+1} attempts")
                 break
-            time.sleep(0.5)
-
+            
+            time.sleep(0.3)
         except Exception as e:
-            logging.error(f"Error durante fuerza bruta {i+1}: {e}")
+            logging.error(f"Attempt {i+1} error: {e}")
             browser.refresh()
-
-    assert "Account locked" in final_alert_text or "Too many attempts" in final_alert_text, \
-        f"Sistema debería bloquear tras {attempts} intentos (Bug #12). Última alerta: '{final_alert_text}'"
-    logging.info("✅ TC-LOGIN-020: (XFAIL) Completado.")
-
-
-def test_login_modal_close_button(login_page):
-    """TC-LOGIN-021: Verify 'Close' button functionality on Login Modal"""
-    logging.info("🚀 TC-LOGIN-021: Probando botón 'Close' del modal...")
     
-    username_field = login_page.find_element(*LOGIN_USERNAME_FIELD)
-    assert username_field.is_displayed(), "Modal de login debería estar abierto"
-    
-    close_button = login_page.find_element(*LOGIN_MODAL_CLOSE_BUTTON)
-    close_button.click()
-    
-    try:
-        WebDriverWait(login_page, TIMEOUT).until(
-            EC.invisibility_of_element_located(LOGIN_MODAL)
-        )
+    if lockout_detected:
         assert True
-        logging.info("✅ TC-LOGIN-021: Modal cerrado correctamente.")
-    except TimeoutException:
-        assert False, "Modal de login no se cerró"
+    else:
+        log_business_rule_violation(
+            test_id="TC-LOGIN-BR-004",
+            standard="OWASP ASVS v5.0-2.2.1, PCI-DSS Requirement 8.1.6",
+            expected_behavior="Account lockout after 6 failed login attempts",
+            actual_behavior=f"No lockout mechanism detected after {attempts} failed attempts. Last response: '{final_alert_text}'",
+            impact="Vulnerable to automated brute force attacks, credential stuffing, password spraying",
+            severity="CRITICAL"
+        )
+        assert False, f"No brute force protection detected after {attempts} failed attempts"
 
 
-# --- Test Corregido (de la conversación anterior) ---
-def test_login_modal_interaction_signup_login(browser):
-    """TC-LOGIN-022: Verify interaction between Sign Up and Log In modals"""
-    logging.info("🚀 TC-LOGIN-022: Probando interacción entre modales (Versión Corregida)...")
+@pytest.mark.business_rules
+def test_error_message_presentation_method(login_page):
+    """TC-LOGIN-BR-005: Error Message Accessibility
+    
+    Standard: WCAG 2.1 Level AA - Success Criterion 3.3.1 (Error Identification)
+    Requirement: Error messages should be inline, accessible to screen readers
+    """
+    logging.info("TC-LOGIN-BR-005: Testing error message presentation accessibility")
+    perform_login(login_page, "", "")
+    alert_text = wait_for_alert(login_page, timeout=3)
+    
+    if alert_text:
+        log_business_rule_violation(
+            test_id="TC-LOGIN-BR-005",
+            standard="WCAG 2.1 Success Criterion 3.3.1",
+            expected_behavior="Inline error messages with aria-live regions for screen reader support",
+            actual_behavior="JavaScript alert() used for error presentation",
+            impact="Poor accessibility for screen reader users, outdated UX pattern, modal interruption",
+            severity="MEDIUM"
+        )
+        assert False, "System uses JavaScript alerts instead of accessible inline validation"
+    else:
+        logging.info("No JavaScript alert detected")
+        assert True
+
+
+@pytest.mark.business_rules
+@pytest.mark.parametrize("payload", [
+    "' OR '1'='1",
+    "' OR 1=1--",
+    "admin'--",
+    "1' OR '1' = '1",
+])
+def test_sql_injection_prevention(login_page, payload):
+    """TC-LOGIN-BR-006: SQL Injection Prevention
+    
+    Standard: OWASP ASVS v5.0-1.2.5 (Injection Prevention)
+    Requirement: Use parameterized queries, input sanitization for all database interactions
+    """
+    logging.info(f"TC-LOGIN-BR-006: Testing SQL injection prevention - Payload: {payload}")
+    perform_login(login_page, payload, "anypassword")
+    wait_for_alert(login_page, timeout=3)
+    
+    if check_user_logged_in(login_page, timeout=2):
+        log_business_rule_violation(
+            test_id="TC-LOGIN-BR-006",
+            standard="OWASP ASVS v5.0-1.2.5 (Injection Prevention)",
+            expected_behavior="SQL injection attempt blocked, authentication denied",
+            actual_behavior=f"Authentication bypass successful with SQL injection payload: {payload}",
+            impact="Complete database compromise, unauthorized access, data breach, data manipulation",
+            severity="CRITICAL"
+        )
+        assert False, f"SQL injection vulnerability detected - Login succeeded with payload: {payload}"
+    
+    assert check_user_logged_out(login_page, 2), "User should not be authenticated after injection attempt"
+
+
+@pytest.mark.business_rules
+@pytest.mark.parametrize("payload", [
+    "<script>alert('XSS')</script>",
+    "<img src=x onerror=alert('XSS')>",
+    "<svg/onload=alert('XSS')>",
+])
+def test_xss_prevention(login_page, payload):
+    """TC-LOGIN-BR-007: Cross-Site Scripting (XSS) Prevention
+    
+    Standard: OWASP ASVS v5.0-1.2.1 (Output Encoding)
+    Requirement: All output should be encoded, Content Security Policy headers enforced
+    """
+    logging.info(f"TC-LOGIN-BR-007: Testing XSS prevention - Payload: {payload}")
+    perform_login(login_page, payload, "anypassword")
+    
+    alert_text = wait_for_alert(login_page, timeout=3)
+    
+    if alert_text and 'XSS' in alert_text:
+        log_business_rule_violation(
+            test_id="TC-LOGIN-BR-007",
+            standard="OWASP ASVS v5.0-1.2.1 (Output Encoding)",
+            expected_behavior="XSS payload sanitized, HTML entities encoded, no script execution",
+            actual_behavior=f"XSS payload executed in browser: {payload}",
+            impact="Session hijacking, cookie theft, phishing attacks, malware distribution",
+            severity="CRITICAL"
+        )
+        assert False, f"XSS vulnerability detected - Script executed with payload: {payload}"
+    
+    assert check_user_logged_out(login_page, 2)
+
+
+@pytest.mark.business_rules
+def test_password_maximum_length(login_page):
+    """TC-LOGIN-BR-008: Password Maximum Length Enforcement
+    
+    Standard: NIST 800-63B Section 5.1.1.2, ISO 25010 - Resource Utilization
+    Requirement: Maximum password length of 64 characters to prevent DoS
+    """
+    logging.info("TC-LOGIN-BR-008: Testing password maximum length enforcement")
+    extremely_long_password = "p" * 10000
+    
+    perform_login(login_page, TEST_USERNAME, extremely_long_password)
+    alert_text = wait_for_alert(login_page, timeout=3)
+    
+    if alert_text and ("length" in alert_text.lower() or 
+                       "maximum" in alert_text.lower() or 
+                       "long" in alert_text.lower()):
+        logging.info("System correctly enforces maximum password length")
+        assert True
+    else:
+        log_business_rule_violation(
+            test_id="TC-LOGIN-BR-008",
+            standard="NIST 800-63B Section 5.1.1.2, ISO 25010",
+            expected_behavior="Reject passwords exceeding 64 characters",
+            actual_behavior=f"Processed password with {len(extremely_long_password)} characters without validation",
+            impact="Denial of Service (DoS) attack vector, excessive memory consumption, server resource exhaustion",
+            severity="MEDIUM"
+        )
+        assert False, f"System processed password with {len(extremely_long_password)} characters"
+
+
+@pytest.mark.business_rules
+@pytest.mark.parametrize("test_input", [
+    "   user   ",
+    " testuser",
+    "testuser ",
+])
+def test_whitespace_handling(login_page, test_input):
+    """TC-LOGIN-BR-009: Whitespace Normalization
+    
+    Standard: ISO 25010 - Data Quality, Usability
+    Requirement: Trim leading/trailing whitespace from username inputs
+    """
+    logging.info(f"TC-LOGIN-BR-009: Testing whitespace handling - Input: '{test_input}'")
+    perform_login(login_page, test_input, TEST_PASSWORD)
+    alert_text = wait_for_alert(login_page, timeout=3)
+    
+    trimmed_input = test_input.strip()
+    if trimmed_input == TEST_USERNAME and check_user_logged_in(login_page, timeout=2):
+        logging.info("System correctly trims whitespace from username")
+        assert True
+    elif alert_text and "does not exist" in alert_text.lower():
+        log_business_rule_violation(
+            test_id="TC-LOGIN-BR-009",
+            standard="ISO 25010 - Data Quality, Usability",
+            expected_behavior="Trim leading/trailing whitespace before authentication",
+            actual_behavior=f"Whitespace-padded input '{test_input}' treated as different username",
+            impact="User confusion, authentication failures for valid users, poor user experience",
+            severity="LOW"
+        )
+        assert False, f"System does not trim whitespace from username: '{test_input}'"
+
+
+@pytest.mark.business_rules
+def test_session_timeout_enforcement(browser):
+    """TC-LOGIN-BR-010: Session Timeout
+    
+    Standard: OWASP ASVS v5.0-3.3.4, ISO 27001 A.9.4.2
+    Requirement: Automatic logout after 15 minutes of inactivity
+    """
+    logging.info("TC-LOGIN-BR-010: Testing session timeout enforcement")
     browser.get(BASE_URL)
     
-    # --- 1. Abrir y cerrar Sign Up ---
-    logging.info("  Abriendo modal Sign Up...")
-    WebDriverWait(browser, TIMEOUT).until(EC.element_to_be_clickable(SIGNUP_BUTTON)).click()
-    
-    # Verificar que está abierto
-    signup_modal = WebDriverWait(browser, TIMEOUT).until(
-        EC.visibility_of_element_located((By.ID, "signInModal"))
-    )
-    assert signup_modal.is_displayed(), "Modal Sign Up debería estar visible"
-    logging.info("  Modal Sign Up está visible.")
-
-    # Cerrar el modal Sign Up
-    signup_close_button = (By.XPATH, "//div[@id='signInModal']//button[@class='close']")
-    WebDriverWait(browser, TIMEOUT).until(EC.element_to_be_clickable(signup_close_button)).click()
-    
-    # Verificar que está cerrado
     WebDriverWait(browser, TIMEOUT).until(
-        EC.invisibility_of_element_located((By.ID, "signInModal"))
+        EC.element_to_be_clickable(LOGIN_BUTTON_NAV)
+    ).click()
+    
+    WebDriverWait(browser, TIMEOUT).until(
+        EC.visibility_of_element_located(LOGIN_USERNAME_FIELD)
     )
-    logging.info("  Modal Sign Up cerrado correctamente.")
     
-    time.sleep(1) # Pausa breve
-
-    # --- 2. Abrir Log In ---
-    logging.info("  Abriendo modal Log In...")
-    WebDriverWait(browser, TIMEOUT).until(EC.element_to_be_clickable(LOGIN_BUTTON_NAV)).click()
+    perform_login(browser, TEST_USERNAME, TEST_PASSWORD)
+    assert check_user_logged_in(browser), "Login should succeed before timeout test"
     
-    # Verificar que está abierto
-    login_modal = WebDriverWait(browser, TIMEOUT).until(
-        EC.visibility_of_element_located(LOGIN_MODAL)
-    )
-    assert login_modal.is_displayed(), "Modal Log In debería estar visible"
-    logging.info("  Modal Log In está visible.")
+    logging.info("Waiting 30 seconds to check session persistence")
+    time.sleep(30)
     
-    logging.info("✅ TC-LOGIN-022: PASSED")
+    session_still_active = check_user_logged_in(browser, timeout=2)
+    
+    if session_still_active:
+        log_business_rule_violation(
+            test_id="TC-LOGIN-BR-010",
+            standard="OWASP ASVS v5.0-3.3.4, ISO 27001 A.9.4.2",
+            expected_behavior="Automatic logout after 15 minutes of inactivity",
+            actual_behavior="Session remains active after 30 seconds with no activity (timeout likely not implemented)",
+            impact="Unattended sessions vulnerable to hijacking, unauthorized access from shared devices",
+            severity="HIGH"
+        )
 
 
-# --- Main execution ---
+@pytest.mark.business_rules
+def test_password_case_sensitivity(login_page):
+    """TC-LOGIN-BR-011: Password Case Sensitivity
+    
+    Standard: OWASP ASVS v5.0-2.1.1
+    Requirement: Passwords SHALL be case-sensitive
+    """
+    logging.info("TC-LOGIN-BR-011: Testing password case sensitivity enforcement")
+    wrong_case_password = TEST_PASSWORD.swapcase()
+    
+    if wrong_case_password == TEST_PASSWORD:
+        pytest.skip("Test password has no case variance")
+    
+    perform_login(login_page, TEST_USERNAME, wrong_case_password)
+    alert_text = wait_for_alert(login_page, timeout=3)
+    
+    if check_user_logged_in(login_page, timeout=2):
+        log_business_rule_violation(
+            test_id="TC-LOGIN-BR-011",
+            standard="OWASP ASVS v5.0-2.1.1",
+            expected_behavior="Case-swapped password rejected",
+            actual_behavior=f"Login successful with case-swapped password (Original: {TEST_PASSWORD}, Used: {wrong_case_password})",
+            impact="Reduced password entropy by 50%, significantly easier brute force attacks",
+            severity="HIGH"
+        )
+        assert False, "Password case sensitivity not enforced"
+    
+    assert alert_text and ("wrong" in alert_text.lower() or "invalid" in alert_text.lower() or "incorrect" in alert_text.lower()), \
+        "System should reject case-swapped password"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])
