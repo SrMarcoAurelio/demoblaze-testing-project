@@ -834,45 +834,9 @@ pytest tests/login/
 
 ---
 
-## For Recruiters
 
-### What This Project Demonstrates
 
-**Technical Competency**:
-- Can build test automation from scratch
-- Understands security testing fundamentals
-- Writes clean, maintainable code
-- Creates comprehensive documentation
-
-**Learning Ability**:
-- Went from zero to 119 automated tests in 20 days
-- Learned Python, Selenium, and Pytest simultaneously
-- Applied industry standards (OWASP, ISO 25010)
-- Created reusable templates for future projects
-
-**Professional Maturity**:
-- Transparent about AI usage (shows honesty)
-- Documents mistakes and iterations (shows growth mindset)
-- Doesn't oversell incomplete work (shows integrity)
-- Seeks continuous improvement (shows dedication)
-
-**Real-World Skills**:
-- Test planning and strategy
-- Manual and automated testing
-- Bug tracking and reporting
-- Cross-browser testing
-- Security vulnerability detection
-
-### Project Highlights
-
-- **119 automated tests** across 3 modules
-- **29 bugs discovered** through manual testing
-- **13,255 lines** of professional documentation
-- **4 reusable templates** for future projects
-- **Multiple code iterations** demonstrating improvement
-- **Industry standards** referenced in every test
-
-### What Makes This Different
+## What Makes This Different
 
 **Not a tutorial project**: Every line of code was reviewed, understood, and tested by me.
 
@@ -906,11 +870,7 @@ pytest tests/login/
 
 ### Special Recognition
 
-**To myself**: For committing to 20 days of intensive learning, not accepting "good enough," and pushing through multiple code iterations until getting it right.
-
 **To the QA community**: For open-source tools and knowledge sharing that make learning accessible.
-
-**To future me**: This project represents where I started. Keep building on this foundation.
 
 ---
 
