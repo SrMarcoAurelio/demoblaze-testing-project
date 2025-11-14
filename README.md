@@ -37,7 +37,7 @@ This README is completely transparent about the process, including mistakes, ite
 
 ---
 
-## Personal Message from the Author
+## My Message 
 
 It's a genuine pleasure to share this repository with the community. If you've made it this far and find something useful—whether for learning or your own projects—it genuinely makes me happy. I've tried to document EVERYTHING: each test has its own README explaining how it works, I update the code daily to meet current standards, and although there's still plenty of work left to finish it, this project has all my time and attention right now.
 
