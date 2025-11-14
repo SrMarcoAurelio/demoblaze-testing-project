@@ -68,8 +68,7 @@ This repository can be used in two ways depending on your needs:
 9. [Installation & Usage](#installation--usage)
 10. [Key Learnings](#key-learnings)
 11. [What's Next](#whats-next)
-12. [For Recruiters](#for-recruiters)
-13. [Acknowledgments](#acknowledgments)
+12. [Acknowledgments](#acknowledgments)
 
 ---
 
