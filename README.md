@@ -37,6 +37,24 @@ This README is completely transparent about the process, including mistakes, ite
 
 ---
 
+## Personal Message from the Author
+
+It's a genuine pleasure to share this repository with the community. If you've made it this far and find something useful—whether for learning or your own projects—it genuinely makes me happy. I've tried to document EVERYTHING: each test has its own README explaining how it works, I update the code daily to meet current standards, and although there's still plenty of work left to finish it, this project has all my time and attention right now.
+
+If you have questions, use GitHub Discussions or email me directly. If you have QA experience and like the project, or simply want to help make it more useful for more people, I'd be delighted to collaborate with you. The idea is that this actually helps someone learning, not just becoming another project on GitHub.
+
+---
+
+## How to Use This Repository
+
+This repository can be used in two ways depending on your needs:
+
+**Option 1 - Direct Implementation**: Take the existing test files (`tests/` directory), modify the configuration variables (BASE_URL, locators, test data), and run them against your application. Each test file includes a comprehensive README explaining how everything works.
+
+**Option 2 - Template-Based Development**: Use the testing templates (`templates/` directory - 4,000+ lines) as a foundation to create AI-assisted test generation. The templates include complete methodology (DISCOVER vs ASSUME philosophy), code patterns, standards references (OWASP, ISO 25010, PCI-DSS), and example conversations for creating new test modules. Perfect for building an AI agent that generates and corrects test code following professional standards.
+
+---
+
 ## Table of Contents
 
 1. [Project Overview](#project-overview)
@@ -903,10 +921,18 @@ pytest tests/login/
 **Duration**: November 2025 (20 days)  
 **Status**: Active Development
 
-**GitHub**: How i do this?   
-**LinkedIn**: linkedin.com/in/marc-arévalo-caño-413a88338  
+**GitHub**: HOW I DO THIS? 
 **Email**: marcarevalocano@gmail.com
+**Discussions**: Available in GitHub Discussions tab
 
+**Open to**:
+- Questions about the project
+- Collaboration opportunities
+- Feedback and suggestions
+- Mentoring discussions (I'm learning too!)
+
+**Response Time**: Usually within 12 hours
+ 
 ---
 
 ## License
@@ -930,4 +956,4 @@ This README documents a learning journey, not a perfect product. If you're learn
 ---
 
 **Last Updated**: November 14, 2025  
-**Version**: 1.0  
+**Version**: 2.0  
