@@ -1,6 +1,6 @@
 # Test Suite Documentation: Login & Authentication Security Testing
 
-## 📋 **OVERVIEW**
+##  **OVERVIEW**
 
 **Module:** `test_login_security.py`  
 **Version:** 2.0 - Complete DISCOVER Philosophy Implementation  
@@ -12,7 +12,7 @@ This test suite focuses on **security vulnerabilities** and **exploitation attem
 
 ---
 
-## 🎯 **PHILOSOPHY: EXPLOITATION TESTING**
+##  **PHILOSOPHY: EXPLOITATION TESTING**
 
 Unlike functional testing (which verifies features work), security testing **attempts to break** the system:
 
@@ -44,7 +44,7 @@ else:
 
 ---
 
-## 🛡️ **TEST COVERAGE**
+##  **TEST COVERAGE**
 
 ### Total Tests: 20 functions (~40+ executions with parametrization)
 
@@ -100,7 +100,7 @@ else:
 
 ---
 
-## 📊 **STANDARDS VALIDATED**
+##  **STANDARDS VALIDATED**
 
 | Standard | Coverage Area |
 |----------|---------------|
@@ -113,7 +113,7 @@ else:
 
 ---
 
-## ⚙️ **CONFIGURATION**
+##  **CONFIGURATION**
 
 ### Environment Setup
 
@@ -141,7 +141,7 @@ pip install pytest selenium requests
 
 ---
 
-## 🚀 **EXECUTION**
+##  **EXECUTION**
 
 ### Basic Execution
 
@@ -184,7 +184,7 @@ pytest test_login_security.py::test_xss_username_field_INJ_003 -v
 
 ---
 
-## 📝 **TEST INVENTORY**
+##  **TEST INVENTORY**
 
 ### **INJECTION TESTS (INJ-XXX)**
 
@@ -298,7 +298,7 @@ pytest test_login_security.py::test_xss_username_field_INJ_003 -v
 
 ---
 
-## 🎯 **EXPECTED RESULTS & INTERPRETATION**
+##  **EXPECTED RESULTS & INTERPRETATION**
 
 ### Understanding Security Test Results
 
@@ -373,7 +373,7 @@ INFO: SQL injection attempt blocked: ' OR '1'='1
 
 ---
 
-## 🔍 **DETAILED TEST EXPLANATIONS**
+##  **DETAILED TEST EXPLANATIONS**
 
 ### TC-SEC-LOGIN-INJ-001: SQL Injection in Username Field
 
@@ -566,7 +566,7 @@ Actual: No password reset functionality detected
 
 ---
 
-## 📊 **COMPREHENSIVE SECURITY COVERAGE**
+##  **COMPREHENSIVE SECURITY COVERAGE**
 
 ### All Security Requirements Are Tested
 
@@ -601,7 +601,7 @@ This test suite provides **complete coverage** of authentication security requir
 
 ---
 
-## 🔒 **CVSS SCORING REFERENCE**
+##  **CVSS SCORING REFERENCE**
 
 Tests include CVSS v3.1 severity scores:
 
@@ -614,7 +614,7 @@ Tests include CVSS v3.1 severity scores:
 
 ---
 
-## 📝 **LOGGING LEVELS**
+##  **LOGGING LEVELS**
 
 Security tests use specific logging levels:
 
@@ -635,9 +635,9 @@ INFO: SQL injection attempt blocked: admin'--
 
 ---
 
-## 🔐 **ETHICAL TESTING GUIDELINES**
+##  **ETHICAL TESTING GUIDELINES**
 
-### ⚠️ **CRITICAL: AUTHORIZED TESTING ONLY**
+###  **CRITICAL: AUTHORIZED TESTING ONLY**
 
 1. **NEVER** run these tests on:
    - Production systems without written permission
@@ -666,7 +666,7 @@ If critical vulnerabilities found:
 
 ---
 
-## 📚 **ADDING NEW SECURITY TESTS**
+##  **ADDING NEW SECURITY TESTS**
 
 ### Example: Add New Vulnerability Test
 
@@ -755,7 +755,7 @@ Test BOT-002 creates multiple browser instances:
 
 ---
 
-## 📜 **VERSION HISTORY**
+##  **VERSION HISTORY**
 
 ### Version 2.0 (November 2024)
 - **MAJOR UPDATE:** Complete DISCOVER philosophy implementation
@@ -776,7 +776,7 @@ Test BOT-002 creates multiple browser instances:
 
 ---
 
-## 📖 **REFERENCES**
+##  **REFERENCES**
 
 ### Security Standards
 
@@ -807,4 +807,4 @@ Test BOT-002 creates multiple browser instances:
 **Severity:** CRITICAL, HIGH, MEDIUM, LOW vulnerabilities tested  
 **Philosophy:** DISCOVER - Tests discover vulnerabilities through actual exploitation attempts  
 
-**⚠️ REMEMBER: AUTHORIZED TESTING ONLY ⚠️**
+** REMEMBER: AUTHORIZED TESTING ONLY **
