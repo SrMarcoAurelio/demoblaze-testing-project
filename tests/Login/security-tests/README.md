@@ -757,7 +757,7 @@ Test BOT-002 creates multiple browser instances:
 
 ##  **VERSION HISTORY**
 
-### Version 2.0 (November 2024)
+### Version 2.0 (November 2025)
 - **MAJOR UPDATE:** Complete DISCOVER philosophy implementation
 - Added missing security tests (Password Reset, Session Timeout, Remember Me)
 - Removed "NOT IMPLEMENTED" section - all standards are now tested
@@ -769,7 +769,7 @@ Test BOT-002 creates multiple browser instances:
 - CVSS v3.1 scoring for all findings
 - Enhanced documentation with detailed explanations
 
-### Version 1.0 (November 2024)
+### Version 1.0 (November 2025)
 - Initial release
 - 17 security test functions (~35+ with parametrization)
 - Partial coverage
