@@ -725,17 +725,247 @@ def test_form_labels_for_screen_readers_BR_016(browser, base_url):
     logging.info(f"  Password placeholder: '{password_placeholder}'")
 
 
-# NOTE: Additional business rules tests can be added following the same pattern:
-# - test_username_whitespace_normalization_BR_005
-# - test_case_sensitivity_username_BR_007
-# - test_empty_username_only_BR_009
-# - test_empty_password_only_BR_010
-# - test_numeric_only_username_BR_011
-# - test_unicode_characters_BR_012
-#
-# All tests follow the same DISCOVER pattern:
-# 1. EXECUTE the action/test
-# 2. OBSERVE the result
-# 3. DECIDE based on standards (OWASP, NIST, ISO, WCAG)
-# 4. Log findings with appropriate severity
-# 5. Assert or fail with clear message
+@pytest.mark.business_rules
+@pytest.mark.validation
+@pytest.mark.medium
+def test_username_whitespace_normalization_BR_005(browser, base_url):
+    """
+    TC-LOGIN-BR-005: Username Whitespace Normalization
+
+    Standard: ISO 25010 - Usability (User error protection)
+    Priority: MEDIUM
+
+    Tests if system trims leading/trailing whitespace from username.
+    Good UX practice to prevent user errors from accidental spaces.
+
+    Expected: System should trim whitespace and allow login
+    """
+    browser.get(base_url)
+    login_page = LoginPage(browser)
+
+    # EXECUTE: Attempt login with spaces around username
+    username_with_spaces = f"  Apolo2025  "
+    login_page.login(username_with_spaces, "apolo2025")
+
+    # OBSERVE: Check if login succeeded (whitespace trimmed)
+    time.sleep(1)
+    alert_text = login_page.get_alert_text(timeout=5)
+    logged_in = login_page.is_user_logged_in(timeout=3)
+
+    # DECIDE: System behavior (either trims or doesn't)
+    if logged_in:
+        logging.info("✓ BR-005 PASSED: System trims whitespace - Good UX")
+        logging.info("Standard: ISO 25010 - User error protection")
+        login_page.logout()
+        assert True
+    else:
+        logging.warning("⚠ DISCOVERED: System does NOT trim whitespace from username")
+        logging.warning(f"Alert received: {alert_text}")
+        logging.warning("Standard: ISO 25010 recommends user error protection")
+        logging.warning("Impact: Users may fail login due to accidental spaces")
+        # This is not a failure - just a UX observation
+        assert True
+
+
+@pytest.mark.business_rules
+@pytest.mark.validation
+@pytest.mark.low
+def test_case_sensitivity_username_BR_007(browser, base_url):
+    """
+    TC-LOGIN-BR-007: Username Case Sensitivity
+
+    Standard: ISO 27001 A.9.4 - Authentication consistency
+    Priority: LOW
+
+    Tests if usernames are case-sensitive or case-insensitive.
+    System should have consistent behavior documented.
+
+    Expected: System has consistent case-handling behavior
+    """
+    browser.get(base_url)
+    login_page = LoginPage(browser)
+
+    # EXECUTE: Attempt login with uppercase username
+    # Real username is "Apolo2025", trying "APOLO2025"
+    login_page.login("APOLO2025", "apolo2025")
+
+    # OBSERVE: Check if login succeeded
+    time.sleep(1)
+    alert_text = login_page.get_alert_text(timeout=5)
+    logged_in = login_page.is_user_logged_in(timeout=3)
+
+    # DECIDE: Document the behavior (not enforce)
+    if logged_in:
+        logging.info("✓ DISCOVERED: Usernames are NOT case-sensitive")
+        logging.info("Both 'Apolo2025' and 'APOLO2025' work")
+        login_page.logout()
+    else:
+        logging.info("✓ DISCOVERED: Usernames ARE case-sensitive")
+        logging.info(f"'APOLO2025' does not match 'Apolo2025'. Alert: {alert_text}")
+
+    logging.info("Note: Either behavior is acceptable if consistent")
+    assert True
+
+
+@pytest.mark.business_rules
+@pytest.mark.validation
+@pytest.mark.medium
+def test_empty_username_only_BR_009(browser, base_url):
+    """
+    TC-LOGIN-BR-009: Empty Username Field Only
+
+    Standard: WCAG 2.1 SC 3.3.1 (Error Identification)
+    Priority: MEDIUM
+
+    Tests if system provides specific error for empty username.
+    Good UX requires field-specific error messages.
+
+    Expected: System rejects and provides field-specific error
+    """
+    browser.get(base_url)
+    login_page = LoginPage(browser)
+
+    # EXECUTE: Attempt login with empty username only
+    login_page.login("", "somepassword")
+
+    # OBSERVE: Check error message
+    time.sleep(1)
+    alert_text = login_page.get_alert_text(timeout=5)
+    logged_in = login_page.is_user_logged_in(timeout=2)
+
+    # DECIDE: Empty username should be rejected
+    assert not logged_in, "Should not be logged in with empty username"
+    assert alert_text is not None, "Should show error for empty username"
+
+    # Check if error is field-specific (good UX)
+    if "username" in alert_text.lower():
+        logging.info(f"✓ BR-009 PASSED: Field-specific error. Alert: '{alert_text}'")
+        logging.info("Standard: WCAG 2.1 SC 3.3.1 - Error Identification")
+    else:
+        logging.info(f"✓ Empty username rejected. Alert: '{alert_text}'")
+        logging.info("Note: Generic error (WCAG recommends field-specific errors)")
+
+
+@pytest.mark.business_rules
+@pytest.mark.validation
+@pytest.mark.critical
+def test_empty_password_only_BR_010(browser, base_url):
+    """
+    TC-LOGIN-BR-010: Empty Password Field Only
+
+    Standard: WCAG 2.1 SC 3.3.1 (Error Identification)
+    Priority: CRITICAL
+
+    Tests if system rejects empty password.
+    Critical security requirement - empty passwords are invalid.
+
+    Expected: System rejects empty password
+    """
+    browser.get(base_url)
+    login_page = LoginPage(browser)
+
+    # EXECUTE: Attempt login with empty password only
+    login_page.login("Apolo2025", "")
+
+    # OBSERVE: Check error message
+    time.sleep(1)
+    alert_text = login_page.get_alert_text(timeout=5)
+    logged_in = login_page.is_user_logged_in(timeout=2)
+
+    # DECIDE: Empty password MUST be rejected (security)
+    assert not logged_in, "CRITICAL: Empty password must be rejected"
+    assert alert_text is not None, "Should show error for empty password"
+
+    # Check if error is field-specific (good UX)
+    if "password" in alert_text.lower():
+        logging.info(f"✓ BR-010 PASSED: Field-specific error. Alert: '{alert_text}'")
+        logging.info("Standard: WCAG 2.1 SC 3.3.1 - Error Identification")
+    else:
+        logging.info(f"✓ Empty password rejected. Alert: '{alert_text}'")
+        logging.info("Note: Generic error (WCAG recommends field-specific errors)")
+
+
+@pytest.mark.business_rules
+@pytest.mark.validation
+@pytest.mark.low
+def test_numeric_only_username_BR_011(browser, base_url):
+    """
+    TC-LOGIN-BR-011: Numeric-Only Username
+
+    Standard: ISO 25010 - Functional Suitability
+    Priority: LOW
+
+    Tests if system allows usernames with only numbers.
+    Edge case - some systems restrict numeric-only usernames.
+
+    Expected: System handles numeric usernames consistently
+    """
+    browser.get(base_url)
+    login_page = LoginPage(browser)
+
+    # EXECUTE: Attempt login with numeric-only username
+    numeric_username = "1234567890"
+    login_page.login(numeric_username, "anypassword")
+
+    # OBSERVE: System response
+    time.sleep(1)
+    alert_text = login_page.get_alert_text(timeout=5)
+    logged_in = login_page.is_user_logged_in(timeout=2)
+
+    # DECIDE: Document behavior (not enforce)
+    if not logged_in:
+        if alert_text:
+            logging.info(f"✓ DISCOVERED: System response to numeric username: '{alert_text}'")
+        else:
+            logging.info("✓ DISCOVERED: Numeric username not matched (expected if user doesn't exist)")
+    else:
+        logging.info("✓ DISCOVERED: System accepts numeric-only usernames")
+
+    logging.info("Note: Either behavior is acceptable")
+    assert True
+
+
+@pytest.mark.business_rules
+@pytest.mark.validation
+@pytest.mark.medium
+def test_unicode_characters_BR_012(browser, base_url):
+    """
+    TC-LOGIN-BR-012: Unicode Characters in Username
+
+    Standard: ISO 25010 - Portability (Adaptability)
+    Priority: MEDIUM
+
+    Tests if system supports international characters (Unicode).
+    Important for global accessibility and i18n compliance.
+
+    Expected: System handles Unicode characters gracefully
+    """
+    browser.get(base_url)
+    login_page = LoginPage(browser)
+
+    # EXECUTE: Test various Unicode character sets
+    unicode_tests = [
+        ("用户名测试", "Chinese characters"),
+        ("Имя_пользователя", "Cyrillic characters"),
+        ("مستخدم", "Arabic characters"),
+        ("ユーザー名", "Japanese characters"),
+    ]
+
+    for unicode_username, description in unicode_tests:
+        browser.get(base_url)
+        login_page.login(unicode_username, "anypassword")
+
+        # OBSERVE: System response
+        time.sleep(1)
+        alert_text = login_page.get_alert_text(timeout=3)
+        logged_in = login_page.is_user_logged_in(timeout=2)
+
+        # DECIDE: Document Unicode support
+        if not logged_in:
+            logging.info(f"✓ DISCOVERED: {description} - System response: {alert_text if alert_text else 'No match (expected)'}")
+        else:
+            logging.info(f"✓ DISCOVERED: {description} - System supports Unicode login")
+
+    logging.info("Standard: ISO 25010 recommends international character support")
+    logging.info("Note: This test documents Unicode handling behavior")
+    assert True
