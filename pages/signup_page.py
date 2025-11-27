@@ -29,17 +29,12 @@ class SignupPage(BasePage):
     - Error handling
     """
 
-    # ============================================================================
-    # LOCATORS
-    # ============================================================================
 
-    # Navigation buttons
     SIGNUP_BUTTON_NAV = (By.ID, "signin2")
     LOGIN_BUTTON_NAV = (By.ID, "login2")
     LOGOUT_BUTTON_NAV = (By.ID, "logout2")
     HOME_NAV_LINK = (By.XPATH, "//a[contains(text(), 'Home')]")
 
-    # Signup modal
     SIGNUP_MODAL = (By.ID, "signInModal")
     SIGNUP_MODAL_TITLE = (By.XPATH, "//div[@id='signInModal']//h5[@class='modal-title']")
     SIGNUP_USERNAME_FIELD = (By.ID, "sign-username")
@@ -48,18 +43,13 @@ class SignupPage(BasePage):
     SIGNUP_CLOSE_BUTTON = (By.XPATH, "//div[@id='signInModal']//button[@class='close']")
     SIGNUP_CLOSE_FOOTER_BUTTON = (By.XPATH, "//div[@id='signInModal']//button[text()='Close']")
 
-    # Login modal (for verification after signup)
     LOGIN_MODAL = (By.ID, "logInModal")
     LOGIN_USERNAME_FIELD = (By.ID, "loginusername")
     LOGIN_PASSWORD_FIELD = (By.ID, "loginpassword")
     LOGIN_SUBMIT_BUTTON = (By.XPATH, "//button[text()='Log in']")
 
-    # User status indicators
     WELCOME_USER_TEXT = (By.ID, "nameofuser")
 
-    # ============================================================================
-    # SIGNUP MODAL ACTIONS
-    # ============================================================================
 
     def open_signup_modal(self):
         """
@@ -101,9 +91,6 @@ class SignupPage(BasePage):
         """
         return self.is_element_visible(self.SIGNUP_MODAL, timeout=2)
 
-    # ============================================================================
-    # SIGNUP ACTIONS
-    # ============================================================================
 
     def fill_signup_username(self, username, clear_first=True):
         """
@@ -161,9 +148,6 @@ class SignupPage(BasePage):
         self.logger.info(f"Signup attempted for user: {username}")
         return True
 
-    # ============================================================================
-    # LOGIN ACTIONS (for verification after signup)
-    # ============================================================================
 
     def login_after_signup(self, username, password):
         """
@@ -226,9 +210,6 @@ class SignupPage(BasePage):
             return text
         return None
 
-    # ============================================================================
-    # FORM FIELD INSPECTION (for testing)
-    # ============================================================================
 
     def get_signup_username_value(self):
         """Get current value of signup username field."""
@@ -256,9 +237,6 @@ class SignupPage(BasePage):
         enabled = self.get_attribute(self.SIGNUP_PASSWORD_FIELD, "disabled")
         return enabled is None
 
-    # ============================================================================
-    # ACCESSIBILITY HELPERS
-    # ============================================================================
 
     def get_signup_username_aria_label(self):
         """Get aria-label of signup username field (for accessibility testing)."""
@@ -277,18 +255,13 @@ class SignupPage(BasePage):
         """
         self.open_signup_modal()
 
-        # Tab to username field
         self.send_keys(self.SIGNUP_USERNAME_FIELD, Keys.TAB)
 
-        # Tab to password field
         self.send_keys(self.SIGNUP_PASSWORD_FIELD, Keys.TAB)
 
         self.logger.info("Tabbed through signup form")
         return True
 
-    # ============================================================================
-    # SECURITY TESTING HELPERS
-    # ============================================================================
 
     def inject_sql_payload_username(self, payload):
         """
@@ -343,9 +316,6 @@ class SignupPage(BasePage):
 
         return has_csrf
 
-    # ============================================================================
-    # UTILITY METHODS
-    # ============================================================================
 
     @staticmethod
     def generate_unique_username():

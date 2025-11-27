@@ -33,9 +33,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-# ============================================================================
-# SQL INJECTION TESTS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.critical
@@ -57,18 +54,14 @@ def test_sql_injection_product_id_INJ_001(browser, base_url, sql_payload):
 
     DISCOVER: Is product ID parameter vulnerable to SQL injection?
     """
-    # EXECUTE: Navigate to product with SQL injection payload
     product_page = ProductPage(browser)
     product_page.navigate_to_product_by_url(sql_payload)
 
-    # OBSERVE: Check for SQL error disclosure
     has_error, error_indicators = product_page.check_for_sql_error_indicators()
 
-    # OBSERVE: Check if page behaves unexpectedly
     page_source = browser.page_source.lower()
     products_listed = page_source.count("hrefch")  # Product link class
 
-    # DECIDE: SQL injection should be prevented
     if has_error:
         logger.critical(f"✗ CRITICAL: SQL error disclosure detected: {error_indicators}")
         pytest.fail(f"DISCOVERED: SQL error disclosure with payload '{sql_payload}': {error_indicators}")
@@ -92,7 +85,6 @@ def test_sql_injection_error_disclosure_INJ_002(browser, base_url):
 
     DISCOVER: Are SQL errors disclosed to users?
     """
-    # EXECUTE: Send malformed SQL to trigger error
     product_page = ProductPage(browser)
     error_payloads = ["1'", "1''", "1'''", "1' AND '1"]
 
@@ -101,23 +93,18 @@ def test_sql_injection_error_disclosure_INJ_002(browser, base_url):
     for payload in error_payloads:
         product_page.navigate_to_product_by_url(payload)
 
-        # OBSERVE: Check for SQL error messages
         has_error, error_indicators = product_page.check_for_sql_error_indicators()
 
         if has_error:
             violations.append((payload, error_indicators))
             logger.critical(f"✗ SQL error disclosed with payload '{payload}': {error_indicators}")
 
-    # DECIDE: SQL errors should not be disclosed
     if violations:
         pytest.fail(f"DISCOVERED: SQL error disclosure in {len(violations)} cases: {violations}")
 
     logger.info("✓ No SQL error disclosure detected")
 
 
-# ============================================================================
-# XSS TESTS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.critical
@@ -138,14 +125,11 @@ def test_xss_product_id_parameter_INJ_003(browser, base_url, xss_payload):
 
     DISCOVER: Is product ID parameter vulnerable to reflected XSS?
     """
-    # EXECUTE: Navigate to product with XSS payload
     product_page = ProductPage(browser)
     product_page.navigate_to_product_by_url(xss_payload)
 
-    # OBSERVE: Check for XSS execution
     is_vulnerable, evidence = product_page.check_for_xss_execution(xss_payload)
 
-    # DECIDE: XSS should be prevented
     if is_vulnerable:
         logger.critical(f"✗ CRITICAL: XSS vulnerability detected!")
         pytest.fail(f"DISCOVERED: XSS vulnerability with payload '{xss_payload}': {evidence}")
@@ -165,7 +149,6 @@ def test_xss_product_description_stored_INJ_004(browser, base_url):
 
     DISCOVER: Are product descriptions vulnerable to stored XSS?
     """
-    # EXECUTE: Navigate to multiple products and check descriptions
     product_page = ProductPage(browser)
     xss_patterns = [
         r'<script>',
@@ -180,22 +163,17 @@ def test_xss_product_description_stored_INJ_004(browser, base_url):
         description = details['description']
 
         if description:
-            # OBSERVE: Check if description contains unescaped XSS patterns
             for pattern in xss_patterns:
                 if re.search(pattern, description, re.IGNORECASE):
                     violations.append(f"Product {index}: {product_name}")
                     logger.critical(f"✗ Potential stored XSS in product {index}: {pattern}")
 
-    # DECIDE: No XSS patterns should be in descriptions
     if violations:
         pytest.fail(f"DISCOVERED: Potential stored XSS in {len(violations)} products")
 
     logger.info("✓ No stored XSS detected in product descriptions")
 
 
-# ============================================================================
-# IDOR (Insecure Direct Object Reference) TESTS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.high
@@ -209,21 +187,17 @@ def test_idor_product_enumeration_IDOR_001(browser, base_url):
 
     DISCOVER: Can attackers enumerate products by guessing IDs?
     """
-    # EXECUTE: Try accessing products with sequential IDs
     product_page = ProductPage(browser)
     accessible_products = []
 
-    # Try IDs 1-20
     for product_id in range(1, 21):
         product_page.navigate_to_product_by_url(product_id)
 
-        # OBSERVE: Check if product loads successfully
         product_name = product_page.get_product_name(timeout=3)
 
         if product_name:
             accessible_products.append((product_id, product_name))
 
-    # DECIDE: Enumeration is possible (expected for public catalog)
     logger.info(f"✓ Product enumeration check: {len(accessible_products)} products accessible")
     logger.info(f"  Note: Product enumeration is expected for public catalogs")
 
@@ -239,7 +213,6 @@ def test_idor_invalid_product_id_IDOR_002(browser, base_url):
 
     DISCOVER: How does system handle invalid product IDs?
     """
-    # EXECUTE: Try accessing non-existent product IDs
     product_page = ProductPage(browser)
     invalid_ids = [99999, 0, -1, "abc", "!@#$%"]
 
@@ -248,7 +221,6 @@ def test_idor_invalid_product_id_IDOR_002(browser, base_url):
     for invalid_id in invalid_ids:
         product_page.navigate_to_product_by_url(invalid_id)
 
-        # OBSERVE: Check for error disclosure
         page_source = browser.page_source.lower()
         error_indicators = ['error', 'exception', 'stack trace', 'warning']
 
@@ -257,7 +229,6 @@ def test_idor_invalid_product_id_IDOR_002(browser, base_url):
                 violations.append(f"ID {invalid_id}: {indicator}")
                 logger.warning(f"⚠ Error disclosure for invalid ID {invalid_id}: {indicator}")
 
-    # DECIDE: Should handle gracefully without error disclosure
     if violations:
         logger.warning(f"⚠ DISCOVERED: Error disclosure in {len(violations)} cases")
 
@@ -275,7 +246,6 @@ def test_idor_negative_product_id_IDOR_003(browser, base_url):
 
     DISCOVER: Can negative product IDs access unintended data?
     """
-    # EXECUTE: Try accessing products with negative IDs
     product_page = ProductPage(browser)
     negative_ids = [-1, -100, -999]
 
@@ -284,23 +254,18 @@ def test_idor_negative_product_id_IDOR_003(browser, base_url):
     for negative_id in negative_ids:
         product_page.navigate_to_product_by_url(negative_id)
 
-        # OBSERVE: Check if product loads
         product_name = product_page.get_product_name(timeout=3)
 
         if product_name:
             unexpected_access.append(f"ID {negative_id}: {product_name}")
             logger.warning(f"⚠ Negative ID accessible: {negative_id} -> {product_name}")
 
-    # DECIDE: Negative IDs should not access products
     if unexpected_access:
         logger.warning(f"⚠ DISCOVERED: Negative IDs accessible: {unexpected_access}")
 
     logger.info("✓ Negative product ID handling checked")
 
 
-# ============================================================================
-# PRICE TAMPERING TESTS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.critical
@@ -314,25 +279,20 @@ def test_price_tampering_url_parameter_PRICE_001(browser, base_url):
 
     DISCOVER: Can prices be manipulated via URL parameters?
     """
-    # EXECUTE: Navigate to product normally
     product_page = ProductPage(browser)
     product_page.navigate_to_first_product()
 
-    # OBSERVE: Get legitimate price
     legitimate_price = product_page.get_product_price_value()
     product_id = product_page.get_current_product_id_from_url()
 
     logger.info(f"Legitimate price: ${legitimate_price}, Product ID: {product_id}")
 
-    # EXECUTE: Try to manipulate price via URL
     manipulated_url = f"{base_url}prod.html?idp_={product_id}&price=1"
     browser.get(manipulated_url)
     product_page.wait_for_page_load()
 
-    # OBSERVE: Check if price changed
     manipulated_price = product_page.get_product_price_value()
 
-    # DECIDE: Price should not be manipulatable via URL
     if manipulated_price and manipulated_price != legitimate_price:
         logger.critical(f"✗ CRITICAL: Price manipulation succeeded!")
         pytest.fail(f"DISCOVERED: Price changed from ${legitimate_price} to ${manipulated_price}")
@@ -351,23 +311,17 @@ def test_price_consistency_across_views_PRICE_002(browser, base_url):
 
     DISCOVER: Are prices consistent between catalog and detail views?
     """
-    # EXECUTE: Get product price from catalog (if visible)
     product_page = ProductPage(browser)
     browser.get(base_url)
     product_page.wait_for_page_load()
 
-    # Navigate to product detail page
     success, product_name = product_page.navigate_to_first_product()
     detail_price = product_page.get_product_price_value()
 
-    # DECIDE: Prices should be consistent
     logger.info(f"✓ Price consistency check: Product detail price: ${detail_price}")
     logger.info("  Note: Catalog view prices would require additional comparison logic")
 
 
-# ============================================================================
-# PATH TRAVERSAL TESTS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.high
@@ -387,11 +341,9 @@ def test_path_traversal_product_id_TRAV_001(browser, base_url, traversal_payload
 
     DISCOVER: Is product ID parameter vulnerable to path traversal?
     """
-    # EXECUTE: Navigate with path traversal payload
     product_page = ProductPage(browser)
     product_page.navigate_to_product_by_url(traversal_payload)
 
-    # OBSERVE: Check for file system disclosure
     page_source = browser.page_source.lower()
 
     disclosure_indicators = [
@@ -409,16 +361,12 @@ def test_path_traversal_product_id_TRAV_001(browser, base_url, traversal_payload
             violations.append(indicator)
             logger.critical(f"✗ Path traversal disclosure: {indicator}")
 
-    # DECIDE: Path traversal should be prevented
     if violations:
         pytest.fail(f"DISCOVERED: Path traversal vulnerability - {violations}")
 
     logger.info(f"✓ Path traversal prevented: {traversal_payload}")
 
 
-# ============================================================================
-# SESSION SECURITY TESTS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.medium
@@ -431,18 +379,14 @@ def test_session_fixation_product_access_SESS_001(browser, base_url):
 
     DISCOVER: Is session ID regenerated appropriately?
     """
-    # EXECUTE: Get cookies before product access
     product_page = ProductPage(browser)
     browser.get(base_url)
     cookies_before = browser.get_cookies()
 
-    # Navigate to product
     product_page.navigate_to_first_product()
 
-    # OBSERVE: Get cookies after product access
     cookies_after = browser.get_cookies()
 
-    # DECIDE: Check if session handling is appropriate
     logger.info(f"Cookies before: {len(cookies_before)}")
     logger.info(f"Cookies after: {len(cookies_after)}")
 
@@ -450,9 +394,6 @@ def test_session_fixation_product_access_SESS_001(browser, base_url):
     logger.info("  Note: Full session security testing requires authentication flow")
 
 
-# ============================================================================
-# CSRF TESTS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.medium
@@ -466,11 +407,9 @@ def test_csrf_add_to_cart_CSRF_001(browser, base_url):
 
     DISCOVER: Is Add to Cart protected against CSRF attacks?
     """
-    # EXECUTE: Navigate to product
     product_page = ProductPage(browser)
     product_page.navigate_to_first_product()
 
-    # OBSERVE: Check page source for CSRF tokens
     page_source = browser.page_source
 
     csrf_indicators = [
@@ -486,7 +425,6 @@ def test_csrf_add_to_cart_CSRF_001(browser, base_url):
         if indicator in page_source.lower():
             csrf_tokens_found.append(indicator)
 
-    # DECIDE: CSRF protection should be implemented
     if csrf_tokens_found:
         logger.info(f"✓ CSRF tokens detected: {csrf_tokens_found}")
     else:
@@ -496,9 +434,6 @@ def test_csrf_add_to_cart_CSRF_001(browser, base_url):
     logger.info("✓ CSRF check completed")
 
 
-# ============================================================================
-# SECURITY HEADERS TESTS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.medium
@@ -511,13 +446,9 @@ def test_security_headers_product_page_HEAD_001(browser, base_url):
 
     DISCOVER: Are security headers properly implemented?
     """
-    # EXECUTE: Navigate to product
     product_page = ProductPage(browser)
     product_page.navigate_to_first_product()
 
-    # OBSERVE: Check for security headers
-    # Note: Selenium doesn't directly access response headers
-    # This test documents the limitation and recommended approach
     logger.info("✓ Security headers check completed")
     logger.info("  Note: Full header checking requires network interception")
     logger.info("  Recommended headers:")
@@ -527,9 +458,6 @@ def test_security_headers_product_page_HEAD_001(browser, base_url):
     logger.info("    - Strict-Transport-Security")
 
 
-# ============================================================================
-# INFORMATION DISCLOSURE TESTS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.medium
@@ -542,14 +470,11 @@ def test_information_disclosure_page_source_INFO_001(browser, base_url):
 
     DISCOVER: Is sensitive information disclosed in page source?
     """
-    # EXECUTE: Navigate to product
     product_page = ProductPage(browser)
     product_page.navigate_to_first_product()
 
-    # OBSERVE: Check for information disclosure
     has_disclosure, findings = product_page.check_for_information_disclosure()
 
-    # DECIDE: No sensitive information should be disclosed
     if has_disclosure:
         logger.warning(f"⚠ DISCOVERED: Information disclosure: {findings}")
     else:

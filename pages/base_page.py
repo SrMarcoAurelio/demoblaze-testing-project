@@ -43,9 +43,6 @@ class BasePage:
         self.wait = WebDriverWait(driver, timeout)
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    # ============================================================================
-    # ELEMENT INTERACTION METHODS
-    # ============================================================================
 
     def find_element(self, locator, timeout=None):
         """
@@ -255,9 +252,6 @@ class BasePage:
         except TimeoutException:
             return False
 
-    # ============================================================================
-    # ALERT HANDLING METHODS
-    # ============================================================================
 
     def wait_for_alert(self, timeout=5):
         """
@@ -320,9 +314,6 @@ class BasePage:
             alert.dismiss()
             self.logger.info("Alert dismissed")
 
-    # ============================================================================
-    # NAVIGATION METHODS
-    # ============================================================================
 
     def navigate_to(self, url):
         """
@@ -366,9 +357,6 @@ class BasePage:
         self.logger.debug(f"Page title: {title}")
         return title
 
-    # ============================================================================
-    # JAVASCRIPT METHODS
-    # ============================================================================
 
     def execute_script(self, script, *args):
         """
@@ -401,9 +389,6 @@ class BasePage:
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         self.logger.info("Scrolled to bottom")
 
-    # ============================================================================
-    # KEYBOARD & MOUSE ACTIONS
-    # ============================================================================
 
     def send_keys(self, locator, keys, timeout=None):
         """
@@ -440,9 +425,6 @@ class BasePage:
         ActionChains(self.driver).move_to_element(element).perform()
         self.logger.info(f"Hovered over: {locator}")
 
-    # ============================================================================
-    # UTILITY METHODS
-    # ============================================================================
 
     def wait(self, seconds):
         """

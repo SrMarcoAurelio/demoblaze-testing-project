@@ -30,7 +30,6 @@ from pages.catalog_page import CatalogPage
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# SQL INJECTION TESTS
 
 @pytest.mark.security
 @pytest.mark.critical
@@ -47,12 +46,10 @@ def test_sql_injection_category_filter_INJ_001(browser, base_url, sql_payload):
     CWE: CWE-89, CVSS Score: 9.8 CRITICAL"""
     catalog = CatalogPage(browser)
     
-    # Try SQL injection via URL manipulation
     malicious_url = f"{base_url}?cat={sql_payload}"
     browser.get(malicious_url)
     catalog.wait_for_page_load()
     
-    # Check for SQL errors
     has_error, indicators = catalog.check_for_sql_error_indicators()
     
     if has_error:
@@ -74,7 +71,6 @@ def test_sql_injection_product_id_INJ_002(browser, base_url, sql_payload):
     CWE: CWE-89, CVSS Score: 9.8 CRITICAL"""
     catalog = CatalogPage(browser)
     
-    # Navigate with SQL injection in product ID
     malicious_url = f"{base_url}prod.html?idp_={sql_payload}"
     browser.get(malicious_url)
     catalog.wait_for_page_load()
@@ -86,7 +82,6 @@ def test_sql_injection_product_id_INJ_002(browser, base_url, sql_payload):
     
     logger.info(f"✓ SQL injection prevented: {sql_payload}")
 
-# XSS TESTS
 
 @pytest.mark.security
 @pytest.mark.critical
@@ -102,18 +97,15 @@ def test_xss_product_search_INJ_003(browser, base_url, xss_payload):
     CWE: CWE-79, CVSS Score: 8.2 HIGH"""
     catalog = CatalogPage(browser)
     
-    # Try XSS via search parameter
     search_url = f"{base_url}?search={xss_payload}"
     browser.get(search_url)
     catalog.wait_for_page_load()
     
     page_source = browser.page_source
     
-    # Check if payload reflected unescaped
     if xss_payload in page_source:
         pytest.fail(f"DISCOVERED: XSS payload reflected unescaped")
     
-    # Check for alert execution
     try:
         alert = browser.switch_to.alert
         alert.accept()
@@ -132,7 +124,6 @@ def test_stored_xss_product_review_INJ_004(browser, base_url):
     catalog = CatalogPage(browser)
     catalog.go_to_catalog()
     
-    # Navigate to product to check for stored XSS
     catalog.click_first_product()
     page_source = browser.page_source
     
@@ -145,7 +136,6 @@ def test_stored_xss_product_review_INJ_004(browser, base_url):
     
     logger.info("✓ Stored XSS check completed")
 
-# IDOR TESTS
 
 @pytest.mark.security
 @pytest.mark.high
@@ -155,7 +145,6 @@ def test_idor_product_access_IDOR_001(browser, base_url):
     CWE: CWE-639, CVSS Score: 7.5 HIGH"""
     catalog = CatalogPage(browser)
     
-    # Try accessing products with sequential IDs
     accessible = []
     for product_id in range(1, 11):
         url = f"{base_url}prod.html?idp_={product_id}"
@@ -189,7 +178,6 @@ def test_idor_invalid_product_handling_IDOR_002(browser, base_url):
     
     logger.info("✓ Invalid product ID handling checked")
 
-# PATH TRAVERSAL
 
 @pytest.mark.security
 @pytest.mark.high
@@ -205,7 +193,6 @@ def test_path_traversal_product_images_TRAV_001(browser, base_url, traversal_pay
     CWE: CWE-22, CVSS Score: 7.5 HIGH"""
     catalog = CatalogPage(browser)
     
-    # Try path traversal in image parameter
     traversal_url = f"{base_url}?img={traversal_payload}"
     browser.get(traversal_url)
     catalog.wait_for_page_load()
@@ -220,7 +207,6 @@ def test_path_traversal_product_images_TRAV_001(browser, base_url, traversal_pay
     
     logger.info(f"✓ Path traversal prevented: {traversal_payload}")
 
-# ENUMERATION
 
 @pytest.mark.security
 @pytest.mark.medium
@@ -231,7 +217,6 @@ def test_product_enumeration_ENUM_001(browser, base_url):
     catalog = CatalogPage(browser)
     catalog.go_to_catalog()
     
-    # Count products across categories
     catalog.click_phones_category()
     phones = catalog.get_product_count()
     
@@ -244,7 +229,6 @@ def test_product_enumeration_ENUM_001(browser, base_url):
     total = phones + laptops + monitors
     logger.info(f"✓ Product enumeration: {total} total (P:{phones}, L:{laptops}, M:{monitors})")
 
-# TIMING ATTACKS
 
 @pytest.mark.security
 @pytest.mark.medium
@@ -254,7 +238,6 @@ def test_timing_attack_product_existence_TIME_001(browser, base_url):
     CWE: CWE-208, CVSS Score: 5.3 MEDIUM"""
     catalog = CatalogPage(browser)
     
-    # Measure response time for valid vs invalid product
     start = time.time()
     browser.get(f"{base_url}prod.html?idp_=1")
     catalog.wait_for_page_load()
@@ -273,7 +256,6 @@ def test_timing_attack_product_existence_TIME_001(browser, base_url):
     
     logger.info("✓ Timing attack resistance checked")
 
-# SESSION SECURITY
 
 @pytest.mark.security
 @pytest.mark.medium
@@ -283,20 +265,16 @@ def test_session_fixation_catalog_browsing_SESS_001(browser, base_url):
     CWE: CWE-384, CVSS Score: 6.5 MEDIUM"""
     catalog = CatalogPage(browser)
     
-    # Get cookies before browsing
     browser.get(base_url)
     cookies_before = browser.get_cookies()
     
-    # Browse catalog
     catalog.click_laptops_category()
     
-    # Get cookies after browsing
     cookies_after = browser.get_cookies()
     
     logger.info(f"Cookies: before={len(cookies_before)}, after={len(cookies_after)}")
     logger.info("✓ Session fixation check completed")
 
-# COOKIE SECURITY
 
 @pytest.mark.security
 @pytest.mark.medium
@@ -321,7 +299,6 @@ def test_cookie_security_flags_COOK_001(browser, base_url):
     
     logger.info(f"✓ Cookie security checked: {len(cookies)} cookies")
 
-# CSRF
 
 @pytest.mark.security
 @pytest.mark.medium
@@ -348,7 +325,6 @@ def test_csrf_token_catalog_actions_CSRF_001(browser, base_url):
     
     logger.info("✓ CSRF check completed")
 
-# SECURITY HEADERS
 
 @pytest.mark.security
 @pytest.mark.medium
@@ -362,7 +338,6 @@ def test_security_headers_validation_HEAD_001(browser, base_url):
     logger.info("✓ Security headers check completed")
     logger.info("  Recommended headers: X-Frame-Options, X-Content-Type-Options, CSP")
 
-# RATE LIMITING
 
 @pytest.mark.security
 @pytest.mark.medium
@@ -372,7 +347,6 @@ def test_rate_limiting_catalog_browsing_RATE_001(browser, base_url):
     CWE: CWE-770, CVSS Score: 6.5 MEDIUM"""
     catalog = CatalogPage(browser)
     
-    # Rapid catalog requests
     requests_count = 20
     blocked = False
     
@@ -391,7 +365,6 @@ def test_rate_limiting_catalog_browsing_RATE_001(browser, base_url):
     
     logger.info("✓ Rate limiting check completed")
 
-# INFORMATION DISCLOSURE
 
 @pytest.mark.security
 @pytest.mark.medium
@@ -401,7 +374,6 @@ def test_verbose_error_messages_INFO_001(browser, base_url):
     CWE: CWE-209, CVSS Score: 5.3 MEDIUM"""
     catalog = CatalogPage(browser)
     
-    # Try to trigger errors
     error_urls = [
         f"{base_url}nonexistent.html",
         f"{base_url}prod.html?idp_=abc",
@@ -426,7 +398,6 @@ def test_directory_listing_INFO_002(browser, base_url):
     CWE: CWE-548, CVSS Score: 5.3 MEDIUM"""
     catalog = CatalogPage(browser)
     
-    # Try common directory paths
     dir_paths = ["imgs/", "css/", "js/", "assets/"]
     
     for path in dir_paths:

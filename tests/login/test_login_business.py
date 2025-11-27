@@ -21,9 +21,6 @@ from selenium.webdriver.common.keys import Keys
 logging.basicConfig(level=logging.INFO)
 
 
-# ============================================================================
-# INPUT VALIDATION TESTS (Expected: PASS)
-# ============================================================================
 
 @pytest.mark.business_rules
 @pytest.mark.validation
@@ -43,15 +40,12 @@ def test_username_max_length_BR_001(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Attempt login with very long username (1000 chars)
     long_username = "A" * 1000
     login_page.login(long_username, "anypassword")
 
-    # OBSERVE: System response
     alert_text = login_page.get_alert_text(timeout=5)
     logged_in = login_page.is_user_logged_in(timeout=2)
 
-    # DECIDE: System should handle gracefully (not crash, give feedback)
     if alert_text:
         logging.info(f"✓ BR-001 PASSED: System handled long username. Alert: '{alert_text}'")
         assert not logged_in, "Should not be logged in with invalid long username"
@@ -79,14 +73,11 @@ def test_password_max_length_BR_002(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Attempt with 100-char password
     long_password = "P" * 100
     login_page.login("Apolo2025", long_password)
 
-    # OBSERVE: System response
     alert_text = login_page.get_alert_text(timeout=5)
 
-    # DECIDE: System should handle long passwords per NIST
     if alert_text:
         if "wrong" in alert_text.lower() or "incorrect" in alert_text.lower():
             logging.info(f"✓ BR-002 PASSED: System accepts long passwords. Alert: '{alert_text}'")
@@ -114,14 +105,11 @@ def test_whitespace_only_username_BR_003(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Attempt login with whitespace-only username
     login_page.login("     ", "anypassword")
 
-    # OBSERVE: System response
     alert_text = login_page.get_alert_text(timeout=5)
     logged_in = login_page.is_user_logged_in(timeout=2)
 
-    # DECIDE: Whitespace-only should be rejected
     assert alert_text is not None, "System should reject whitespace-only username"
     assert not logged_in, "Should not be logged in with whitespace username"
 
@@ -146,14 +134,11 @@ def test_whitespace_only_password_BR_004(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Attempt login with whitespace-only password
     login_page.login("Apolo2025", "     ")
 
-    # OBSERVE: System response
     alert_text = login_page.get_alert_text(timeout=5)
     logged_in = login_page.is_user_logged_in(timeout=2)
 
-    # DECIDE: Whitespace-only should be rejected
     assert alert_text is not None, "System should reject whitespace-only password"
     assert not logged_in, "Should not be logged in with whitespace password"
 
@@ -178,14 +163,11 @@ def test_special_characters_in_username_BR_006(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Attempt with special characters
     special_username = "user@#$%^&*()"
     login_page.login(special_username, "anypassword")
 
-    # OBSERVE: System response
     alert_text = login_page.get_alert_text(timeout=5)
 
-    # DECIDE: System should handle gracefully
     if alert_text:
         logging.info(f"✓ BR-006 PASSED: System handled special chars. Alert: '{alert_text}'")
     else:
@@ -212,24 +194,17 @@ def test_case_sensitivity_password_BR_008(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Attempt login with wrong case password
-    # Real password is "apolo2025", trying "APOLO2025"
     login_page.login("Apolo2025", "APOLO2025")
 
-    # OBSERVE: Should fail (case-sensitive)
     alert_text = login_page.get_alert_text(timeout=5)
     logged_in = login_page.is_user_logged_in(timeout=2)
 
-    # DECIDE: Must be case-sensitive per NIST
     assert not logged_in, "Password MUST be case-sensitive per NIST 800-63B"
     assert alert_text is not None, "Should receive error for wrong-case password"
 
     logging.info(f"✓ BR-008 PASSED: Password is case-sensitive. Alert: '{alert_text}'")
 
 
-# ============================================================================
-# SECURITY VALIDATION TESTS (Mixed Results)
-# ============================================================================
 
 @pytest.mark.business_rules
 @pytest.mark.security
@@ -256,14 +231,11 @@ def test_sql_injection_prevention_BR_013(browser, base_url, sql_payload):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Try SQL injection
     login_page.login(sql_payload, "anypassword")
 
-    # OBSERVE: Check if attack succeeded
     logged_in = login_page.is_user_logged_in(timeout=2)
     login_page.get_alert_text(timeout=2)
 
-    # DECIDE: SQL injection MUST be blocked
     if logged_in:
         logging.critical(f"CRITICAL VIOLATION: SQL Injection succeeded: {sql_payload}")
         logging.critical("Standard: OWASP ASVS v5.0 Section 1.2.5")
@@ -299,13 +271,10 @@ def test_xss_prevention_BR_014(browser, base_url, xss_payload):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Try XSS payload
     login_page.login(xss_payload, "anypassword")
 
-    # OBSERVE: Check if XSS executed
     alert_text = login_page.get_alert_text(timeout=2)
 
-    # DECIDE: XSS MUST be prevented
     if alert_text and "XSS" in alert_text:
         logging.critical(f"CRITICAL VIOLATION: XSS executed: {xss_payload}")
         logging.critical("Standard: OWASP ASVS v5.0 Section 1.2.1")
@@ -340,11 +309,9 @@ def test_account_lockout_enforcement_BR_017(browser, base_url):
     attempts = 0
     rate_limited = False
 
-    # EXECUTE: Attempt multiple failed logins
     for i in range(10):
         login_page.login("Apolo2025", f"wrongpass{i}")
 
-        # OBSERVE: Check for rate limiting
         alert_text = login_page.get_alert_text(timeout=2)
 
         if alert_text and ("rate" in alert_text.lower() or "locked" in alert_text.lower() or "wait" in alert_text.lower()):
@@ -355,7 +322,6 @@ def test_account_lockout_enforcement_BR_017(browser, base_url):
         attempts += 1
         browser.get(base_url)
 
-    # DECIDE: Rate limiting SHOULD exist per OWASP/NIST
     if not rate_limited:
         logging.critical("=" * 80)
         logging.critical("SECURITY VIOLATION: NO ACCOUNT LOCKOUT / RATE LIMITING")
@@ -392,20 +358,16 @@ def test_2fa_mfa_enforcement_BR_018(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Login with password only
     login_page.login("Apolo2025", "apolo2025")
     time.sleep(2)
     login_page.get_alert_text(timeout=2)
 
-    # OBSERVE: Check for 2FA prompt
     page_source = browser.page_source.lower()
     mfa_keywords = ['2fa', 'mfa', 'two-factor', 'multi-factor', 'authentication code', 'verify', 'otp']
     mfa_detected = any(keyword in page_source for keyword in mfa_keywords)
 
-    # Also check if logged in immediately (no 2FA challenge)
     logged_in_immediately = login_page.is_user_logged_in(timeout=2)
 
-    # DECIDE: 2FA/MFA SHOULD be required per NIST
     if logged_in_immediately and not mfa_detected:
         logging.critical("=" * 80)
         logging.critical("SECURITY VIOLATION: NO 2FA/MFA ENFORCEMENT")
@@ -453,7 +415,6 @@ def test_password_complexity_enforcement_BR_019(browser, base_url, weak_password
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Attempt signup with weak password
     try:
         login_page.open_signup_modal()
 
@@ -462,10 +423,8 @@ def test_password_complexity_enforcement_BR_019(browser, base_url, weak_password
         login_page.fill_signup_password(weak_password)
         login_page.click_signup_submit()
 
-        # OBSERVE: Check if weak password was accepted
         alert_text = login_page.get_alert_text(timeout=5)
 
-        # DECIDE: Weak passwords SHOULD be rejected per NIST
         if alert_text and "success" in alert_text.lower():
             logging.error(f"SECURITY VIOLATION: Weak password accepted: '{weak_password}'")
             logging.error("Standard: NIST SP 800-63B Section 5.1.1.2")
@@ -501,15 +460,12 @@ def test_captcha_bot_protection_BR_020(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Open login modal
     login_page.open_login_modal()
 
-    # OBSERVE: Check for CAPTCHA elements
     page_source = browser.page_source.lower()
     captcha_keywords = ['captcha', 'recaptcha', 'hcaptcha', 'bot protection', 'g-recaptcha']
     captcha_detected = any(keyword in page_source for keyword in captcha_keywords)
 
-    # DECIDE: CAPTCHA SHOULD exist per OWASP
     if not captcha_detected:
         logging.warning("=" * 80)
         logging.warning("SECURITY CONCERN: NO CAPTCHA / BOT PROTECTION")
@@ -545,12 +501,10 @@ def test_password_reset_mechanism_BR_021(browser, base_url):
     """
     browser.get(base_url)
 
-    # OBSERVE: Check for password reset functionality
     page_source = browser.page_source.lower()
     reset_keywords = ['forgot password', 'reset password', 'recover password', 'forgot your password']
     reset_found = any(keyword in page_source for keyword in reset_keywords)
 
-    # DECIDE: Password reset SHOULD exist per OWASP
     if not reset_found:
         logging.warning("=" * 80)
         logging.warning("SECURITY CONCERN: NO PASSWORD RESET MECHANISM")
@@ -590,7 +544,6 @@ def test_session_timeout_enforcement_BR_022(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Login
     login_page.login("Apolo2025", "apolo2025")
     time.sleep(1)
     login_page.get_alert_text()
@@ -600,15 +553,12 @@ def test_session_timeout_enforcement_BR_022(browser, base_url):
 
     logging.info("DISCOVERED: User logged in, waiting 60 seconds to test timeout...")
 
-    # EXECUTE: Wait idle for 60 seconds
     time.sleep(60)
 
-    # OBSERVE: Check if session expired
     browser.refresh()
     time.sleep(2)
     still_logged_in = login_page.is_user_logged_in(timeout=2)
 
-    # DECIDE: Session SHOULD timeout per OWASP
     if still_logged_in:
         logging.warning("=" * 80)
         logging.warning("SECURITY CONCERN: NO SESSION TIMEOUT CLEARLY CONFIGURED")
@@ -627,9 +577,6 @@ def test_session_timeout_enforcement_BR_022(browser, base_url):
         assert True
 
 
-# ============================================================================
-# ACCESSIBILITY TESTS (Expected: PASS)
-# ============================================================================
 
 @pytest.mark.business_rules
 @pytest.mark.accessibility
@@ -649,33 +596,26 @@ def test_keyboard_navigation_BR_015(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Open modal
     login_page.open_login_modal()
 
-    # EXECUTE: Navigate with Tab key
     login_page.send_keys(login_page.LOGIN_USERNAME_FIELD, Keys.TAB)
     time.sleep(0.5)
 
-    # Fill fields
     login_page.fill_login_username("Apolo2025")
     login_page.send_keys(login_page.LOGIN_USERNAME_FIELD, Keys.TAB)
     time.sleep(0.5)
     login_page.fill_login_password("apolo2025")
 
-    # EXECUTE: Submit with Enter key
     login_page.submit_login_with_enter()
 
-    # OBSERVE: Check if login succeeded
     time.sleep(2)
     login_page.get_alert_text(timeout=2)
     logged_in = login_page.is_user_logged_in(timeout=3)
 
-    # DECIDE: Keyboard navigation SHOULD work per WCAG
     assert logged_in, "Login via keyboard navigation should work"
 
     logging.info("✓ BR-015 PASSED: Keyboard navigation works (WCAG 2.1 SC 2.1.1)")
 
-    # Cleanup
     login_page.logout()
 
 
@@ -697,17 +637,14 @@ def test_form_labels_for_screen_readers_BR_016(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Open modal
     login_page.open_login_modal()
 
-    # OBSERVE: Check for accessibility attributes
     username_placeholder = login_page.get_login_username_placeholder()
     password_placeholder = login_page.get_login_password_placeholder()
 
     username_aria = login_page.get_login_username_aria_label()
     password_aria = login_page.get_login_password_aria_label()
 
-    # DECIDE: Fields SHOULD have labels or placeholders per WCAG
     username_has_label = username_placeholder or username_aria
     password_has_label = password_placeholder or password_aria
 
@@ -717,7 +654,6 @@ def test_form_labels_for_screen_readers_BR_016(browser, base_url):
     if not password_has_label:
         logging.warning("Password field missing placeholder/aria-label")
 
-    # At least placeholders should be present for basic accessibility
     assert username_placeholder or password_placeholder, "Form fields should have some accessibility labeling"
 
     logging.info(f"✓ BR-016 PASSED: Form has accessibility labels")
@@ -743,16 +679,13 @@ def test_username_whitespace_normalization_BR_005(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Attempt login with spaces around username
     username_with_spaces = f"  Apolo2025  "
     login_page.login(username_with_spaces, "apolo2025")
 
-    # OBSERVE: Check if login succeeded (whitespace trimmed)
     time.sleep(1)
     alert_text = login_page.get_alert_text(timeout=5)
     logged_in = login_page.is_user_logged_in(timeout=3)
 
-    # DECIDE: System behavior (either trims or doesn't)
     if logged_in:
         logging.info("✓ BR-005 PASSED: System trims whitespace - Good UX")
         logging.info("Standard: ISO 25010 - User error protection")
@@ -763,7 +696,6 @@ def test_username_whitespace_normalization_BR_005(browser, base_url):
         logging.warning(f"Alert received: {alert_text}")
         logging.warning("Standard: ISO 25010 recommends user error protection")
         logging.warning("Impact: Users may fail login due to accidental spaces")
-        # This is not a failure - just a UX observation
         assert True
 
 
@@ -785,16 +717,12 @@ def test_case_sensitivity_username_BR_007(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Attempt login with uppercase username
-    # Real username is "Apolo2025", trying "APOLO2025"
     login_page.login("APOLO2025", "apolo2025")
 
-    # OBSERVE: Check if login succeeded
     time.sleep(1)
     alert_text = login_page.get_alert_text(timeout=5)
     logged_in = login_page.is_user_logged_in(timeout=3)
 
-    # DECIDE: Document the behavior (not enforce)
     if logged_in:
         logging.info("✓ DISCOVERED: Usernames are NOT case-sensitive")
         logging.info("Both 'Apolo2025' and 'APOLO2025' work")
@@ -825,19 +753,15 @@ def test_empty_username_only_BR_009(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Attempt login with empty username only
     login_page.login("", "somepassword")
 
-    # OBSERVE: Check error message
     time.sleep(1)
     alert_text = login_page.get_alert_text(timeout=5)
     logged_in = login_page.is_user_logged_in(timeout=2)
 
-    # DECIDE: Empty username should be rejected
     assert not logged_in, "Should not be logged in with empty username"
     assert alert_text is not None, "Should show error for empty username"
 
-    # Check if error is field-specific (good UX)
     if "username" in alert_text.lower():
         logging.info(f"✓ BR-009 PASSED: Field-specific error. Alert: '{alert_text}'")
         logging.info("Standard: WCAG 2.1 SC 3.3.1 - Error Identification")
@@ -864,19 +788,15 @@ def test_empty_password_only_BR_010(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Attempt login with empty password only
     login_page.login("Apolo2025", "")
 
-    # OBSERVE: Check error message
     time.sleep(1)
     alert_text = login_page.get_alert_text(timeout=5)
     logged_in = login_page.is_user_logged_in(timeout=2)
 
-    # DECIDE: Empty password MUST be rejected (security)
     assert not logged_in, "CRITICAL: Empty password must be rejected"
     assert alert_text is not None, "Should show error for empty password"
 
-    # Check if error is field-specific (good UX)
     if "password" in alert_text.lower():
         logging.info(f"✓ BR-010 PASSED: Field-specific error. Alert: '{alert_text}'")
         logging.info("Standard: WCAG 2.1 SC 3.3.1 - Error Identification")
@@ -903,16 +823,13 @@ def test_numeric_only_username_BR_011(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Attempt login with numeric-only username
     numeric_username = "1234567890"
     login_page.login(numeric_username, "anypassword")
 
-    # OBSERVE: System response
     time.sleep(1)
     alert_text = login_page.get_alert_text(timeout=5)
     logged_in = login_page.is_user_logged_in(timeout=2)
 
-    # DECIDE: Document behavior (not enforce)
     if not logged_in:
         if alert_text:
             logging.info(f"✓ DISCOVERED: System response to numeric username: '{alert_text}'")
@@ -943,7 +860,6 @@ def test_unicode_characters_BR_012(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Test various Unicode character sets
     unicode_tests = [
         ("用户名测试", "Chinese characters"),
         ("Имя_пользователя", "Cyrillic characters"),
@@ -955,12 +871,10 @@ def test_unicode_characters_BR_012(browser, base_url):
         browser.get(base_url)
         login_page.login(unicode_username, "anypassword")
 
-        # OBSERVE: System response
         time.sleep(1)
         alert_text = login_page.get_alert_text(timeout=3)
         logged_in = login_page.is_user_logged_in(timeout=2)
 
-        # DECIDE: Document Unicode support
         if not logged_in:
             logging.info(f"✓ DISCOVERED: {description} - System response: {alert_text if alert_text else 'No match (expected)'}")
         else:

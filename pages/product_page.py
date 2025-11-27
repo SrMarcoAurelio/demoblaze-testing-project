@@ -35,39 +35,28 @@ class ProductPage(BasePage):
     - Product validation across all catalog items
     """
 
-    # ============================================================================
-    # LOCATORS
-    # ============================================================================
 
-    # Product list (catalog/home page)
     PRODUCT_LINKS = (By.CSS_SELECTOR, ".hrefch")
     PRODUCT_CARDS = (By.CSS_SELECTOR, ".card")
     FIRST_PRODUCT_LINK = (By.XPATH, "(//a[@class='hrefch'])[1]")
     SECOND_PRODUCT_LINK = (By.XPATH, "(//a[@class='hrefch'])[2]")
 
-    # Product detail page elements
     PRODUCT_NAME = (By.CSS_SELECTOR, "h2.name")
     PRODUCT_PRICE = (By.CSS_SELECTOR, "h3.price-container")
     PRODUCT_DESCRIPTION = (By.CSS_SELECTOR, "#more")
     PRODUCT_IMAGE = (By.CSS_SELECTOR, ".item.active img")
     ADD_TO_CART_BUTTON = (By.CSS_SELECTOR, "a.btn.btn-success.btn-lg")
 
-    # Navigation
     HOME_LINK = (By.CSS_SELECTOR, "a.nav-link[href='index.html']")
     CART_LINK = (By.ID, "cartur")
 
-    # Categories
     CATEGORY_PHONES = (By.LINK_TEXT, "Phones")
     CATEGORY_LAPTOPS = (By.LINK_TEXT, "Laptops")
     CATEGORY_MONITORS = (By.LINK_TEXT, "Monitors")
 
-    # Pagination
     NEXT_BUTTON = (By.ID, "next2")
     PREV_BUTTON = (By.ID, "prev2")
 
-    # ============================================================================
-    # NAVIGATION METHODS
-    # ============================================================================
 
     def navigate_to_first_product(self):
         """
@@ -78,15 +67,12 @@ class ProductPage(BasePage):
             self.driver.get(self.base_url)
             self.wait_for_page_load()
 
-            # Wait for product links to be available
             self.wait_for_element_visible(self.PRODUCT_LINKS, timeout=10)
             time.sleep(1)
 
-            # Get product name before clicking
             first_product = self.find_element(self.FIRST_PRODUCT_LINK)
             product_name = first_product.text
 
-            # Click to navigate to product detail page
             first_product.click()
             self.wait_for_page_load()
             time.sleep(2)
@@ -107,16 +93,13 @@ class ProductPage(BasePage):
             self.driver.get(self.base_url)
             self.wait_for_page_load()
 
-            # Wait for product links
             self.wait_for_element_visible(self.PRODUCT_LINKS, timeout=10)
             time.sleep(1)
 
-            # Find the specific product link
             locator = (By.XPATH, f"(//a[@class='hrefch'])[{index}]")
             product_link = self.find_element(locator)
             product_name = product_link.text
 
-            # Navigate to product
             product_link.click()
             self.wait_for_page_load()
             time.sleep(2)
@@ -156,9 +139,6 @@ class ProductPage(BasePage):
         self.wait_for_page_load()
         time.sleep(1)
 
-    # ============================================================================
-    # PRODUCT INFORMATION METHODS
-    # ============================================================================
 
     def get_product_name(self, timeout=10):
         """
@@ -248,9 +228,6 @@ class ProductPage(BasePage):
         }
         return details
 
-    # ============================================================================
-    # ADD TO CART METHODS
-    # ============================================================================
 
     def is_add_to_cart_visible(self, timeout=5):
         """
@@ -300,9 +277,6 @@ class ProductPage(BasePage):
 
         return success, product_name, alert_text
 
-    # ============================================================================
-    # CATALOG ITERATION METHODS
-    # ============================================================================
 
     def get_all_product_links_on_page(self):
         """
@@ -344,22 +318,16 @@ class ProductPage(BasePage):
         count = len(products) if max_products is None else min(len(products), max_products)
 
         for i in range(1, count + 1):
-            # Navigate to product
             success, product_name = self.navigate_to_product_by_index(i)
 
             if success:
-                # Get product details
                 details = self.get_all_product_details()
                 yield i, product_name, details
 
-            # Go back to catalog for next iteration
             self.driver.get(self.base_url)
             self.wait_for_page_load()
             time.sleep(1)
 
-    # ============================================================================
-    # VALIDATION METHODS
-    # ============================================================================
 
     def validate_product_data_completeness(self):
         """
@@ -393,7 +361,6 @@ class ProductPage(BasePage):
         if not price:
             return False, None
 
-        # Expected format: "$790 *includes tax"
         pattern = r'^\$\d+\s+\*includes tax$'
         is_valid = bool(re.match(pattern, price))
 
@@ -418,9 +385,6 @@ class ProductPage(BasePage):
             logger.error(f"Failed to verify image: {e}")
             return False, None, image_url
 
-    # ============================================================================
-    # ACCESSIBILITY METHODS
-    # ============================================================================
 
     def test_keyboard_navigation(self):
         """
@@ -436,7 +400,6 @@ class ProductPage(BasePage):
         try:
             actions = ActionChains(self.driver)
 
-            # Try to Tab to Add to Cart button
             for _ in range(10):
                 actions.send_keys(Keys.TAB).perform()
                 time.sleep(0.2)
@@ -458,9 +421,6 @@ class ProductPage(BasePage):
 
         return results
 
-    # ============================================================================
-    # PERFORMANCE METHODS
-    # ============================================================================
 
     def measure_page_load_time(self):
         """
@@ -499,9 +459,6 @@ class ProductPage(BasePage):
             'success': False
         }
 
-    # ============================================================================
-    # SECURITY TESTING METHODS
-    # ============================================================================
 
     def get_current_product_id_from_url(self):
         """
@@ -551,11 +508,9 @@ class ProductPage(BasePage):
         """
         page_source = self.driver.page_source
 
-        # Check if payload is reflected unescaped
         if payload in page_source:
             return True, f"Payload reflected unescaped: {payload}"
 
-        # Check for alert execution
         try:
             alert = self.driver.switch_to.alert
             alert_text = alert.text
@@ -571,9 +526,6 @@ class ProductPage(BasePage):
         Check for security headers in HTTP response (requires network log access)
         Returns: dict with header presence
         """
-        # Note: Selenium doesn't directly access response headers
-        # This would require browser dev tools protocol or proxy
-        # Returning structure for completeness
         return {
             'note': 'Security header checking requires network log access',
             'recommendation': 'Use browser DevTools Protocol or proxy like mitmproxy'
