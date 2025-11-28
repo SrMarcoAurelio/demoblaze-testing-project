@@ -176,7 +176,7 @@ def validate_password_strength(password: str, min_length: int = 8) -> dict:
         feedback.append("Include special characters")
 
     return {
-        'valid': score >= 3,
+        'valid': len(password) >= min_length and score >= 3,
         'score': score,
         'feedback': feedback
     }

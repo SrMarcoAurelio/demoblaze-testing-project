@@ -51,7 +51,7 @@ def pytest_addoption(parser):
 
 
 @pytest.hookimpl(tryfirst=True)
-def pytest_configure(config_obj):
+def pytest_configure(config):
     """
     Configure pytest session.
 
@@ -62,8 +62,8 @@ def pytest_configure(config_obj):
     test_type = "general"
 
     try:
-        if config_obj.args:
-            test_path_str = str(config_obj.args[0])
+        if config.args:
+            test_path_str = str(config.args[0])
             norm_path = os.path.normpath(test_path_str)
             path_parts = norm_path.split(os.sep)
 
@@ -88,38 +88,41 @@ def pytest_configure(config_obj):
 
     date_folder = datetime.datetime.now().strftime("%Y-%m-%d")
 
+    # Import config module to avoid name conflict
+    from config import config as cfg
+
     if module_name != "general" and test_type != "general":
-        report_dir = os.path.join(config.REPORTS_ROOT, module_name, test_type, date_folder)
+        report_dir = os.path.join(cfg.REPORTS_ROOT, module_name, test_type, date_folder)
     elif module_name != "general":
-        report_dir = os.path.join(config.REPORTS_ROOT, module_name, date_folder)
+        report_dir = os.path.join(cfg.REPORTS_ROOT, module_name, date_folder)
     else:
-        report_dir = os.path.join(config.REPORTS_ROOT, "general", date_folder)
+        report_dir = os.path.join(cfg.REPORTS_ROOT, "general", date_folder)
 
     os.makedirs(report_dir, exist_ok=True)
-    os.makedirs(config.SCREENSHOTS_DIR, exist_ok=True)
+    os.makedirs(cfg.SCREENSHOTS_DIR, exist_ok=True)
 
-    browser_name = config_obj.getoption("--browser").lower()
+    browser_name = config.getoption("--browser").lower()
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     report_name = f"report_{browser_name}_{timestamp}.html"
     report_path = os.path.join(report_dir, report_name)
 
-    config_obj.option.htmlpath = report_path
-    config_obj.option.self_contained_html = True
+    config.option.htmlpath = report_path
+    config.option.self_contained_html = True
 
     logger.info(f"{'='*70}")
     logger.info(f"TEST SESSION STARTED")
     logger.info(f"Module: {module_name.upper()} | Type: {test_type.upper()}")
-    logger.info(f"Browser: {browser_name.upper()} | Headless: {config_obj.getoption('--headless')}")
+    logger.info(f"Browser: {browser_name.upper()} | Headless: {config.getoption('--headless')}")
     logger.info(f"Report: {report_path}")
     logger.info(f"{'='*70}")
 
-    config_obj.addinivalue_line("markers", "smoke: Critical smoke tests")
-    config_obj.addinivalue_line("markers", "regression: Full regression suite")
-    config_obj.addinivalue_line("markers", "functional: Functional tests")
-    config_obj.addinivalue_line("markers", "security: Security tests")
-    config_obj.addinivalue_line("markers", "business_rules: Business rules validation")
-    config_obj.addinivalue_line("markers", "accessibility: Accessibility tests")
-    config_obj.addinivalue_line("markers", "slow: Long-running tests")
+    config.addinivalue_line("markers", "smoke: Critical smoke tests")
+    config.addinivalue_line("markers", "regression: Full regression suite")
+    config.addinivalue_line("markers", "functional: Functional tests")
+    config.addinivalue_line("markers", "security: Security tests")
+    config.addinivalue_line("markers", "business_rules: Business rules validation")
+    config.addinivalue_line("markers", "accessibility: Accessibility tests")
+    config.addinivalue_line("markers", "slow: Long-running tests")
 
 
 @pytest.fixture(scope="session")

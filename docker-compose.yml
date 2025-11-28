@@ -1,0 +1,116 @@
+# Universal QA Automation Framework - Docker Compose Configuration
+# Includes Selenium Grid with Chrome and Firefox nodes
+
+version: '3.8'
+
+services:
+  # Selenium Hub - Central coordination point
+  selenium-hub:
+    image: selenium/hub:4.25.0
+    container_name: selenium-hub
+    ports:
+      - "4444:4444"
+      - "4442:4442"
+      - "4443:4443"
+    environment:
+      - GRID_MAX_SESSION=5
+      - GRID_BROWSER_TIMEOUT=300
+      - GRID_TIMEOUT=300
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4444/wd/hub/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Chrome Node
+  chrome:
+    image: selenium/node-chrome:4.25.0
+    container_name: selenium-chrome
+    depends_on:
+      selenium-hub:
+        condition: service_healthy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=3
+      - SE_NODE_SESSION_TIMEOUT=300
+    shm_size: '2gb'
+    ports:
+      - "5900:5900"  # VNC port for debugging
+
+  # Firefox Node
+  firefox:
+    image: selenium/node-firefox:4.25.0
+    container_name: selenium-firefox
+    depends_on:
+      selenium-hub:
+        condition: service_healthy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=3
+      - SE_NODE_SESSION_TIMEOUT=300
+    shm_size: '2gb'
+    ports:
+      - "5901:5900"  # VNC port for debugging
+
+  # Test Execution Container
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qa-framework-tests
+    depends_on:
+      selenium-hub:
+        condition: service_healthy
+    environment:
+      - BASE_URL=https://www.demoblaze.com/
+      - SELENIUM_HUB_URL=http://selenium-hub:4444/wd/hub
+      - BROWSER=chrome
+    volumes:
+      # Mount source code for development
+      - ./tests:/app/tests
+      - ./pages:/app/pages
+      - ./config:/app/config
+      - ./utils:/app/utils
+      - ./test_data:/app/test_data
+      # Mount results directories
+      - ./test_results:/app/test_results
+      - ./allure-results:/app/allure-results
+      - ./allure-report:/app/allure-report
+    command: >
+      sh -c "
+      echo 'Waiting for Selenium Grid to be ready...' &&
+      sleep 5 &&
+      echo 'Running tests...' &&
+      pytest tests/ -v
+      --html=test_results/report.html
+      --self-contained-html
+      --alluredir=allure-results
+      "
+
+  # Allure Report Server (optional - for viewing reports)
+  allure:
+    image: frankescobar/allure-docker-service:latest
+    container_name: allure-server
+    ports:
+      - "5050:5050"
+    environment:
+      - CHECK_RESULTS_EVERY_SECONDS=3
+      - KEEP_HISTORY=1
+    volumes:
+      - ./allure-results:/app/allure-results
+      - ./allure-report:/app/allure-report
+    profiles:
+      - reporting  # Only start when explicitly requested
+
+networks:
+  default:
+    name: qa-automation-network
+
+volumes:
+  test_results:
+  allure-results:
+  allure-report:
