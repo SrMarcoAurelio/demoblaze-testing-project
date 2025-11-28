@@ -22,15 +22,10 @@ import datetime
 class PurchasePage(BasePage):
     """Purchase Page Object - handles order form and checkout"""
 
-    # ============================================================================
-    # LOCATORS
-    # ============================================================================
 
-    # Order Modal
     ORDER_MODAL = (By.ID, "orderModal")
     ORDER_MODAL_TITLE = (By.XPATH, "//div[@id='orderModal']//h5[@class='modal-title']")
 
-    # Order Form Fields
     ORDER_NAME_FIELD = (By.ID, "name")
     ORDER_COUNTRY_FIELD = (By.ID, "country")
     ORDER_CITY_FIELD = (By.ID, "city")
@@ -38,23 +33,17 @@ class PurchasePage(BasePage):
     ORDER_MONTH_FIELD = (By.ID, "month")
     ORDER_YEAR_FIELD = (By.ID, "year")
 
-    # Order Form Buttons
     PURCHASE_BUTTON = (By.XPATH, "//button[text()='Purchase']")
     CLOSE_ORDER_MODAL_BUTTON = (By.XPATH, "//div[@id='orderModal']//button[@class='close']")
     CLOSE_ORDER_MODAL_BUTTON_TEXT = (By.XPATH, "//div[@id='orderModal']//button[text()='Close']")
 
-    # Purchase Confirmation
     PURCHASE_CONFIRM_MODAL = (By.CLASS_NAME, "sweet-alert")
     PURCHASE_CONFIRM_MSG = (By.XPATH, "//h2[text()='Thank you for your purchase!']")
     PURCHASE_CONFIRM_TEXT = (By.CLASS_NAME, "sweet-alert")
     CONFIRM_OK_BUTTON = (By.XPATH, "//button[contains(@class, 'confirm')]")
 
-    # Cart Total (visible in modal context)
     CART_TOTAL_PRICE = (By.ID, "totalp")
 
-    # ============================================================================
-    # ORDER MODAL OPERATIONS
-    # ============================================================================
 
     def is_order_modal_visible(self):
         """Check if order modal is open"""
@@ -79,7 +68,6 @@ class PurchasePage(BasePage):
         close_btn = self.find_element(self.CLOSE_ORDER_MODAL_BUTTON)
         close_btn.click()
 
-        # Wait for modal to close
         try:
             WebDriverWait(self.driver, 10).until(
                 EC.invisibility_of_element_located(self.ORDER_MODAL)
@@ -118,47 +106,37 @@ class PurchasePage(BasePage):
             self.logger.info("Order modal did NOT close with ESC key")
             return False
 
-    # ============================================================================
-    # FORM FILLING
-    # ============================================================================
 
     def fill_order_form(self, name="", country="", city="", card="", month="", year=""):
         """Fill all order form fields"""
         try:
-            # Wait for form to be ready
             self.wait_for_element_visible(self.ORDER_NAME_FIELD)
 
-            # Fill Name
             name_field = self.find_element(self.ORDER_NAME_FIELD)
             name_field.clear()
             if name:
                 name_field.send_keys(name)
 
-            # Fill Country
             country_field = self.find_element(self.ORDER_COUNTRY_FIELD)
             country_field.clear()
             if country:
                 country_field.send_keys(country)
 
-            # Fill City
             city_field = self.find_element(self.ORDER_CITY_FIELD)
             city_field.clear()
             if city:
                 city_field.send_keys(city)
 
-            # Fill Card
             card_field = self.find_element(self.ORDER_CARD_FIELD)
             card_field.clear()
             if card:
                 card_field.send_keys(card)
 
-            # Fill Month
             month_field = self.find_element(self.ORDER_MONTH_FIELD)
             month_field.clear()
             if month:
                 month_field.send_keys(month)
 
-            # Fill Year
             year_field = self.find_element(self.ORDER_YEAR_FIELD)
             year_field.clear()
             if year:
@@ -190,9 +168,6 @@ class PurchasePage(BasePage):
         except:
             return None
 
-    # ============================================================================
-    # FORM NAVIGATION (Tab Order Testing)
-    # ============================================================================
 
     def navigate_form_with_tab(self, fill_data=None):
         """
@@ -203,20 +178,17 @@ class PurchasePage(BasePage):
         if fill_data is None:
             fill_data = ["Test1", "Test2", "Test3", "Test4", "Test5", "Test6"]
 
-        # Click first field to start
         name_field = self.find_element(self.ORDER_NAME_FIELD)
         name_field.click()
 
         actions = ActionChains(self.driver)
 
-        # Tab through fields and fill
         for i, data in enumerate(fill_data):
             active_element = self.driver.switch_to.active_element
             active_element.send_keys(data)
             actions.send_keys(Keys.TAB).perform()
             self.logger.info(f"Tabbed to field {i+2}/{len(fill_data)+1}")
 
-        # Verify values
         filled_values = {
             'name': self.get_form_field_value(self.ORDER_NAME_FIELD),
             'country': self.get_form_field_value(self.ORDER_COUNTRY_FIELD),
@@ -228,9 +200,6 @@ class PurchasePage(BasePage):
 
         return filled_values
 
-    # ============================================================================
-    # PURCHASE EXECUTION
-    # ============================================================================
 
     def click_purchase(self):
         """Click Purchase button"""
@@ -267,30 +236,23 @@ class PurchasePage(BasePage):
         4. Close confirmation
         Returns: (success, confirmation_text, confirmed_amount)
         """
-        # Fill form
         self.fill_order_form(name, country, city, card, month, year)
 
-        # Get expected total before purchase
         time.sleep(0.5)
 
-        # Click purchase
         self.click_purchase()
 
-        # Wait for confirmation
         try:
             confirm_msg = WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_element_located(self.PURCHASE_CONFIRM_MSG)
             )
 
-            # Get confirmation details
             confirm_modal = self.find_element(self.PURCHASE_CONFIRM_MODAL)
             confirm_text = confirm_modal.text
 
-            # Extract amount from confirmation
             amount_match = re.search(r'Amount:\s*(\d+)\s*USD', confirm_text)
             confirmed_amount = int(amount_match.group(1)) if amount_match else 0
 
-            # Extract other details
             card_match = re.search(r'Card Number:\s*(\d+)', confirm_text)
             name_match = re.search(r'Name:\s*(.+)', confirm_text, re.MULTILINE)
 
@@ -303,7 +265,6 @@ class PurchasePage(BasePage):
 
             self.logger.info(f"Purchase confirmed: ${confirmed_amount}")
 
-            # Close confirmation
             self.close_purchase_confirmation()
 
             return (True, confirm_text, details)
@@ -312,9 +273,6 @@ class PurchasePage(BasePage):
             self.logger.error("Purchase confirmation did not appear")
             return (False, None, None)
 
-    # ============================================================================
-    # PURCHASE CONFIRMATION
-    # ============================================================================
 
     def is_purchase_confirmed(self, timeout=10):
         """Check if purchase confirmation appeared"""
@@ -349,7 +307,6 @@ class PurchasePage(BasePage):
             ok_btn = self.find_element(self.CONFIRM_OK_BUTTON)
             ok_btn.click()
 
-            # Wait for modal to close
             WebDriverWait(self.driver, 10).until(
                 EC.invisibility_of_element_located(self.PURCHASE_CONFIRM_MODAL)
             )
@@ -359,9 +316,6 @@ class PurchasePage(BasePage):
         except:
             return False
 
-    # ============================================================================
-    # VALIDATION HELPERS
-    # ============================================================================
 
     def get_current_year(self):
         """Get current year for validation tests"""
@@ -432,9 +386,6 @@ class PurchasePage(BasePage):
             }
         }
 
-    # ============================================================================
-    # ADDITIONAL MODALS (Contact, About Us)
-    # ============================================================================
 
     CONTACT_NAV_LINK = (By.XPATH, "//a[text()='Contact']")
     CONTACT_EMAIL_FIELD = (By.ID, "recipient-email")
@@ -449,19 +400,15 @@ class PurchasePage(BasePage):
 
     def send_contact_message(self, email="test@example.com", name="Test User", message="Test message"):
         """Send a contact form message"""
-        # Open contact modal
         self.click(self.CONTACT_NAV_LINK)
         self.wait_for_element_visible(self.CONTACT_EMAIL_FIELD)
 
-        # Fill form
         self.type(self.CONTACT_EMAIL_FIELD, email)
         self.type(self.CONTACT_NAME_FIELD, name)
         self.type(self.CONTACT_MESSAGE_FIELD, message)
 
-        # Send
         self.click(self.CONTACT_SEND_BUTTON)
 
-        # Get alert
         alert_text = self.get_alert_text(timeout=5)
         self.logger.info(f"Contact form alert: {alert_text}")
 

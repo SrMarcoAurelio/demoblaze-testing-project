@@ -12,7 +12,6 @@ from selenium.webdriver.common.keys import Keys
 from pages.base_page import BasePage
 import logging
 
-logging.basicConfig(level=logging.INFO)
 
 
 class LoginPage(BasePage):
@@ -27,17 +26,12 @@ class LoginPage(BasePage):
     - Signup modal (basic support)
     """
 
-    # ============================================================================
-    # LOCATORS
-    # ============================================================================
 
-    # Navigation buttons
     LOGIN_BUTTON_NAV = (By.ID, "login2")
     SIGNUP_BUTTON_NAV = (By.ID, "signin2")
     LOGOUT_BUTTON_NAV = (By.ID, "logout2")
     HOME_NAV_LINK = (By.XPATH, "//a[contains(text(), 'Home')]")
 
-    # Login modal
     LOGIN_MODAL = (By.ID, "logInModal")
     LOGIN_MODAL_TITLE = (By.XPATH, "//div[@id='logInModal']//h5[@class='modal-title']")
     LOGIN_USERNAME_FIELD = (By.ID, "loginusername")
@@ -46,7 +40,6 @@ class LoginPage(BasePage):
     LOGIN_CLOSE_BUTTON = (By.XPATH, "//div[@id='logInModal']//button[@class='close']")
     LOGIN_CLOSE_FOOTER_BUTTON = (By.XPATH, "//div[@id='logInModal']//button[text()='Close']")
 
-    # Signup modal
     SIGNUP_MODAL = (By.ID, "signInModal")
     SIGNUP_MODAL_TITLE = (By.XPATH, "//div[@id='signInModal']//h5[@class='modal-title']")
     SIGNUP_USERNAME_FIELD = (By.ID, "sign-username")
@@ -54,12 +47,8 @@ class LoginPage(BasePage):
     SIGNUP_SUBMIT_BUTTON = (By.XPATH, "//button[text()='Sign up']")
     SIGNUP_CLOSE_BUTTON = (By.XPATH, "//div[@id='signInModal']//button[@class='close']")
 
-    # User status indicators
     WELCOME_USER_TEXT = (By.ID, "nameofuser")
 
-    # ============================================================================
-    # LOGIN MODAL ACTIONS
-    # ============================================================================
 
     def open_login_modal(self):
         """
@@ -101,9 +90,6 @@ class LoginPage(BasePage):
         """
         return self.is_element_visible(self.LOGIN_MODAL, timeout=2)
 
-    # ============================================================================
-    # LOGIN ACTIONS
-    # ============================================================================
 
     def fill_login_username(self, username, clear_first=True):
         """
@@ -161,9 +147,6 @@ class LoginPage(BasePage):
         self.logger.info(f"Login attempted for user: {username}")
         return True
 
-    # ============================================================================
-    # LOGOUT ACTIONS
-    # ============================================================================
 
     def logout(self):
         """
@@ -186,9 +169,6 @@ class LoginPage(BasePage):
         """
         return self.is_element_visible(self.LOGOUT_BUTTON_NAV, timeout=2)
 
-    # ============================================================================
-    # SIGNUP MODAL ACTIONS
-    # ============================================================================
 
     def open_signup_modal(self):
         """
@@ -254,9 +234,6 @@ class LoginPage(BasePage):
         self.logger.info(f"Signup attempted for user: {username}")
         return True
 
-    # ============================================================================
-    # USER SESSION STATUS
-    # ============================================================================
 
     def is_user_logged_in(self, timeout=3):
         """
@@ -299,15 +276,11 @@ class LoginPage(BasePage):
         """
         welcome_msg = self.get_welcome_message()
         if welcome_msg:
-            # Format: "Welcome {username}"
             username = welcome_msg.replace("Welcome", "").strip()
             self.logger.info(f"Logged in username: {username}")
             return username
         return None
 
-    # ============================================================================
-    # FORM FIELD INSPECTION (for testing)
-    # ============================================================================
 
     def get_login_username_value(self):
         """Get current value of login username field."""
@@ -335,9 +308,6 @@ class LoginPage(BasePage):
         enabled = self.get_attribute(self.LOGIN_PASSWORD_FIELD, "disabled")
         return enabled is None
 
-    # ============================================================================
-    # ACCESSIBILITY HELPERS
-    # ============================================================================
 
     def get_login_username_aria_label(self):
         """Get aria-label of login username field (for accessibility testing)."""
@@ -356,18 +326,13 @@ class LoginPage(BasePage):
         """
         self.open_login_modal()
 
-        # Tab to username field
         self.send_keys(self.LOGIN_USERNAME_FIELD, Keys.TAB)
 
-        # Tab to password field
         self.send_keys(self.LOGIN_PASSWORD_FIELD, Keys.TAB)
 
         self.logger.info("Tabbed through login form")
         return True
 
-    # ============================================================================
-    # SECURITY TESTING HELPERS
-    # ============================================================================
 
     def inject_sql_payload_username(self, payload):
         """

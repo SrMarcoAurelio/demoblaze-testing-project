@@ -19,40 +19,28 @@ import re
 class CartPage(BasePage):
     """Cart Page Object - handles all cart-related operations"""
 
-    # ============================================================================
-    # LOCATORS
-    # ============================================================================
 
-    # Navigation
     CART_NAV_LINK = (By.ID, "cartur")
     HOME_NAV_LINK = (By.XPATH, "//a[contains(text(), 'Home')]")
 
-    # Cart Items
     CART_ITEMS = (By.XPATH, "//tbody[@id='tbodyid']/tr")
     FIRST_ITEM_NAME = (By.XPATH, "//tbody[@id='tbodyid']/tr[1]/td[2]")
     FIRST_ITEM_PRICE = (By.XPATH, "//tbody[@id='tbodyid']/tr[1]/td[3]")
     FIRST_DELETE_LINK = (By.XPATH, "(//a[text()='Delete'])[1]")
     SECOND_DELETE_LINK = (By.XPATH, "(//a[text()='Delete'])[2]")
 
-    # Cart Total
     CART_TOTAL_PRICE = (By.ID, "totalp")
 
-    # Actions
     PLACE_ORDER_BUTTON = (By.XPATH, "//button[text()='Place Order']")
 
-    # Product Page Elements (for adding to cart)
     FIRST_PRODUCT_LINK = (By.XPATH, "(//a[@class='hrefch'])[1]")
     SECOND_PRODUCT_LINK = (By.XPATH, "(//a[@class='hrefch'])[2]")
     PRODUCT_NAME_HEADER = (By.TAG_NAME, "h2")
     PRODUCT_PRICE_HEADER = (By.TAG_NAME, "h3")
     ADD_TO_CART_BUTTON = (By.XPATH, "//a[text()='Add to cart']")
 
-    # Category
     CATEGORY_LAPTOPS_LINK = (By.XPATH, "//a[text()='Laptops']")
 
-    # ============================================================================
-    # CART NAVIGATION
-    # ============================================================================
 
     def open_cart(self):
         """Navigate to cart page"""
@@ -67,9 +55,6 @@ class CartPage(BasePage):
         self.wait_for_element_visible(self.FIRST_PRODUCT_LINK)
         return True
 
-    # ============================================================================
-    # ADD TO CART OPERATIONS
-    # ============================================================================
 
     def add_product_to_cart(self, product_locator=None):
         """
@@ -79,28 +64,22 @@ class CartPage(BasePage):
         if product_locator is None:
             product_locator = self.FIRST_PRODUCT_LINK
 
-        # Click product
         product_link = self.wait_for_element_clickable(product_locator)
         product_name_elem = self.find_element(product_locator)
         product_name = product_name_elem.text
         product_link.click()
 
-        # Wait for product page to load
         self.wait_for_element_visible(self.PRODUCT_PRICE_HEADER)
 
-        # Get price
         price_element = self.find_element(self.PRODUCT_PRICE_HEADER)
         price_text = price_element.text
         price = self._parse_price(price_text)
 
-        # Click Add to Cart
         add_to_cart_btn = self.wait_for_element_clickable(self.ADD_TO_CART_BUTTON)
         add_to_cart_btn.click()
 
-        # Wait for and accept alert
         self.get_alert_text(timeout=5)
 
-        # Return to home
         self.go_home()
 
         self.logger.info(f"Added product '{product_name}' to cart (${price})")
@@ -116,23 +95,18 @@ class CartPage(BasePage):
 
     def add_product_from_category(self, category_locator, product_name):
         """Add product from specific category"""
-        # Click category
         self.click(category_locator)
         time.sleep(1)
 
-        # Find and click product by name
         product_link = self.wait_for_element_clickable((By.LINK_TEXT, product_name))
         product_link.click()
 
-        # Get price
         price_element = self.wait_for_element_visible(self.PRODUCT_PRICE_HEADER)
         price = self._parse_price(price_element.text)
 
-        # Add to cart
         add_to_cart_btn = self.wait_for_element_clickable(self.ADD_TO_CART_BUTTON)
         add_to_cart_btn.click()
 
-        # Accept alert
         self.get_alert_text(timeout=5)
 
         self.logger.info(f"Added '{product_name}' from category (${price})")
@@ -143,15 +117,12 @@ class CartPage(BasePage):
         Rapidly click Add to Cart multiple times
         Used for testing duplicate handling
         """
-        # Navigate to product
         self.click(product_locator)
         self.wait_for_element_visible(self.PRODUCT_PRICE_HEADER)
 
-        # Get price
         price_element = self.find_element(self.PRODUCT_PRICE_HEADER)
         price = self._parse_price(price_element.text)
 
-        # Rapid clicks
         add_to_cart_btn = self.wait_for_element_clickable(self.ADD_TO_CART_BUTTON)
 
         for i in range(times):
@@ -162,9 +133,6 @@ class CartPage(BasePage):
 
         return price
 
-    # ============================================================================
-    # CART INFORMATION
-    # ============================================================================
 
     def get_cart_item_count(self):
         """Get number of items in cart"""
@@ -182,10 +150,8 @@ class CartPage(BasePage):
         Waits for total to update before returning
         """
         try:
-            # Wait for total element to be visible
             total_element = self.wait_for_element_visible(self.CART_TOTAL_PRICE, timeout=timeout)
 
-            # Wait for total to have a value (not empty)
             WebDriverWait(self.driver, timeout).until(
                 lambda d: d.find_element(*self.CART_TOTAL_PRICE).text.strip() != ""
             )
@@ -213,20 +179,14 @@ class CartPage(BasePage):
         count = self.get_cart_item_count()
         return count == 0
 
-    # ============================================================================
-    # CART MODIFICATIONS
-    # ============================================================================
 
     def delete_first_item(self):
         """Delete first item from cart"""
-        # Get initial count
         initial_count = self.get_cart_item_count()
 
-        # Click delete
         delete_link = self.find_element(self.FIRST_DELETE_LINK)
         delete_link.click()
 
-        # Wait for item to be removed
         try:
             WebDriverWait(self.driver, 10).until(
                 lambda d: len(d.find_elements(*self.CART_ITEMS)) < initial_count
@@ -248,9 +208,6 @@ class CartPage(BasePage):
         self.logger.info("Deleted all items from cart")
         return True
 
-    # ============================================================================
-    # CHECKOUT INITIATION
-    # ============================================================================
 
     def click_place_order(self):
         """Click Place Order button to open checkout modal"""
@@ -267,9 +224,6 @@ class CartPage(BasePage):
         except:
             return False
 
-    # ============================================================================
-    # HELPER METHODS
-    # ============================================================================
 
     def _parse_price(self, price_str):
         """

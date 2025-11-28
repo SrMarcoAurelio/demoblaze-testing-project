@@ -23,13 +23,9 @@ from pages.cart_page import CartPage
 from pages.purchase_page import PurchasePage
 from pages.login_page import LoginPage
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-# ============================================================================
-# FORM VALIDATION TESTS (Parametrized)
-# ============================================================================
 
 @pytest.mark.business_rules
 @pytest.mark.validation
@@ -50,14 +46,12 @@ def test_empty_field_validation_VAL_001(browser, base_url, field_name, test_data
 
     DISCOVER: How does the system handle empty required fields?
     """
-    # EXECUTE: Add product to cart
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Fill form with one empty field
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
@@ -74,12 +68,10 @@ def test_empty_field_validation_VAL_001(browser, base_url, field_name, test_data
     purchase.fill_order_form(**form_data)
     purchase.click_purchase()
 
-    # OBSERVE: Check if purchase proceeds
     time.sleep(1)
     is_confirmed = purchase.is_purchase_confirmed(timeout=3)
     alert_text = purchase.get_alert_text(timeout=1)
 
-    # DECIDE: Purchase should NOT succeed with empty required fields
     if is_confirmed:
         logger.error(f"✗ VIOLATION: Purchase succeeded with empty {field_name} field")
         pytest.fail(f"DISCOVERED: Empty field validation missing for '{field_name}'")
@@ -104,14 +96,12 @@ def test_invalid_card_format_VAL_002(browser, base_url, invalid_card):
 
     DISCOVER: Does the system validate card number format?
     """
-    # EXECUTE: Add product and open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Try to purchase with invalid card format
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
     purchase.fill_order_form(
@@ -124,11 +114,9 @@ def test_invalid_card_format_VAL_002(browser, base_url, invalid_card):
     )
     purchase.click_purchase()
 
-    # OBSERVE: Check if purchase proceeds
     time.sleep(1)
     is_confirmed = purchase.is_purchase_confirmed(timeout=3)
 
-    # DECIDE: Non-numeric card should be rejected
     if is_confirmed:
         logger.error(f"✗ VIOLATION: Invalid card format accepted: {invalid_card}")
         pytest.fail(f"DISCOVERED: Card format validation missing - accepted '{invalid_card}'")
@@ -153,14 +141,12 @@ def test_invalid_card_length_VAL_003(browser, base_url, short_card):
 
     DISCOVER: Does the system enforce minimum card length?
     """
-    # EXECUTE: Add product and open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Try to purchase with short card
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
     purchase.fill_order_form(
@@ -173,11 +159,9 @@ def test_invalid_card_length_VAL_003(browser, base_url, short_card):
     )
     purchase.click_purchase()
 
-    # OBSERVE: Check if purchase proceeds
     time.sleep(1)
     is_confirmed = purchase.is_purchase_confirmed(timeout=3)
 
-    # DECIDE: Short card numbers should be rejected
     if is_confirmed:
         logger.error(f"✗ VIOLATION: Short card accepted: {short_card}")
         pytest.fail(f"DISCOVERED: Card length validation missing - accepted '{short_card}'")
@@ -196,14 +180,12 @@ def test_expired_card_validation_VAL_004(browser, base_url):
 
     DISCOVER: Does the system reject expired cards?
     """
-    # EXECUTE: Add product and open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Try to purchase with expired card
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
@@ -218,11 +200,9 @@ def test_expired_card_validation_VAL_004(browser, base_url):
     )
     purchase.click_purchase()
 
-    # OBSERVE: Check if purchase proceeds
     time.sleep(1)
     is_confirmed = purchase.is_purchase_confirmed(timeout=3)
 
-    # DECIDE: Expired card should be rejected
     if is_confirmed:
         logger.error(f"✗ VIOLATION: Expired card accepted (year: {expired_year})")
         pytest.fail(f"DISCOVERED: Expired card validation missing")
@@ -247,14 +227,12 @@ def test_invalid_month_validation_VAL_005(browser, base_url, invalid_month):
 
     DISCOVER: Does the system validate month range (01-12)?
     """
-    # EXECUTE: Add product and open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Try to purchase with invalid month
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
     purchase.fill_order_form(
@@ -267,11 +245,9 @@ def test_invalid_month_validation_VAL_005(browser, base_url, invalid_month):
     )
     purchase.click_purchase()
 
-    # OBSERVE: Check if purchase proceeds
     time.sleep(1)
     is_confirmed = purchase.is_purchase_confirmed(timeout=3)
 
-    # DECIDE: Invalid month should be rejected
     if is_confirmed:
         logger.error(f"✗ VIOLATION: Invalid month accepted: {invalid_month}")
         pytest.fail(f"DISCOVERED: Month validation missing - accepted '{invalid_month}'")
@@ -299,14 +275,12 @@ def test_sql_injection_protection_VAL_006(browser, base_url, sql_payload):
 
     DISCOVER: Is the purchase form vulnerable to SQL injection?
     """
-    # EXECUTE: Add product and open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Try SQL injection in name field
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
     purchase.fill_order_form(
@@ -319,14 +293,12 @@ def test_sql_injection_protection_VAL_006(browser, base_url, sql_payload):
     )
     purchase.click_purchase()
 
-    # OBSERVE: Check if injection succeeds or causes error disclosure
     time.sleep(1)
     is_confirmed = purchase.is_purchase_confirmed(timeout=3)
     page_source = browser.page_source.lower()
 
     error_indicators = ["sql syntax", "mysql", "postgresql", "sqlite", "database error"]
 
-    # DECIDE: SQL injection should be prevented
     if is_confirmed:
         logger.critical(f"✗ CRITICAL: SQL injection may have succeeded: {sql_payload}")
         pytest.fail(f"DISCOVERED: Possible SQL injection vulnerability with '{sql_payload}'")
@@ -358,14 +330,12 @@ def test_xss_protection_VAL_007(browser, base_url, xss_payload):
 
     DISCOVER: Is the purchase confirmation vulnerable to XSS?
     """
-    # EXECUTE: Add product and open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Try XSS payload in city field
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
     purchase.fill_order_form(
@@ -378,7 +348,6 @@ def test_xss_protection_VAL_007(browser, base_url, xss_payload):
     )
     purchase.click_purchase()
 
-    # OBSERVE: Check if XSS payload is reflected unescaped
     time.sleep(1)
     is_confirmed = purchase.is_purchase_confirmed(timeout=3)
 
@@ -386,12 +355,10 @@ def test_xss_protection_VAL_007(browser, base_url, xss_payload):
         confirm_text = purchase.get_purchase_confirmation_text()
         page_source = browser.page_source
 
-        # DECIDE: XSS payload should be escaped/sanitized
         if xss_payload in page_source and "<script>" in xss_payload:
             logger.critical(f"✗ CRITICAL: XSS payload reflected unescaped: {xss_payload}")
             pytest.fail(f"DISCOVERED: XSS vulnerability - unescaped payload in confirmation")
 
-        # Check for script execution (alert presence)
         try:
             alert = browser.switch_to.alert
             alert_text = alert.text
@@ -420,14 +387,12 @@ def test_max_length_validation_VAL_008(browser, base_url, long_input, field):
 
     DISCOVER: Are there maximum length restrictions on text fields?
     """
-    # EXECUTE: Add product and open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Try extremely long input
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
@@ -444,11 +409,9 @@ def test_max_length_validation_VAL_008(browser, base_url, long_input, field):
     purchase.fill_order_form(**form_data)
     purchase.click_purchase()
 
-    # OBSERVE: Check system behavior
     time.sleep(1)
     is_confirmed = purchase.is_purchase_confirmed(timeout=3)
 
-    # DECIDE: System should handle long inputs gracefully
     if is_confirmed:
         confirm_text = purchase.get_purchase_confirmation_text()
         if len(confirm_text) > 5000:
@@ -474,14 +437,12 @@ def test_whitespace_only_validation_VAL_009(browser, base_url, whitespace_input,
 
     DISCOVER: Are whitespace-only inputs rejected?
     """
-    # EXECUTE: Add product and open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Try whitespace-only input
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
@@ -498,20 +459,15 @@ def test_whitespace_only_validation_VAL_009(browser, base_url, whitespace_input,
     purchase.fill_order_form(**form_data)
     purchase.click_purchase()
 
-    # OBSERVE: Check if purchase proceeds
     time.sleep(1)
     is_confirmed = purchase.is_purchase_confirmed(timeout=3)
 
-    # DECIDE: Whitespace-only should ideally be rejected
     if is_confirmed and field != "card":
         logger.warning(f"⚠ WARNING: Whitespace-only accepted for {field}")
     else:
         logger.info(f"✓ Whitespace-only handled for {field}")
 
 
-# ============================================================================
-# BUSINESS RULES TESTS
-# ============================================================================
 
 @pytest.mark.business_rules
 @pytest.mark.critical
@@ -523,24 +479,19 @@ def test_empty_cart_purchase_prevention_BR_001(browser, base_url):
 
     DISCOVER: Can users attempt to purchase without items in cart?
     """
-    # EXECUTE: Navigate directly to cart without adding products
     browser.get(base_url)
     cart = CartPage(browser)
     cart.open_cart()
 
-    # OBSERVE: Check if Place Order button is present/clickable
     is_place_order_visible = cart.is_place_order_visible()
 
     if is_place_order_visible:
-        # EXECUTE: Try to click Place Order on empty cart
         cart.click_place_order()
 
-        # OBSERVE: Check if order modal opens
         purchase = PurchasePage(browser)
         time.sleep(1)
         is_modal_open = purchase.is_order_modal_visible()
 
-        # DECIDE: Empty cart should not allow purchase
         if is_modal_open:
             logger.error("✗ VIOLATION: Order modal opened with empty cart")
             pytest.fail("DISCOVERED: Empty cart purchase prevention missing")
@@ -559,14 +510,12 @@ def test_card_format_numeric_validation_BR_002(browser, base_url):
 
     DISCOVER: Is non-numeric card input accepted?
     """
-    # EXECUTE: Add product and open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Try multiple non-numeric formats
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
@@ -594,7 +543,6 @@ def test_card_format_numeric_validation_BR_002(browser, base_url):
         )
         purchase.click_purchase()
 
-        # OBSERVE: Check if accepted
         time.sleep(1)
         is_confirmed = purchase.is_purchase_confirmed(timeout=2)
 
@@ -602,7 +550,6 @@ def test_card_format_numeric_validation_BR_002(browser, base_url):
             violations.append(test_card)
             logger.error(f"✗ VIOLATION: Non-numeric card accepted: {test_card}")
 
-    # DECIDE: All non-numeric cards should be rejected
     if violations:
         pytest.fail(f"DISCOVERED: Non-numeric card validation missing - accepted {len(violations)} cards")
 
@@ -620,14 +567,12 @@ def test_card_length_16_digits_BR_003(browser, base_url):
 
     DISCOVER: Are cards with incorrect length accepted?
     """
-    # EXECUTE: Add product and open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Test various invalid lengths
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
@@ -656,7 +601,6 @@ def test_card_length_16_digits_BR_003(browser, base_url):
         )
         purchase.click_purchase()
 
-        # OBSERVE: Check if accepted
         time.sleep(1)
         is_confirmed = purchase.is_purchase_confirmed(timeout=2)
 
@@ -664,7 +608,6 @@ def test_card_length_16_digits_BR_003(browser, base_url):
             violations.append(description)
             logger.error(f"✗ VIOLATION: {description} card accepted")
 
-    # DECIDE: Only 16-digit cards should be accepted
     if violations:
         pytest.fail(f"DISCOVERED: Card length validation missing - accepted {len(violations)} invalid lengths")
 
@@ -682,14 +625,12 @@ def test_card_expiration_validation_BR_004(browser, base_url):
 
     DISCOVER: Are expired cards accepted?
     """
-    # EXECUTE: Add product and open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Test expired dates
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
@@ -718,7 +659,6 @@ def test_card_expiration_validation_BR_004(browser, base_url):
         )
         purchase.click_purchase()
 
-        # OBSERVE: Check if accepted
         time.sleep(1)
         is_confirmed = purchase.is_purchase_confirmed(timeout=2)
 
@@ -726,7 +666,6 @@ def test_card_expiration_validation_BR_004(browser, base_url):
             violations.append(f"{month}/{year}")
             logger.error(f"✗ VIOLATION: Expired card accepted: {month}/{year}")
 
-    # DECIDE: Expired cards should be rejected
     if violations:
         pytest.fail(f"DISCOVERED: Expiration validation missing - accepted {len(violations)} expired cards")
 
@@ -743,14 +682,12 @@ def test_month_range_01_to_12_BR_005(browser, base_url):
 
     DISCOVER: Are invalid month values accepted?
     """
-    # EXECUTE: Add product and open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Test invalid month values
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
@@ -773,7 +710,6 @@ def test_month_range_01_to_12_BR_005(browser, base_url):
         )
         purchase.click_purchase()
 
-        # OBSERVE: Check if accepted
         time.sleep(1)
         is_confirmed = purchase.is_purchase_confirmed(timeout=2)
 
@@ -781,7 +717,6 @@ def test_month_range_01_to_12_BR_005(browser, base_url):
             violations.append(invalid_month)
             logger.error(f"✗ VIOLATION: Invalid month accepted: {invalid_month}")
 
-    # DECIDE: Only 01-12 should be accepted
     if violations:
         pytest.fail(f"DISCOVERED: Month range validation missing - accepted {len(violations)} invalid months")
 
@@ -801,14 +736,12 @@ def test_sql_injection_all_fields_BR_006(browser, base_url):
 
     DISCOVER: Are all form fields protected against SQL injection?
     """
-    # EXECUTE: Add product and open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Test SQL injection in each field
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
@@ -840,7 +773,6 @@ def test_sql_injection_all_fields_BR_006(browser, base_url):
         purchase.fill_order_form(**form_data)
         purchase.click_purchase()
 
-        # OBSERVE: Check for injection success or error disclosure
         time.sleep(1)
         is_confirmed = purchase.is_purchase_confirmed(timeout=2)
         page_source = browser.page_source.lower()
@@ -853,7 +785,6 @@ def test_sql_injection_all_fields_BR_006(browser, base_url):
             violations.append(f"{field_name} (error disclosure)")
             logger.critical(f"✗ CRITICAL: SQL error disclosure in {field_name}")
 
-    # DECIDE: All fields should be protected
     if violations:
         pytest.fail(f"DISCOVERED: SQL injection vulnerabilities in {len(violations)} fields: {violations}")
 
@@ -873,14 +804,12 @@ def test_xss_protection_all_fields_BR_007(browser, base_url):
 
     DISCOVER: Are all form fields protected against XSS?
     """
-    # EXECUTE: Add product and open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Test XSS in each field
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
@@ -908,19 +837,16 @@ def test_xss_protection_all_fields_BR_007(browser, base_url):
         purchase.fill_order_form(**form_data)
         purchase.click_purchase()
 
-        # OBSERVE: Check for XSS reflection
         time.sleep(1)
         is_confirmed = purchase.is_purchase_confirmed(timeout=2)
 
         if is_confirmed:
             page_source = browser.page_source
 
-            # Check if payload is reflected unescaped
             if xss_payload in page_source:
                 violations.append(f"{field_name} (reflected unescaped)")
                 logger.critical(f"✗ CRITICAL: XSS reflected in {field_name}")
 
-            # Check for script execution
             try:
                 alert = browser.switch_to.alert
                 alert.accept()
@@ -929,7 +855,6 @@ def test_xss_protection_all_fields_BR_007(browser, base_url):
             except:
                 pass
 
-    # DECIDE: All fields should be sanitized
     if violations:
         pytest.fail(f"DISCOVERED: XSS vulnerabilities in {len(violations)} fields: {violations}")
 
@@ -946,14 +871,12 @@ def test_name_max_length_enforcement_BR_008(browser, base_url):
 
     DISCOVER: What is the maximum accepted length for name field?
     """
-    # EXECUTE: Add product and open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Try extremely long name
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
@@ -969,7 +892,6 @@ def test_name_max_length_enforcement_BR_008(browser, base_url):
     )
     purchase.click_purchase()
 
-    # OBSERVE: Check system behavior
     time.sleep(1)
     is_confirmed = purchase.is_purchase_confirmed(timeout=3)
 
@@ -990,14 +912,12 @@ def test_whitespace_only_rejection_BR_009(browser, base_url):
 
     DISCOVER: Are whitespace-only inputs rejected in text fields?
     """
-    # EXECUTE: Add product and open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Try whitespace-only in multiple fields
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
@@ -1011,11 +931,9 @@ def test_whitespace_only_rejection_BR_009(browser, base_url):
     )
     purchase.click_purchase()
 
-    # OBSERVE: Check if purchase proceeds
     time.sleep(1)
     is_confirmed = purchase.is_purchase_confirmed(timeout=3)
 
-    # DECIDE: Whitespace-only should ideally be rejected
     if is_confirmed:
         logger.warning("⚠ DISCOVERED: Whitespace-only inputs accepted")
     else:
@@ -1032,24 +950,20 @@ def test_contact_form_validation_BR_010(browser, base_url):
 
     DISCOVER: Does contact form validate required fields?
     """
-    # EXECUTE: Navigate and open contact form
     browser.get(base_url)
     purchase = PurchasePage(browser)
 
-    # EXECUTE: Send valid message
     alert_text = purchase.send_contact_message(
         email="test@example.com",
         name="QA Tester",
         message="Test message"
     )
 
-    # OBSERVE: Check alert response
     if alert_text:
         logger.info(f"✓ Contact form submitted: {alert_text}")
     else:
         logger.warning("⚠ No alert received from contact form")
 
-    # EXECUTE: Try empty fields
     browser.get(base_url)
     alert_text_empty = purchase.send_contact_message(
         email="",
@@ -1057,7 +971,6 @@ def test_contact_form_validation_BR_010(browser, base_url):
         message=""
     )
 
-    # DECIDE: Empty fields should be validated
     if alert_text_empty and "thanks" in alert_text_empty.lower():
         logger.warning("⚠ DISCOVERED: Contact form accepts empty fields")
     else:

@@ -18,12 +18,8 @@ import logging
 from pages.signup_page import SignupPage
 from selenium.webdriver.common.keys import Keys
 
-logging.basicConfig(level=logging.INFO)
 
 
-# ============================================================================
-# INPUT VALIDATION TESTS
-# ============================================================================
 
 @pytest.mark.business_rules
 @pytest.mark.validation
@@ -43,14 +39,11 @@ def test_username_max_length_BR_001(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Attempt signup with very long username (1000 chars)
     long_username = "A" * 1000
     signup_page.signup(long_username, "ValidPass123")
 
-    # OBSERVE: System response
     alert_text = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: System should handle gracefully
     if alert_text:
         logging.info(f"✓ BR-001 PASSED: System handled long username. Alert: '{alert_text}'")
     else:
@@ -77,15 +70,12 @@ def test_password_max_length_BR_002(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Attempt with 100-char password
     unique_username = signup_page.generate_unique_username()
     long_password = "P" * 100
     signup_page.signup(unique_username, long_password)
 
-    # OBSERVE: System response
     alert_text = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: System should handle long passwords per NIST
     if alert_text:
         logging.info(f"✓ BR-002: System response to long password: '{alert_text}'")
 
@@ -110,18 +100,15 @@ def test_username_leading_trailing_whitespace_BR_003(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Signup with whitespace around username
     base_username = signup_page.generate_unique_username()
     username_with_spaces = f"  {base_username}  "
     password = "ValidPass123"
 
     signup_page.signup(username_with_spaces, password)
 
-    # OBSERVE: Check signup result
     alert_text = signup_page.get_alert_text(timeout=5)
     logging.info(f"Signup result: {alert_text}")
 
-    # If successful, try to login with trimmed username
     if alert_text and "success" in alert_text.lower():
         browser.get(base_url)
         signup_page.login_after_signup(base_username.strip(), password)
@@ -155,13 +142,11 @@ def test_password_whitespace_significance_BR_004(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Signup with password containing spaces
     unique_username = signup_page.generate_unique_username()
     password_with_spaces = "Pass Word 123"
 
     signup_page.signup(unique_username, password_with_spaces)
 
-    # OBSERVE: Check signup result
     alert_text = signup_page.get_alert_text(timeout=5)
     logging.info(f"✓ BR-004: Tested password with spaces. Result: {alert_text}")
 
@@ -186,14 +171,11 @@ def test_special_characters_in_username_BR_005(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Test with special characters
     special_username = f"user@#$%{int(time.time())}"
     signup_page.signup(special_username, "ValidPass123")
 
-    # OBSERVE: System response
     alert_text = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: System should handle gracefully
     if alert_text:
         logging.info(f"✓ BR-005: System handled special chars. Alert: '{alert_text}'")
 
@@ -218,14 +200,11 @@ def test_numeric_only_username_BR_006(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Signup with numeric-only username
     numeric_username = f"{int(time.time())}"
     signup_page.signup(numeric_username, "ValidPass123")
 
-    # OBSERVE: System response
     alert_text = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: Document behavior
     if alert_text:
         logging.info(f"✓ BR-006: System response to numeric username: '{alert_text}'")
 
@@ -250,7 +229,6 @@ def test_unicode_characters_BR_007(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Test various Unicode character sets
     unicode_tests = [
         (f"用户{int(time.time())}", "Chinese characters"),
         (f"Пользователь{int(time.time())}", "Cyrillic characters"),
@@ -261,7 +239,6 @@ def test_unicode_characters_BR_007(browser, base_url):
         browser.get(base_url)
         signup_page.signup(unicode_username, "ValidPass123")
 
-        # OBSERVE: System response
         alert_text = signup_page.get_alert_text(timeout=3)
         logging.info(f"✓ {description}: {alert_text if alert_text else 'No alert'}")
 
@@ -287,13 +264,11 @@ def test_username_whitespace_normalization_BR_008(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Test with multiple spaces
     base_username = signup_page.generate_unique_username()
     username_multi_spaces = f"{base_username}    test"
 
     signup_page.signup(username_multi_spaces, "ValidPass123")
 
-    # OBSERVE: System response
     alert_text = signup_page.get_alert_text(timeout=5)
     logging.info(f"✓ BR-008: Multiple spaces handled. Alert: '{alert_text}'")
 
@@ -318,19 +293,16 @@ def test_username_case_sensitivity_BR_009(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Signup with username
     base_username = f"TestUser{int(time.time())}"
     password = "ValidPass123"
 
     signup_page.signup(base_username, password)
     first_alert = signup_page.get_alert_text(timeout=5)
 
-    # EXECUTE: Try signup with different case
     browser.get(base_url)
     signup_page.signup(base_username.lower(), password)
     second_alert = signup_page.get_alert_text(timeout=5)
 
-    # OBSERVE: Compare results
     logging.info(f"First ('{base_username}'): {first_alert}")
     logging.info(f"Second ('{base_username.lower()}'): {second_alert}")
 
@@ -360,14 +332,11 @@ def test_identical_username_password_BR_010(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Signup with username = password
     unique_username = signup_page.generate_unique_username()
     signup_page.signup(unique_username, unique_username)
 
-    # OBSERVE: System response
     alert_text = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: System should ideally reject this
     if alert_text:
         if "success" in alert_text.lower():
             logging.warning("⚠ System allows identical username/password")
@@ -378,9 +347,6 @@ def test_identical_username_password_BR_010(browser, base_url):
     assert True
 
 
-# ============================================================================
-# SECURITY VALIDATION TESTS
-# ============================================================================
 
 @pytest.mark.business_rules
 @pytest.mark.security
@@ -406,13 +372,10 @@ def test_sql_injection_prevention_BR_011(browser, base_url, sql_payload):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Try SQL injection
     signup_page.signup(sql_payload, "anypassword")
 
-    # OBSERVE: Check result
     alert_text = signup_page.get_alert_text(timeout=3)
 
-    # DECIDE: Should be rejected (not succeed)
     if alert_text and "success" in alert_text.lower():
         logging.critical(f"VIOLATION: SQL payload may have succeeded: {sql_payload}")
         pytest.fail(f"DISCOVERED: Possible SQL injection - {sql_payload}")
@@ -445,14 +408,11 @@ def test_xss_prevention_BR_012(browser, base_url, xss_payload):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Try XSS payload
     signup_page.signup(xss_payload, "anypassword")
 
-    # OBSERVE: Check if XSS executed
     time.sleep(1)
     alert_text = signup_page.get_alert_text(timeout=2)
 
-    # DECIDE: XSS should NOT execute
     if alert_text and "XSS" in alert_text:
         logging.critical(f"VIOLATION: XSS executed: {xss_payload}")
         pytest.fail("DISCOVERED: XSS vulnerability")
@@ -487,14 +447,11 @@ def test_password_complexity_enforcement_BR_013(browser, base_url, weak_password
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Attempt signup with weak password
     unique_username = signup_page.generate_unique_username()
     signup_page.signup(unique_username, weak_password)
 
-    # OBSERVE: Check result
     alert_text = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: Weak passwords SHOULD be rejected per NIST
     if alert_text and "success" in alert_text.lower():
         logging.error(f"VIOLATION: Weak password accepted: '{weak_password}'")
         logging.error("Standard: NIST SP 800-63B Section 5.1.1.2")
@@ -526,12 +483,10 @@ def test_signup_rate_limiting_BR_014(browser, base_url):
     attempts = 0
     rate_limited = False
 
-    # EXECUTE: Multiple rapid signup attempts
     for i in range(10):
         unique_username = signup_page.generate_unique_username()
         signup_page.signup(unique_username, "TestPass123")
 
-        # OBSERVE: Check for rate limiting
         alert_text = signup_page.get_alert_text(timeout=2)
 
         if alert_text and ("rate" in alert_text.lower() or "limit" in alert_text.lower() or "wait" in alert_text.lower()):
@@ -542,7 +497,6 @@ def test_signup_rate_limiting_BR_014(browser, base_url):
         attempts += 1
         browser.get(base_url)
 
-    # DECIDE: Rate limiting SHOULD exist
     if not rate_limited:
         logging.warning("=" * 80)
         logging.warning("SECURITY CONCERN: NO SIGNUP RATE LIMITING")
@@ -573,15 +527,12 @@ def test_captcha_protection_BR_015(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Open signup modal
     signup_page.open_signup_modal()
 
-    # OBSERVE: Check for CAPTCHA elements
     page_source = browser.page_source.lower()
     captcha_keywords = ['captcha', 'recaptcha', 'hcaptcha', 'bot protection', 'g-recaptcha']
     captcha_detected = any(keyword in page_source for keyword in captcha_keywords)
 
-    # DECIDE: CAPTCHA SHOULD exist
     if not captcha_detected:
         logging.warning("SECURITY CONCERN: NO CAPTCHA/BOT PROTECTION")
         logging.warning("Standard: OWASP ASVS v5.0 Section 2.2.3")
@@ -609,14 +560,12 @@ def test_email_verification_requirement_BR_016(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # OBSERVE: Check for email field in signup
     signup_page.open_signup_modal()
     page_source = browser.page_source.lower()
 
     email_keywords = ['email', 'e-mail', 'verification', 'verify']
     email_detected = any(keyword in page_source for keyword in email_keywords)
 
-    # DECIDE: Document behavior
     if not email_detected:
         logging.info("✓ No email verification detected")
         logging.info("Note: Email verification recommended per OWASP ASVS 2.1.8")
@@ -626,9 +575,6 @@ def test_email_verification_requirement_BR_016(browser, base_url):
     assert True
 
 
-# ============================================================================
-# ACCESSIBILITY TESTS
-# ============================================================================
 
 @pytest.mark.business_rules
 @pytest.mark.accessibility
@@ -647,7 +593,6 @@ def test_keyboard_navigation_BR_017(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Navigate with keyboard
     signup_page.open_signup_modal()
 
     unique_username = signup_page.generate_unique_username()
@@ -658,13 +603,10 @@ def test_keyboard_navigation_BR_017(browser, base_url):
     time.sleep(0.5)
     signup_page.fill_signup_password(password)
 
-    # EXECUTE: Submit with Enter
     signup_page.submit_signup_with_enter()
 
-    # OBSERVE: Check result
     alert_text = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: Keyboard navigation should work
     assert alert_text is not None, "Should receive feedback via keyboard submission"
     logging.info("✓ BR-017 PASSED: Keyboard navigation works (WCAG 2.1 SC 2.1.1)")
 
@@ -686,17 +628,14 @@ def test_form_labels_accessibility_BR_018(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Open modal
     signup_page.open_signup_modal()
 
-    # OBSERVE: Check for accessibility attributes
     username_placeholder = signup_page.get_signup_username_placeholder()
     password_placeholder = signup_page.get_signup_password_placeholder()
 
     username_aria = signup_page.get_signup_username_aria_label()
     password_aria = signup_page.get_signup_password_aria_label()
 
-    # DECIDE: Fields SHOULD have labels
     username_has_label = username_placeholder or username_aria
     password_has_label = password_placeholder or password_aria
 
@@ -726,21 +665,17 @@ def test_username_enumeration_via_signup_BR_019(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Try to signup with existing username
     signup_page.signup("Apolo2025", "anypassword")  # Known existing user
     existing_msg = signup_page.get_alert_text(timeout=5)
 
-    # EXECUTE: Try with new username
     browser.get(base_url)
     new_username = signup_page.generate_unique_username()
     signup_page.signup(new_username, "ValidPass123")
     new_msg = signup_page.get_alert_text(timeout=5)
 
-    # OBSERVE: Compare messages
     logging.info(f"Existing user: {existing_msg}")
     logging.info(f"New user: {new_msg}")
 
-    # DECIDE: Messages should be similar
     if existing_msg and new_msg:
         if "exist" in existing_msg.lower() or "already" in existing_msg.lower():
             logging.warning("SECURITY CONCERN: Username enumeration possible")

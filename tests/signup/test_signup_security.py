@@ -41,14 +41,10 @@ import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pages.signup_page import SignupPage
 
-logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-# ============================================================================
-# SQL INJECTION TESTS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.critical
@@ -75,16 +71,13 @@ def test_sql_injection_username_field_SEC_001(browser, base_url, sql_payload):
     logging.info("=" * 80)
     logging.info(f"TC-SIGNUP-SEC-001: Testing SQL injection with payload: {sql_payload}")
 
-    # EXECUTE: Attempt signup with SQL injection payload in username
     browser.get(base_url)
     signup_page = SignupPage(browser)
     signup_page.signup(sql_payload, "TestPass123!")
 
-    # OBSERVE: Check system response
     time.sleep(1)
     alert_text = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: SQL injection should be blocked
     if alert_text and "success" in alert_text.lower():
         logging.critical("=" * 80)
         logging.critical("CRITICAL VULNERABILITY DISCOVERED: SQL INJECTION")
@@ -99,7 +92,6 @@ def test_sql_injection_username_field_SEC_001(browser, base_url, sql_payload):
 
         pytest.fail(f"DISCOVERED: SQL Injection vulnerability with payload '{sql_payload}'")
 
-    # OBSERVE: Check for SQL error disclosure in page source
     page_source = browser.page_source.lower()
     error_indicators = ["sql syntax", "mysql", "postgresql", "oracle", "sqlite",
                        "syntax error", "odbc", "jdbc", "error in your sql"]
@@ -141,20 +133,16 @@ def test_sql_injection_password_field_SEC_002(browser, base_url, sql_payload):
     logging.info("=" * 80)
     logging.info(f"TC-SIGNUP-SEC-002: Testing SQL injection in password: {sql_payload}")
 
-    # EXECUTE: Create account with SQL payload in password
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
     test_username = signup_page.generate_unique_username()
     signup_page.signup(test_username, sql_payload)
 
-    # OBSERVE: Check if account creation succeeded
     time.sleep(1)
     alert_text = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: If account created, verify if SQL payload stored/executed
     if alert_text and "success" in alert_text.lower():
-        # EXECUTE: Try to login with the SQL payload password
         browser.get(base_url)
         time.sleep(1)
 
@@ -162,7 +150,6 @@ def test_sql_injection_password_field_SEC_002(browser, base_url, sql_payload):
         time.sleep(1)
         signup_page.get_alert_text(timeout=3)
 
-        # OBSERVE: Check if login succeeded
         if signup_page.is_user_logged_in(timeout=3):
             logging.critical("=" * 80)
             logging.critical("SQL INJECTION IN PASSWORD FIELD")
@@ -178,9 +165,6 @@ def test_sql_injection_password_field_SEC_002(browser, base_url, sql_payload):
     assert True
 
 
-# ============================================================================
-# XSS TESTS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.critical
@@ -206,21 +190,17 @@ def test_xss_username_field_SEC_003(browser, base_url, xss_payload):
     logging.info("=" * 80)
     logging.info(f"TC-SIGNUP-SEC-003: Testing XSS with payload: {xss_payload}")
 
-    # EXECUTE: Attempt signup with XSS payload
     browser.get(base_url)
     signup_page = SignupPage(browser)
     signup_page.signup(xss_payload, "TestPass123!")
 
-    # OBSERVE: Check if account created
     time.sleep(1)
     alert_text = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: Check if XSS payload reflected/stored
     if alert_text and "success" in alert_text.lower():
         browser.get(base_url)
         time.sleep(2)
 
-        # OBSERVE: Check if XSS payload appears unescaped in page
         page_source = browser.page_source
 
         if xss_payload in page_source:
@@ -257,27 +237,22 @@ def test_stored_xss_via_username_SEC_004(browser, base_url):
     logging.info("=" * 80)
     logging.info("TC-SIGNUP-SEC-004: Testing stored XSS")
 
-    # EXECUTE: Create account with XSS payload
     xss_payload = f"<img src=x onerror=alert('XSS')>_{int(time.time())}"
 
     browser.get(base_url)
     signup_page = SignupPage(browser)
     signup_page.signup(xss_payload, "TestPass123!")
 
-    # OBSERVE: Check if account created
     time.sleep(1)
     signup_alert = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: If created, test if XSS executes on login
     if signup_alert and "success" in signup_alert.lower():
         browser.get(base_url)
         time.sleep(1)
 
-        # EXECUTE: Login with XSS username
         signup_page.login_after_signup(xss_payload, "TestPass123!")
         time.sleep(2)
 
-        # OBSERVE: Check if JavaScript alert triggered (XSS executed)
         try:
             from selenium.webdriver.support.ui import WebDriverWait
             from selenium.webdriver.support import expected_conditions as EC
@@ -304,9 +279,6 @@ def test_stored_xss_via_username_SEC_004(browser, base_url):
     assert True
 
 
-# ============================================================================
-# AUTHENTICATION SECURITY TESTS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.high
@@ -328,7 +300,6 @@ def test_brute_force_protection_SEC_005(browser, base_url):
     attempts = 10
     rate_limited = False
 
-    # EXECUTE: Attempt multiple rapid signups
     for i in range(attempts):
         browser.get(base_url)
 
@@ -336,16 +307,13 @@ def test_brute_force_protection_SEC_005(browser, base_url):
         signup_page.signup(username, "TestPass123!")
         time.sleep(0.5)
 
-        # OBSERVE: Check for rate limiting message
         alert_text = signup_page.get_alert_text(timeout=3)
 
-        # DECIDE: Check if rate limiting kicked in
         if alert_text and any(keyword in alert_text.lower() for keyword in ["limit", "wait", "too many"]):
             logging.info(f"✓ Rate limiting detected after {i + 1} attempts")
             rate_limited = True
             break
 
-    # DECIDE: System should have rate limiting
     if not rate_limited:
         logging.error("=" * 80)
         logging.error("NO BRUTE FORCE PROTECTION DETECTED")
@@ -380,7 +348,6 @@ def test_account_enumeration_timing_SEC_006(browser, base_url):
 
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Create test account
     browser.get(base_url)
     existing_user = signup_page.generate_unique_username()
     signup_page.signup(existing_user, "TestPass123!")
@@ -390,7 +357,6 @@ def test_account_enumeration_timing_SEC_006(browser, base_url):
     if not first_alert or "success" not in first_alert.lower():
         pytest.skip("Could not create test account")
 
-    # EXECUTE: Measure timing for existing user (duplicate attempt)
     browser.get(base_url)
     start_time = time.time()
     signup_page.signup(existing_user, "AnotherPass456!")
@@ -398,7 +364,6 @@ def test_account_enumeration_timing_SEC_006(browser, base_url):
     signup_page.get_alert_text(timeout=5)
     existing_duration = time.time() - start_time
 
-    # EXECUTE: Measure timing for nonexistent user (empty password)
     browser.get(base_url)
     nonexistent_user = signup_page.generate_unique_username()
     start_time = time.time()
@@ -407,10 +372,8 @@ def test_account_enumeration_timing_SEC_006(browser, base_url):
     signup_page.get_alert_text(timeout=5)
     nonexistent_duration = time.time() - start_time
 
-    # OBSERVE: Calculate timing difference
     time_diff = abs(existing_duration - nonexistent_duration)
 
-    # DECIDE: Timing differences should be minimal
     if time_diff > 0.5:
         logging.error("=" * 80)
         logging.error("TIMING DISCREPANCY DETECTED")
@@ -445,7 +408,6 @@ def test_username_enumeration_SEC_007(browser, base_url):
 
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Create test account
     browser.get(base_url)
     existing_user = signup_page.generate_unique_username()
     signup_page.signup(existing_user, "TestPass123!")
@@ -455,20 +417,17 @@ def test_username_enumeration_SEC_007(browser, base_url):
     if not signup_alert or "success" not in signup_alert.lower():
         pytest.skip("Could not create test account")
 
-    # EXECUTE: Try duplicate username
     browser.get(base_url)
     signup_page.signup(existing_user, "DifferentPass!")
     time.sleep(1)
     duplicate_alert = signup_page.get_alert_text(timeout=5)
 
-    # EXECUTE: Try nonexistent user with empty password
     browser.get(base_url)
     nonexistent_user = signup_page.generate_unique_username()
     signup_page.signup(nonexistent_user, "")
     time.sleep(1)
     empty_alert = signup_page.get_alert_text(timeout=5)
 
-    # OBSERVE & DECIDE: Check if error messages differ
     if duplicate_alert and empty_alert:
         if duplicate_alert.lower() != empty_alert.lower():
             if any(keyword in duplicate_alert.lower() for keyword in ["exist", "taken", "already"]):
@@ -487,9 +446,6 @@ def test_username_enumeration_SEC_007(browser, base_url):
     assert True
 
 
-# ============================================================================
-# SESSION SECURITY TESTS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.high
@@ -509,35 +465,29 @@ def test_session_fixation_SEC_008(browser, base_url):
 
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Load page and capture pre-signup cookies
     browser.get(base_url)
     time.sleep(1)
 
     pre_signup_cookies = {cookie['name']: cookie['value'] for cookie in browser.get_cookies()}
     logging.info(f"Pre-signup cookies: {list(pre_signup_cookies.keys())}")
 
-    # EXECUTE: Create new account
     test_user = signup_page.generate_unique_username()
     signup_page.signup(test_user, "TestPass123!")
     time.sleep(1)
     signup_alert = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: If account created, check session handling
     if signup_alert and "success" in signup_alert.lower():
         browser.get(base_url)
         time.sleep(1)
 
-        # EXECUTE: Login with new account
         signup_page.login_after_signup(test_user, "TestPass123!")
         time.sleep(2)
         signup_page.get_alert_text(timeout=3)
 
-        # OBSERVE: Check if logged in and capture post-login cookies
         if signup_page.is_user_logged_in(timeout=3):
             post_login_cookies = {cookie['name']: cookie['value'] for cookie in browser.get_cookies()}
             logging.info(f"Post-login cookies: {list(post_login_cookies.keys())}")
 
-            # DECIDE: Session cookies should change after authentication
             session_changed = False
             for cookie_name in pre_signup_cookies:
                 if cookie_name in post_login_cookies:
@@ -582,7 +532,6 @@ def test_cookie_security_flags_SEC_009(browser, base_url):
 
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Create and login with new account
     browser.get(base_url)
     time.sleep(1)
 
@@ -591,7 +540,6 @@ def test_cookie_security_flags_SEC_009(browser, base_url):
     time.sleep(1)
     signup_alert = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: If account created, check cookie flags
     if signup_alert and "success" in signup_alert.lower():
         browser.get(base_url)
         time.sleep(1)
@@ -600,9 +548,7 @@ def test_cookie_security_flags_SEC_009(browser, base_url):
         time.sleep(2)
         signup_page.get_alert_text(timeout=3)
 
-        # OBSERVE: Check if logged in
         if signup_page.is_user_logged_in(timeout=3):
-            # OBSERVE: Examine all cookies
             cookies = browser.get_cookies()
 
             insecure_cookies = []
@@ -618,7 +564,6 @@ def test_cookie_security_flags_SEC_009(browser, base_url):
                         'httponly': is_httponly
                     })
 
-            # DECIDE: All cookies should have security flags
             if insecure_cookies:
                 logging.error("=" * 80)
                 logging.error("INSECURE COOKIE CONFIGURATION")
@@ -639,9 +584,6 @@ def test_cookie_security_flags_SEC_009(browser, base_url):
     assert True
 
 
-# ============================================================================
-# CSRF TESTS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.high
@@ -661,14 +603,12 @@ def test_csrf_token_validation_SEC_010(browser, base_url):
 
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Open signup modal
     browser.get(base_url)
     time.sleep(1)
 
     signup_page.open_signup_modal()
     time.sleep(1)
 
-    # OBSERVE: Check page source for CSRF tokens
     page_source = browser.page_source.lower()
 
     csrf_indicators = [
@@ -686,7 +626,6 @@ def test_csrf_token_validation_SEC_010(browser, base_url):
             logging.info(f"✓ CSRF protection detected: {indicator}")
             break
 
-    # DECIDE: CSRF protection should be present
     if not csrf_found:
         logging.error("=" * 80)
         logging.error("NO CSRF PROTECTION DETECTED")
@@ -702,9 +641,6 @@ def test_csrf_token_validation_SEC_010(browser, base_url):
     assert True
 
 
-# ============================================================================
-# SECURITY HEADERS TESTS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.medium
@@ -723,11 +659,9 @@ def test_security_headers_SEC_011(browser, base_url):
     logging.info("TC-SIGNUP-SEC-011: Testing security headers")
 
     try:
-        # EXECUTE: Fetch page headers
         response = requests.get(base_url, timeout=10)
         headers = response.headers
 
-        # OBSERVE: Check for required security headers
         required_headers = {
             'X-Content-Type-Options': 'nosniff',
             'X-Frame-Options': ['DENY', 'SAMEORIGIN'],
@@ -750,7 +684,6 @@ def test_security_headers_SEC_011(browser, base_url):
                 elif expected_value not in actual_value:
                     misconfigured_headers.append(f"{header}: {actual_value}")
 
-        # DECIDE: All security headers should be present and configured
         if missing_headers or misconfigured_headers:
             logging.error("=" * 80)
             logging.error("SECURITY HEADERS MISSING OR MISCONFIGURED")
@@ -772,9 +705,6 @@ def test_security_headers_SEC_011(browser, base_url):
         pytest.skip("Network request failed")
 
 
-# ============================================================================
-# ADDITIONAL SECURITY TESTS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.medium
@@ -792,13 +722,10 @@ def test_password_transmitted_plaintext_SEC_012(browser, base_url):
     logging.info("=" * 80)
     logging.info("TC-SIGNUP-SEC-012: Testing password transmission security")
 
-    # EXECUTE: Load page
     browser.get(base_url)
 
-    # OBSERVE: Check current URL protocol
     current_url = browser.current_url
 
-    # DECIDE: HTTPS should be enforced
     if not current_url.startswith("https://"):
         logging.error("=" * 80)
         logging.error("INSECURE PASSWORD TRANSMISSION")
@@ -834,16 +761,13 @@ def test_verbose_error_messages_SEC_013(browser, base_url):
 
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Send extreme payload to trigger error
     browser.get(base_url)
     extreme_payload = "A" * 10000
     signup_page.signup(extreme_payload, "test")
 
-    # OBSERVE: Check error message
     time.sleep(1)
     alert_text = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: Error messages should not be verbose
     if alert_text:
         sensitive_terms = [
             "stack trace",
@@ -871,6 +795,3 @@ def test_verbose_error_messages_SEC_013(browser, base_url):
     assert True
 
 
-# ============================================================================
-# END OF TEST SUITE
-# ============================================================================

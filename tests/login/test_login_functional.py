@@ -14,7 +14,6 @@ import pytest
 import logging
 from pages.login_page import LoginPage
 
-logging.basicConfig(level=logging.INFO)
 
 
 @pytest.mark.functional
@@ -38,15 +37,12 @@ def test_valid_login_success_FUNC_001(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # Perform login
     login_page.login("Apolo2025", "apolo2025")
 
-    # Wait for potential alert
     alert_text = login_page.get_alert_text(timeout=5)
     if alert_text:
         logging.warning(f"Alert received: {alert_text}")
 
-    # Verify login success
     assert login_page.is_user_logged_in(), "User should be logged in after valid credentials"
 
     welcome_msg = login_page.get_welcome_message()
@@ -55,7 +51,6 @@ def test_valid_login_success_FUNC_001(browser, base_url):
 
     logging.info("✓ FUNC-001 PASSED: Valid login successful")
 
-    # Cleanup
     login_page.logout()
 
 
@@ -80,10 +75,8 @@ def test_invalid_username_rejected_FUNC_002(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # Attempt login with invalid username
     login_page.login("nonexistent_user_99999", "anypassword")
 
-    # Wait for alert (error message)
     alert_text = login_page.get_alert_text(timeout=5)
 
     assert alert_text is not None, "Error alert should appear for invalid username"
@@ -113,10 +106,8 @@ def test_invalid_password_rejected_FUNC_003(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # Attempt login with wrong password
     login_page.login("Apolo2025", "wrong_password_12345")
 
-    # Wait for alert (error message)
     alert_text = login_page.get_alert_text(timeout=5)
 
     assert alert_text is not None, "Error alert should appear for wrong password"
@@ -145,10 +136,8 @@ def test_empty_credentials_rejected_FUNC_004(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # Attempt login with empty credentials
     login_page.login("", "")
 
-    # Wait for alert (validation message)
     alert_text = login_page.get_alert_text(timeout=5)
 
     assert alert_text is not None, "Validation alert should appear for empty credentials"
@@ -177,18 +166,14 @@ def test_complete_login_logout_flow_FUNC_005(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # Step 1: Login
     login_page.login("Apolo2025", "apolo2025")
     login_page.get_alert_text(timeout=5)  # Handle potential alert
 
-    # Step 2: Verify logged in
     assert login_page.is_user_logged_in(), "User should be logged in"
     logging.info("✓ Login successful")
 
-    # Step 3: Logout
     login_page.logout()
 
-    # Step 4: Verify logged out
     assert not login_page.is_user_logged_in(), "User should be logged out"
     assert login_page.is_element_visible(login_page.LOGIN_BUTTON_NAV, timeout=3), "Login button should be visible after logout"
 
@@ -215,17 +200,13 @@ def test_modal_close_button_FUNC_006(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # Step 1: Open modal
     login_page.open_login_modal()
     assert login_page.is_login_modal_visible(), "Login modal should be visible"
 
-    # Step 2: Close modal
     login_page.close_login_modal()
 
-    # Step 3: Verify modal closed
     assert not login_page.is_login_modal_visible(), "Login modal should be closed"
 
-    # Step 4: Verify still logged out
     assert not login_page.is_user_logged_in(), "User should remain logged out"
 
     logging.info("✓ FUNC-006 PASSED: Login modal close button works")
@@ -251,22 +232,17 @@ def test_session_persistence_after_reload_FUNC_007(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # Step 1: Login
     login_page.login("Apolo2025", "apolo2025")
     login_page.get_alert_text(timeout=5)  # Handle potential alert
 
-    # Step 2: Verify logged in
     assert login_page.is_user_logged_in(), "User should be logged in before reload"
     logging.info("✓ Logged in successfully")
 
-    # Step 3: Refresh page
     login_page.refresh_page()
     login_page.wait(2)  # Wait for page to fully reload
 
-    # Step 4: Verify still logged in
     assert login_page.is_user_logged_in(), "User should remain logged in after page reload (session persistence)"
 
     logging.info("✓ FUNC-007 PASSED: Session persisted after reload")
 
-    # Cleanup
     login_page.logout()

@@ -14,7 +14,6 @@ import pytest
 import logging
 from pages.signup_page import SignupPage
 
-logging.basicConfig(level=logging.INFO)
 
 
 @pytest.mark.functional
@@ -38,34 +37,27 @@ def test_valid_signup_with_unique_credentials_FUNC_001(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Generate unique credentials and signup
     unique_username = signup_page.generate_unique_username()
     password = "TestPass123!"
 
     signup_page.signup(unique_username, password)
 
-    # OBSERVE: Check for success alert
     alert_text = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: Signup should succeed
     assert alert_text is not None, "Should receive feedback after signup"
 
     if "success" in alert_text.lower() or "registered" in alert_text.lower():
         logging.info(f"✓ FUNC-001 PASSED: Signup successful. Alert: '{alert_text}'")
 
-        # EXECUTE: Try to login with new account
         browser.get(base_url)
         signup_page.login_after_signup(unique_username, password)
 
-        # OBSERVE: Check if login succeeded
         login_alert = signup_page.get_alert_text(timeout=3)
         logged_in = signup_page.is_user_logged_in(timeout=3)
 
-        # DECIDE: New account should be able to login
         assert logged_in, f"New account should be able to login. Alert: {login_alert}"
         logging.info("✓ Can login with newly created account")
 
-        # Cleanup
         signup_page.logout()
     else:
         logging.warning(f"Signup may have failed: {alert_text}")
@@ -90,24 +82,19 @@ def test_duplicate_username_rejected_FUNC_002(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: First signup with unique username
     unique_username = signup_page.generate_unique_username()
     password = "TestPass123!"
 
     signup_page.signup(unique_username, password)
 
-    # OBSERVE: First signup result
     first_alert = signup_page.get_alert_text(timeout=5)
     logging.info(f"First signup: {first_alert}")
 
-    # EXECUTE: Try duplicate signup
     browser.get(base_url)
     signup_page.signup(unique_username, password)
 
-    # OBSERVE: Second signup result
     duplicate_alert = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: Duplicate should be rejected
     assert duplicate_alert is not None, "Should receive error for duplicate username"
     assert "exist" in duplicate_alert.lower() or "already" in duplicate_alert.lower(), \
         f"Should indicate username already exists. Got: '{duplicate_alert}'"
@@ -135,13 +122,10 @@ def test_empty_credentials_rejected_FUNC_003(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Attempt signup with empty credentials
     signup_page.signup("", "")
 
-    # OBSERVE: Check for validation message
     alert_text = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: Empty fields should be rejected
     assert alert_text is not None, "Should show validation error for empty credentials"
 
     logging.info(f"✓ FUNC-003 PASSED: Empty credentials rejected. Alert: '{alert_text}'")
@@ -167,13 +151,10 @@ def test_empty_username_only_FUNC_004(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Attempt signup with empty username
     signup_page.signup("", "SomePassword123")
 
-    # OBSERVE: Check for validation message
     alert_text = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: Empty username should be rejected
     assert alert_text is not None, "Should show error for empty username"
 
     logging.info(f"✓ FUNC-004 PASSED: Empty username rejected. Alert: '{alert_text}'")
@@ -199,14 +180,11 @@ def test_empty_password_only_FUNC_005(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Attempt signup with empty password
     unique_username = signup_page.generate_unique_username()
     signup_page.signup(unique_username, "")
 
-    # OBSERVE: Check for validation message
     alert_text = signup_page.get_alert_text(timeout=5)
 
-    # DECIDE: Empty password should be rejected
     assert alert_text is not None, "Should show error for empty password"
 
     logging.info(f"✓ FUNC-005 PASSED: Empty password rejected. Alert: '{alert_text}'")
@@ -232,13 +210,11 @@ def test_signup_modal_close_functionality_FUNC_006(browser, base_url):
     browser.get(base_url)
     signup_page = SignupPage(browser)
 
-    # EXECUTE: Open and close modal
     signup_page.open_signup_modal()
     assert signup_page.is_signup_modal_visible(), "Signup modal should be visible"
 
     signup_page.close_signup_modal()
 
-    # OBSERVE: Check modal closed
     assert not signup_page.is_signup_modal_visible(), "Signup modal should be closed"
 
     logging.info("✓ FUNC-006 PASSED: Signup modal close button works")

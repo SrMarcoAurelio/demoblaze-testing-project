@@ -19,7 +19,6 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from pages.base_page import BasePage
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -36,21 +35,15 @@ class CatalogPage(BasePage):
     - Performance measurement (load time, category switch time)
     """
 
-    # ============================================================================
-    # LOCATORS
-    # ============================================================================
 
-    # Navigation
     HOME_LINK = (By.ID, "nava")
     LOGO_LINK = (By.CSS_SELECTOR, ".navbar-brand")
 
-    # Categories
     CATEGORIES_SECTION = (By.ID, "cat")
     PHONES_CATEGORY = (By.LINK_TEXT, "Phones")
     LAPTOPS_CATEGORY = (By.LINK_TEXT, "Laptops")
     MONITORS_CATEGORY = (By.LINK_TEXT, "Monitors")
 
-    # Products
     PRODUCT_CARDS = (By.CSS_SELECTOR, ".card")
     PRODUCT_TITLES = (By.CSS_SELECTOR, ".card-title a")
     PRODUCT_PRICES = (By.CSS_SELECTOR, ".card-block h5")
@@ -58,16 +51,11 @@ class CatalogPage(BasePage):
     PRODUCT_LINKS = (By.CSS_SELECTOR, ".hrefch")
     PRODUCT_DESCRIPTIONS = (By.CSS_SELECTOR, ".card-block p")
 
-    # Pagination
     NEXT_BUTTON = (By.ID, "next2")
     PREV_BUTTON = (By.ID, "prev2")
 
-    # Product Details Page (for navigation verification)
     PRODUCT_DETAIL_NAME = (By.CSS_SELECTOR, "h2.name")
 
-    # ============================================================================
-    # NAVIGATION METHODS
-    # ============================================================================
 
     def go_to_catalog(self):
         """Navigate to catalog/home page"""
@@ -89,9 +77,6 @@ class CatalogPage(BasePage):
         self.wait_for_page_load()
         time.sleep(1)
 
-    # ============================================================================
-    # CATEGORY NAVIGATION METHODS
-    # ============================================================================
 
     def click_phones_category(self):
         """Click Phones category link"""
@@ -120,7 +105,6 @@ class CatalogPage(BasePage):
         Returns: str or None
         """
         try:
-            # Check URL for category parameter
             current_url = self.driver.current_url
             if "cat=" in current_url:
                 return current_url.split("cat=")[1].split("&")[0]
@@ -149,15 +133,11 @@ class CatalogPage(BasePage):
             element = self.find_element(locator)
             classes = element.get_attribute("class") or ""
 
-            # Check for active styling
             return "active" in classes or "selected" in classes
 
         except NoSuchElementException:
             return False
 
-    # ============================================================================
-    # PRODUCT LISTING METHODS
-    # ============================================================================
 
     def get_all_product_cards(self, timeout=10):
         """
@@ -235,9 +215,6 @@ class CatalogPage(BasePage):
         """
         return self.get_product_count(timeout=timeout) > 0
 
-    # ============================================================================
-    # PRODUCT INTERACTION METHODS
-    # ============================================================================
 
     def click_first_product(self):
         """
@@ -296,9 +273,6 @@ class CatalogPage(BasePage):
         except TimeoutException:
             return False
 
-    # ============================================================================
-    # PAGINATION METHODS
-    # ============================================================================
 
     def is_next_button_visible(self, timeout=5):
         """Check if Next button is visible"""
@@ -360,9 +334,6 @@ class CatalogPage(BasePage):
             logger.warning("Previous button not clickable")
             return False
 
-    # ============================================================================
-    # VALIDATION METHODS
-    # ============================================================================
 
     def validate_all_products_have_names(self):
         """
@@ -400,7 +371,6 @@ class CatalogPage(BasePage):
         if not price_text:
             return False
 
-        # Expected format: "$790" or "$790.00"
         pattern = r'^\$\d+(\.\d{2})?$'
         return bool(re.match(pattern, price_text))
 
@@ -469,9 +439,6 @@ class CatalogPage(BasePage):
             logger.error(f"Link validation failed: {e}")
             return False, None
 
-    # ============================================================================
-    # PERFORMANCE MEASUREMENT METHODS
-    # ============================================================================
 
     def measure_catalog_load_time(self):
         """
@@ -523,9 +490,6 @@ class CatalogPage(BasePage):
 
         return end_time - start_time
 
-    # ============================================================================
-    # ACCESSIBILITY METHODS
-    # ============================================================================
 
     def test_keyboard_navigation_categories(self):
         """
@@ -540,13 +504,11 @@ class CatalogPage(BasePage):
         }
 
         try:
-            # Click on categories section to start
             categories = self.find_element(self.CATEGORIES_SECTION)
             categories.click()
 
             actions = ActionChains(self.driver)
 
-            # Try to Tab through categories
             for _ in range(10):
                 actions.send_keys(Keys.TAB).perform()
                 time.sleep(0.2)
@@ -608,11 +570,9 @@ class CatalogPage(BasePage):
         }
 
         try:
-            # Check category link focus
             phones = self.find_element(self.PHONES_CATEGORY)
             phones.click()
 
-            # Use JavaScript to check computed styles
             has_outline = self.driver.execute_script("""
                 var element = arguments[0];
                 var styles = window.getComputedStyle(element, ':focus');
@@ -621,7 +581,6 @@ class CatalogPage(BasePage):
 
             results['categories_have_focus'] = has_outline
 
-            # Check product link focus
             links = self.get_all_product_links()
             if links:
                 first_link = links[0]
@@ -669,9 +628,6 @@ class CatalogPage(BasePage):
         all_have_alt = missing == 0
         return all_have_alt, missing
 
-    # ============================================================================
-    # SECURITY TESTING METHODS
-    # ============================================================================
 
     def check_for_sql_error_indicators(self):
         """

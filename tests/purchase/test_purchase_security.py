@@ -28,13 +28,9 @@ from pages.cart_page import CartPage
 from pages.purchase_page import PurchasePage
 from pages.login_page import LoginPage
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-# ============================================================================
-# BUSINESS LOGIC EXPLOITS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.critical
@@ -48,17 +44,14 @@ def test_price_manipulation_in_client_SEC_001(browser, base_url):
 
     DISCOVER: Can prices be manipulated via client-side modifications?
     """
-    # EXECUTE: Add product to cart
     browser.get(base_url)
     cart = CartPage(browser)
     product_name, original_price = cart.add_first_product()
     cart.open_cart()
 
-    # OBSERVE: Get original cart total
     cart_total = cart.get_cart_total()
     logger.info(f"Original cart total: ${cart_total}")
 
-    # EXECUTE: Attempt to modify price via JavaScript
     try:
         browser.execute_script("""
             var totalElement = document.getElementById('totalp');
@@ -68,19 +61,16 @@ def test_price_manipulation_in_client_SEC_001(browser, base_url):
         """)
         time.sleep(1)
 
-        # EXECUTE: Proceed with purchase
         cart.click_place_order()
         purchase = PurchasePage(browser)
         purchase.wait_for_order_modal()
 
         success, confirm_text, details = purchase.complete_purchase()
 
-        # OBSERVE: Check if manipulated price was used
         if success:
             confirmed_amount = details['amount']
             logger.info(f"Confirmed amount: ${confirmed_amount}")
 
-            # DECIDE: Server should use original price, not manipulated
             if confirmed_amount != cart_total:
                 logger.critical(f"✗ CRITICAL: Price manipulation succeeded! Original: ${cart_total}, Confirmed: ${confirmed_amount}")
                 pytest.fail(f"DISCOVERED: Client-side price manipulation vulnerability")
@@ -103,17 +93,14 @@ def test_negative_quantity_exploit_SEC_002(browser, base_url):
 
     DISCOVER: Can negative quantities be added to cart for credit?
     """
-    # EXECUTE: Add product to cart
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
 
-    # OBSERVE: Get initial cart state
     initial_count = cart.get_cart_item_count()
     initial_total = cart.get_cart_total()
 
-    # EXECUTE: Attempt to inject negative quantity via JavaScript
     try:
         browser.execute_script("""
             var rows = document.querySelectorAll('#tbodyid tr');
@@ -128,14 +115,12 @@ def test_negative_quantity_exploit_SEC_002(browser, base_url):
         """)
         time.sleep(1)
 
-        # EXECUTE: Try to purchase with manipulated total
         cart.click_place_order()
         purchase = PurchasePage(browser)
         purchase.wait_for_order_modal()
 
         success, confirm_text, details = purchase.complete_purchase()
 
-        # DECIDE: Negative amounts should never be accepted
         if success and details['amount'] < 0:
             logger.critical("✗ CRITICAL: Negative amount accepted!")
             pytest.fail("DISCOVERED: Negative quantity/amount vulnerability")
@@ -158,7 +143,6 @@ def test_race_condition_double_purchase_SEC_003(browser, base_url):
 
     DISCOVER: Can multiple rapid purchase clicks result in double charging?
     """
-    # EXECUTE: Add product to cart
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
@@ -167,15 +151,12 @@ def test_race_condition_double_purchase_SEC_003(browser, base_url):
     cart_total = cart.get_cart_total()
     cart.click_place_order()
 
-    # EXECUTE: Fill form and attempt rapid purchase clicks
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
     purchase.fill_valid_order_form()
 
-    # EXECUTE: Rapid-fire purchase button clicks
     purchase.rapid_purchase_clicks(times=5)
 
-    # OBSERVE: Check if multiple confirmations appear
     time.sleep(2)
     confirmations_count = 0
 
@@ -188,7 +169,6 @@ def test_race_condition_double_purchase_SEC_003(browser, base_url):
     except:
         pass
 
-    # DECIDE: Only one purchase should succeed
     if confirmations_count > 1:
         logger.critical(f"✗ CRITICAL: Multiple purchases detected ({confirmations_count})")
         pytest.fail(f"DISCOVERED: Race condition allows double purchase")
@@ -207,7 +187,6 @@ def test_cart_total_recalculation_exploit_SEC_004(browser, base_url):
 
     DISCOVER: Is cart total recalculated server-side during purchase?
     """
-    # EXECUTE: Add multiple products
     browser.get(base_url)
     cart = CartPage(browser)
     name1, price1 = cart.add_first_product()
@@ -219,21 +198,18 @@ def test_cart_total_recalculation_exploit_SEC_004(browser, base_url):
     expected_total = price1 + price2
     logger.info(f"Expected total: ${expected_total}, Cart shows: ${cart_total}")
 
-    # EXECUTE: Delete one item
     cart.delete_first_item()
     time.sleep(1)
 
     new_total = cart.get_cart_total()
     logger.info(f"After deletion, new total: ${new_total}")
 
-    # EXECUTE: Proceed to purchase
     cart.click_place_order()
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
     success, confirm_text, details = purchase.complete_purchase()
 
-    # DECIDE: Confirmed amount should match current cart total
     if success:
         confirmed_amount = details['amount']
         if confirmed_amount != new_total:
@@ -243,9 +219,6 @@ def test_cart_total_recalculation_exploit_SEC_004(browser, base_url):
             logger.info("✓ Cart total correctly recalculated server-side")
 
 
-# ============================================================================
-# BOT PROTECTION AND AUTOMATED ATTACKS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.high
@@ -259,7 +232,6 @@ def test_rapid_purchase_attempts_BOT_001(browser, base_url):
 
     DISCOVER: Is there rate limiting on purchase attempts?
     """
-    # EXECUTE: Attempt rapid successive purchases
     browser.get(base_url)
     cart = CartPage(browser)
 
@@ -268,13 +240,11 @@ def test_rapid_purchase_attempts_BOT_001(browser, base_url):
     rate_limited = False
 
     for i in range(purchase_attempts):
-        # Add product
         browser.get(base_url)
         cart.add_first_product()
         cart.open_cart()
         cart.click_place_order()
 
-        # Quick purchase
         purchase = PurchasePage(browser)
         purchase.wait_for_order_modal(timeout=3)
         purchase.fill_valid_order_form()
@@ -282,14 +252,12 @@ def test_rapid_purchase_attempts_BOT_001(browser, base_url):
 
         time.sleep(0.5)
 
-        # OBSERVE: Check if purchase succeeded or was rate limited
         is_confirmed = purchase.is_purchase_confirmed(timeout=2)
 
         if is_confirmed:
             successful_purchases += 1
             purchase.close_purchase_confirmation()
         else:
-            # Check for rate limiting message
             alert_text = purchase.get_alert_text(timeout=1)
             if alert_text and any(word in alert_text.lower() for word in ["limit", "wait", "too many"]):
                 rate_limited = True
@@ -298,7 +266,6 @@ def test_rapid_purchase_attempts_BOT_001(browser, base_url):
 
         logger.info(f"Purchase attempt {i+1}/{purchase_attempts}: {'Success' if is_confirmed else 'Failed'}")
 
-    # DECIDE: Should have rate limiting after multiple rapid purchases
     if successful_purchases >= purchase_attempts and not rate_limited:
         logger.warning(f"⚠ DISCOVERED: No rate limiting after {purchase_attempts} rapid purchases")
     else:
@@ -316,7 +283,6 @@ def test_automated_cart_manipulation_BOT_002(browser, base_url):
 
     DISCOVER: Are automated rapid cart operations detected?
     """
-    # EXECUTE: Rapidly add and remove items from cart
     browser.get(base_url)
     cart = CartPage(browser)
 
@@ -334,7 +300,6 @@ def test_automated_cart_manipulation_BOT_002(browser, base_url):
 
             time.sleep(0.1)  # Very rapid operations
 
-            # Check for blocking/captcha
             page_source = browser.page_source.lower()
             if any(keyword in page_source for keyword in ["captcha", "robot", "automated", "blocked"]):
                 blocked = True
@@ -344,16 +309,12 @@ def test_automated_cart_manipulation_BOT_002(browser, base_url):
         except Exception as e:
             logger.info(f"Operation {i+1} failed: {str(e)}")
 
-    # DECIDE: Automated behavior should ideally be detected
     if not blocked:
         logger.warning(f"⚠ DISCOVERED: No bot detection after {operations} rapid operations")
     else:
         logger.info("✓ Automated manipulation detected")
 
 
-# ============================================================================
-# PCI-DSS COMPLIANCE TESTS
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.critical
@@ -367,14 +328,12 @@ def test_card_number_masking_PCI_001(browser, base_url):
 
     DISCOVER: Is the full card number displayed in confirmation?
     """
-    # EXECUTE: Complete a purchase
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Purchase with test card
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
@@ -388,19 +347,15 @@ def test_card_number_masking_PCI_001(browser, base_url):
         year="2028"
     )
 
-    # OBSERVE: Check if full card number is exposed
     if success and confirm_text:
-        # DECIDE: Full card number should NOT be displayed
         if test_card in confirm_text:
             logger.critical("✗ CRITICAL: Full card number exposed in confirmation!")
             pytest.fail("DISCOVERED: PCI-DSS violation - unmasked card number displayed")
 
-        # Check for proper masking (e.g., ****3456 or XXXX-XXXX-XXXX-3456)
         if details['card']:
             displayed_card = details['card']
             logger.info(f"Card displayed as: {displayed_card}")
 
-            # Proper masking should show only last 4 digits
             if len(displayed_card) == 16 and displayed_card == test_card:
                 logger.critical("✗ CRITICAL: Card number not masked!")
                 pytest.fail("DISCOVERED: PCI-DSS violation - card not masked")
@@ -419,7 +374,6 @@ def test_card_data_in_url_PCI_002(browser, base_url):
 
     DISCOVER: Is card data ever transmitted in URL parameters?
     """
-    # EXECUTE: Complete purchase flow
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
@@ -442,11 +396,9 @@ def test_card_data_in_url_PCI_002(browser, base_url):
 
     time.sleep(2)
 
-    # OBSERVE: Check URL for card data
     current_url = browser.current_url
     logger.info(f"Current URL: {current_url}")
 
-    # DECIDE: Card number should NEVER appear in URL
     if test_card in current_url or "1234" in current_url:
         logger.critical("✗ CRITICAL: Card data found in URL!")
         pytest.fail("DISCOVERED: PCI-DSS critical violation - card in URL")
@@ -465,7 +417,6 @@ def test_card_data_in_browser_storage_PCI_003(browser, base_url):
 
     DISCOVER: Is card data stored in localStorage or sessionStorage?
     """
-    # EXECUTE: Fill out purchase form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
@@ -487,14 +438,12 @@ def test_card_data_in_browser_storage_PCI_003(browser, base_url):
 
     time.sleep(1)
 
-    # OBSERVE: Check browser storage
     local_storage = browser.execute_script("return JSON.stringify(localStorage);")
     session_storage = browser.execute_script("return JSON.stringify(sessionStorage);")
 
     logger.info(f"LocalStorage: {local_storage[:100]}...")
     logger.info(f"SessionStorage: {session_storage[:100]}...")
 
-    # DECIDE: Card data should NEVER be in browser storage
     if test_card in local_storage or test_card in session_storage:
         logger.critical("✗ CRITICAL: Card data stored in browser storage!")
         pytest.fail("DISCOVERED: PCI-DSS critical violation - card in client storage")
@@ -513,7 +462,6 @@ def test_card_cvv_not_stored_PCI_004(browser, base_url):
 
     DISCOVER: Does the system ask for CVV? If so, is it stored?
     """
-    # EXECUTE: Check if CVV field exists in form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
@@ -523,7 +471,6 @@ def test_card_cvv_not_stored_PCI_004(browser, base_url):
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
-    # OBSERVE: Check for CVV field
     page_source = browser.page_source.lower()
 
     cvv_indicators = ["cvv", "cvc", "security code", "card verification"]
@@ -532,8 +479,6 @@ def test_card_cvv_not_stored_PCI_004(browser, base_url):
     if cvv_field_found:
         logger.info("CVV field detected - checking if it's stored...")
 
-        # If CVV field exists, fill it and check storage
-        # Note: DemoBlaze doesn't have CVV field, but we test the principle
         local_storage = browser.execute_script("return JSON.stringify(localStorage);")
         session_storage = browser.execute_script("return JSON.stringify(sessionStorage);")
 
@@ -545,9 +490,6 @@ def test_card_cvv_not_stored_PCI_004(browser, base_url):
     logger.info("✓ CVV storage test passed (no CVV field or not stored)")
 
 
-# ============================================================================
-# SESSION AND AUTHENTICATION SECURITY
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.high
@@ -560,11 +502,9 @@ def test_purchase_without_authentication_SESSION_001(browser, base_url):
 
     DISCOVER: Can unauthenticated users complete purchases?
     """
-    # EXECUTE: Attempt purchase without logging in
     browser.get(base_url)
     cart = CartPage(browser)
 
-    # Verify not logged in
     login_page = LoginPage(browser)
     is_logged_in = login_page.is_user_logged_in(timeout=1)
 
@@ -572,7 +512,6 @@ def test_purchase_without_authentication_SESSION_001(browser, base_url):
         login_page.logout()
         time.sleep(1)
 
-    # EXECUTE: Add product and attempt purchase
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
@@ -580,7 +519,6 @@ def test_purchase_without_authentication_SESSION_001(browser, base_url):
     purchase = PurchasePage(browser)
     modal_opened = purchase.wait_for_order_modal(timeout=3)
 
-    # DECIDE: Check if purchase is allowed without auth
     if modal_opened:
         logger.info("Purchase modal accessible without authentication")
 
@@ -605,21 +543,17 @@ def test_session_fixation_SESSION_002(browser, base_url):
 
     DISCOVER: Is session ID regenerated after sensitive operations?
     """
-    # EXECUTE: Get session before login
     browser.get(base_url)
     cookies_before = browser.get_cookies()
     session_cookie_before = next((c for c in cookies_before if 'session' in c['name'].lower()), None)
 
-    # EXECUTE: Login
     login_page = LoginPage(browser)
     login_page.login("testuser123", "testpass")
     time.sleep(2)
 
-    # OBSERVE: Get session after login
     cookies_after = browser.get_cookies()
     session_cookie_after = next((c for c in cookies_after if 'session' in c['name'].lower()), None)
 
-    # DECIDE: Session should be regenerated after login
     if session_cookie_before and session_cookie_after:
         if session_cookie_before['value'] == session_cookie_after['value']:
             logger.warning("⚠ DISCOVERED: Session ID not regenerated after login")
@@ -640,19 +574,16 @@ def test_cart_session_hijacking_SESSION_003(browser, base_url):
 
     DISCOVER: Can cart contents be manipulated via session?
     """
-    # EXECUTE: Add item to cart
     browser.get(base_url)
     cart = CartPage(browser)
     product_name, price = cart.add_first_product()
     cart.open_cart()
 
-    # OBSERVE: Get initial cart state
     initial_count = cart.get_cart_item_count()
     initial_total = cart.get_cart_total()
 
     logger.info(f"Initial cart: {initial_count} items, ${initial_total}")
 
-    # EXECUTE: Try to manipulate session storage
     try:
         browser.execute_script("""
             var cartData = localStorage.getItem('cart') || sessionStorage.getItem('cart');
@@ -662,7 +593,6 @@ def test_cart_session_hijacking_SESSION_003(browser, base_url):
             }
         """)
 
-        # Refresh and check if manipulation persisted
         browser.refresh()
         time.sleep(1)
 
@@ -672,7 +602,6 @@ def test_cart_session_hijacking_SESSION_003(browser, base_url):
 
         logger.info(f"After refresh: {new_count} items, ${new_total}")
 
-        # DECIDE: Server should validate cart contents
         if new_count == initial_count and new_total == initial_total:
             logger.info("✓ Cart session properly validated")
         else:
@@ -682,9 +611,6 @@ def test_cart_session_hijacking_SESSION_003(browser, base_url):
         logger.info(f"Session manipulation blocked: {str(e)}")
 
 
-# ============================================================================
-# INPUT VALIDATION AND INJECTION
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.critical
@@ -704,7 +630,6 @@ def test_advanced_sql_injection_INJ_001(browser, base_url, sqli_payload):
 
     DISCOVER: Advanced SQL injection vectors in purchase form
     """
-    # EXECUTE: Add product and attempt SQL injection
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
@@ -724,7 +649,6 @@ def test_advanced_sql_injection_INJ_001(browser, base_url, sqli_payload):
     )
     purchase.click_purchase()
 
-    # OBSERVE: Check for injection success or error disclosure
     time.sleep(1)
     is_confirmed = purchase.is_purchase_confirmed(timeout=2)
     page_source = browser.page_source.lower()
@@ -734,7 +658,6 @@ def test_advanced_sql_injection_INJ_001(browser, base_url, sqli_payload):
         "odbc", "jdbc", "oracle", "syntax error near"
     ]
 
-    # DECIDE: Injection should be prevented
     if is_confirmed:
         logger.critical(f"✗ CRITICAL: SQL injection may have succeeded: {sqli_payload}")
         pytest.fail(f"DISCOVERED: SQL injection vulnerability with '{sqli_payload}'")
@@ -765,7 +688,6 @@ def test_advanced_xss_vectors_INJ_002(browser, base_url, xss_vector):
 
     DISCOVER: Advanced XSS vectors in purchase confirmation
     """
-    # EXECUTE: Add product and inject XSS payload
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
@@ -785,19 +707,16 @@ def test_advanced_xss_vectors_INJ_002(browser, base_url, xss_vector):
     )
     purchase.click_purchase()
 
-    # OBSERVE: Check for XSS execution
     time.sleep(1)
     is_confirmed = purchase.is_purchase_confirmed(timeout=2)
 
     if is_confirmed:
         page_source = browser.page_source
 
-        # DECIDE: XSS should be sanitized
         if xss_vector in page_source:
             logger.critical(f"✗ CRITICAL: XSS payload reflected: {xss_vector}")
             pytest.fail(f"DISCOVERED: XSS vulnerability - payload reflected unescaped")
 
-        # Check for alert execution
         try:
             alert = browser.switch_to.alert
             alert_text = alert.text
@@ -827,7 +746,6 @@ def test_ldap_injection_INJ_003(browser, base_url):
         "*))%00"
     ]
 
-    # EXECUTE: Test LDAP injection in name field
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
@@ -853,7 +771,6 @@ def test_ldap_injection_INJ_003(browser, base_url):
         time.sleep(1)
         page_source = browser.page_source.lower()
 
-        # OBSERVE: Check for LDAP error disclosure
         ldap_errors = ["ldap", "directory", "naming exception"]
 
         for error in ldap_errors:
@@ -861,7 +778,6 @@ def test_ldap_injection_INJ_003(browser, base_url):
                 violations.append(f"{payload} -> {error}")
                 logger.critical(f"✗ LDAP error disclosure: {error}")
 
-    # DECIDE: LDAP injection should be prevented
     if violations:
         pytest.fail(f"DISCOVERED: LDAP injection vulnerabilities: {violations}")
 
@@ -886,7 +802,6 @@ def test_command_injection_INJ_004(browser, base_url):
         "$(cat /etc/passwd)"
     ]
 
-    # EXECUTE: Test command injection
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
@@ -912,7 +827,6 @@ def test_command_injection_INJ_004(browser, base_url):
         time.sleep(1)
         page_source = browser.page_source.lower()
 
-        # OBSERVE: Check for command execution artifacts
         command_indicators = ["/bin", "/usr", "root:", "uid=", "total "]
 
         for indicator in command_indicators:
@@ -920,16 +834,12 @@ def test_command_injection_INJ_004(browser, base_url):
                 violations.append(f"{payload} -> {indicator}")
                 logger.critical(f"✗ Command injection artifact: {indicator}")
 
-    # DECIDE: Command injection should be blocked
     if violations:
         pytest.fail(f"DISCOVERED: Command injection vulnerabilities: {violations}")
 
     logger.info("✓ Command injection prevented")
 
 
-# ============================================================================
-# ACCESSIBILITY AND WCAG COMPLIANCE
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.low
@@ -942,14 +852,12 @@ def test_keyboard_navigation_WCAG_001(browser, base_url):
 
     DISCOVER: Can purchase flow be completed using only keyboard?
     """
-    # EXECUTE: Add product and navigate to order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
     cart.open_cart()
     cart.click_place_order()
 
-    # EXECUTE: Try keyboard-only form navigation
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
@@ -958,10 +866,8 @@ def test_keyboard_navigation_WCAG_001(browser, base_url):
             fill_data=["QA Tester", "Spain", "Barcelona", "1234567890123456", "12", "2028"]
         )
 
-        # OBSERVE: Check if all fields were filled via Tab navigation
         logger.info(f"Keyboard navigation filled: {filled_values}")
 
-        # DECIDE: All fields should be accessible via keyboard
         if all(filled_values.values()):
             logger.info("✓ Keyboard navigation fully functional")
         else:
@@ -983,7 +889,6 @@ def test_screen_reader_labels_WCAG_002(browser, base_url):
 
     DISCOVER: Do form fields have proper labels for screen readers?
     """
-    # EXECUTE: Open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
@@ -993,7 +898,6 @@ def test_screen_reader_labels_WCAG_002(browser, base_url):
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
-    # OBSERVE: Check for proper label associations
     form_fields = [
         "name", "country", "city", "card", "month", "year"
     ]
@@ -1001,7 +905,6 @@ def test_screen_reader_labels_WCAG_002(browser, base_url):
     missing_labels = []
 
     for field_id in form_fields:
-        # Check if field has associated label
         label_check = browser.execute_script(f"""
             var field = document.getElementById('{field_id}');
             if (!field) return false;
@@ -1017,7 +920,6 @@ def test_screen_reader_labels_WCAG_002(browser, base_url):
         if not label_check:
             missing_labels.append(field_id)
 
-    # DECIDE: All fields should have proper labels
     if missing_labels:
         logger.warning(f"⚠ ACCESSIBILITY ISSUE: Missing labels for {missing_labels}")
     else:
@@ -1035,7 +937,6 @@ def test_color_contrast_WCAG_003(browser, base_url):
 
     DISCOVER: Do buttons and text meet minimum contrast ratios?
     """
-    # EXECUTE: Open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
@@ -1045,7 +946,6 @@ def test_color_contrast_WCAG_003(browser, base_url):
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
-    # OBSERVE: Check button contrast
     purchase_button_styles = browser.execute_script("""
         var button = document.querySelector('button:contains("Purchase")') ||
                      document.evaluate("//button[text()='Purchase']", document, null,
@@ -1078,7 +978,6 @@ def test_focus_indicators_WCAG_004(browser, base_url):
 
     DISCOVER: Are focus indicators visible when tabbing through form?
     """
-    # EXECUTE: Open order form
     browser.get(base_url)
     cart = CartPage(browser)
     cart.add_first_product()
@@ -1088,7 +987,6 @@ def test_focus_indicators_WCAG_004(browser, base_url):
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
-    # EXECUTE: Tab through fields and check focus
     actions = ActionChains(browser)
     name_field = browser.find_element(*purchase.ORDER_NAME_FIELD)
     name_field.click()
@@ -1098,7 +996,6 @@ def test_focus_indicators_WCAG_004(browser, base_url):
     for i in range(6):  # 6 form fields
         time.sleep(0.3)
 
-        # OBSERVE: Check if focused element has visible focus indicator
         focus_check = browser.execute_script("""
             var activeEl = document.activeElement;
             var styles = window.getComputedStyle(activeEl);
@@ -1121,7 +1018,6 @@ def test_focus_indicators_WCAG_004(browser, base_url):
 
         actions.send_keys(Keys.TAB).perform()
 
-    # DECIDE: Focus should be visible on all fields
     logger.info(f"✓ Visible focus detected on {len(fields_with_visible_focus)} fields")
 
     if len(fields_with_visible_focus) < 6:

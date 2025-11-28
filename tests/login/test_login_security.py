@@ -22,12 +22,8 @@ import logging
 from pages.login_page import LoginPage
 from selenium.webdriver.common.keys import Keys
 
-logging.basicConfig(level=logging.ERROR)
 
 
-# ============================================================================
-# INJECTION ATTACKS (CRITICAL)
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.critical
@@ -56,14 +52,11 @@ def test_sql_injection_username_INJ_001(browser, base_url, sql_payload):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Try SQL injection payload
     login_page.login(sql_payload, "anypassword")
 
-    # OBSERVE: Check if injection succeeded
     logged_in = login_page.is_user_logged_in(timeout=2)
     login_page.get_alert_text(timeout=2)  # Dismiss any alert
 
-    # DECIDE: SQL injection should be blocked
     if logged_in:
         logging.critical(f"CRITICAL VULNERABILITY: SQL Injection succeeded with payload: {sql_payload}")
         logging.error("CVSS Score: 9.8 CRITICAL")
@@ -99,14 +92,11 @@ def test_sql_injection_password_INJ_002(browser, base_url, sql_payload):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Try SQL injection in password field
     login_page.login("Apolo2025", sql_payload)
 
-    # OBSERVE: Check if injection succeeded
     logged_in = login_page.is_user_logged_in(timeout=2)
     login_page.get_alert_text(timeout=2)
 
-    # DECIDE: SQL injection should be blocked
     if logged_in:
         logging.critical(f"CRITICAL VULNERABILITY: SQL Injection in password field: {sql_payload}")
         logging.error("CVSS Score: 9.8 CRITICAL")
@@ -142,13 +132,10 @@ def test_xss_username_field_INJ_003(browser, base_url, xss_payload):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Try XSS payload
     login_page.login(xss_payload, "anypassword")
 
-    # OBSERVE: Check if XSS executed
     alert_text = login_page.get_alert_text(timeout=2)
 
-    # DECIDE: XSS should be prevented
     if alert_text and "XSS" in alert_text:
         logging.critical(f"CRITICAL VULNERABILITY: XSS executed with payload: {xss_payload}")
         logging.error("CVSS Score: 8.8 HIGH")
@@ -159,9 +146,6 @@ def test_xss_username_field_INJ_003(browser, base_url, xss_payload):
         assert True
 
 
-# ============================================================================
-# BOT & BRUTE FORCE PROTECTION (HIGH)
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.high
@@ -185,11 +169,9 @@ def test_brute_force_no_rate_limiting_BOT_001(browser, base_url):
     attempts = 0
     rate_limited = False
 
-    # EXECUTE: Attempt 50 rapid logins
     for i in range(50):
         login_page.login("Apolo2025", f"wrongpass{i}")
 
-        # OBSERVE: Check for rate limiting
         alert_text = login_page.get_alert_text(timeout=2)
 
         if alert_text and ("rate" in alert_text.lower() or "locked" in alert_text.lower() or "blocked" in alert_text.lower()):
@@ -200,7 +182,6 @@ def test_brute_force_no_rate_limiting_BOT_001(browser, base_url):
         attempts += 1
         browser.get(base_url)
 
-    # DECIDE: Rate limiting should exist
     if not rate_limited and attempts >= 45:
         logging.critical("CRITICAL VULNERABILITY: NO RATE LIMITING")
         logging.error("CVSS Score: 8.1 HIGH")
@@ -213,9 +194,6 @@ def test_brute_force_no_rate_limiting_BOT_001(browser, base_url):
         assert True
 
 
-# ============================================================================
-# BUSINESS LOGIC VULNERABILITIES (MEDIUM)
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.medium
@@ -236,17 +214,14 @@ def test_account_enumeration_BL_001(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Try invalid username
     login_page.login("definitely_non_existent_user_9999", "anypassword")
     invalid_user_msg = login_page.get_alert_text(timeout=5)
 
     browser.get(base_url)
 
-    # EXECUTE: Try valid username with wrong password
     login_page.login("Apolo2025", "definitely_wrong_password_123")
     valid_user_wrong_pass_msg = login_page.get_alert_text(timeout=5)
 
-    # DECIDE: Error messages should be generic (not reveal username validity)
     if invalid_user_msg and valid_user_wrong_pass_msg:
         if invalid_user_msg.lower() != valid_user_wrong_pass_msg.lower():
             if "not exist" in invalid_user_msg.lower() or "exist" in invalid_user_msg.lower():
@@ -261,9 +236,6 @@ def test_account_enumeration_BL_001(browser, base_url):
     assert True
 
 
-# ============================================================================
-# AUTHENTICATION TESTS (HIGH)
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.high
@@ -284,25 +256,20 @@ def test_session_fixation_AUTH_001(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Get cookies before login
     cookies_before = browser.get_cookies()
     session_before = [c for c in cookies_before if 'session' in c.get('name', '').lower()]
 
-    # EXECUTE: Login
     login_page.login("Apolo2025", "apolo2025")
 
-    # OBSERVE: Check if logged in
     logged_in = login_page.is_user_logged_in(timeout=5)
 
     if not logged_in:
         alert_text = login_page.get_alert_text()
         pytest.skip(f"Cannot test session fixation - login failed: {alert_text}")
 
-    # OBSERVE: Get cookies after login
     cookies_after = browser.get_cookies()
     session_after = [c for c in cookies_after if 'session' in c.get('name', '').lower()]
 
-    # DECIDE: Session ID should change after authentication
     if session_before and session_after:
         if session_before[0].get('value') == session_after[0].get('value'):
             logging.error("SESSION FIXATION VULNERABILITY")
@@ -336,16 +303,13 @@ def test_session_cookie_security_flags_AUTH_002(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Login
     login_page.login("Apolo2025", "apolo2025")
 
-    # OBSERVE: Check if logged in
     logged_in = login_page.is_user_logged_in(timeout=5)
     if not logged_in:
         alert_text = login_page.get_alert_text()
         pytest.skip(f"Cannot test cookies - login failed: {alert_text}")
 
-    # OBSERVE: Get cookies
     cookies = browser.get_cookies()
 
     missing_flags = []
@@ -357,7 +321,6 @@ def test_session_cookie_security_flags_AUTH_002(browser, base_url):
             if not cookie.get('secure', False):
                 missing_flags.append(f"{cookie['name']}: Missing Secure flag")
 
-    # DECIDE: Session cookies should have security flags
     if missing_flags:
         logging.warning("COOKIE SECURITY FLAGS MISSING")
         logging.warning("CVSS Score: 6.5 MEDIUM")
@@ -371,9 +334,6 @@ def test_session_cookie_security_flags_AUTH_002(browser, base_url):
     assert True
 
 
-# ============================================================================
-# CSRF PROTECTION (MEDIUM)
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.medium
@@ -394,10 +354,8 @@ def test_csrf_token_validation_CSRF_001(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Open login modal
     login_page.open_login_modal()
 
-    # OBSERVE: Check for CSRF token in form
     form_html = browser.page_source
 
     has_csrf = False
@@ -406,7 +364,6 @@ def test_csrf_token_validation_CSRF_001(browser, base_url):
             has_csrf = True
             logging.info("CSRF token found in login form")
 
-    # DECIDE: CSRF token should be present
     if not has_csrf:
         logging.warning("NO CSRF TOKEN DETECTED IN LOGIN FORM")
         logging.warning("CVSS Score: 6.5 MEDIUM")
@@ -417,9 +374,6 @@ def test_csrf_token_validation_CSRF_001(browser, base_url):
     assert True
 
 
-# ============================================================================
-# SECURITY HEADERS (HIGH)
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.high
@@ -472,9 +426,6 @@ def test_security_headers_validation_HEAD_001(browser, base_url):
         assert True
 
 
-# ============================================================================
-# SSL/TLS TESTS (HIGH)
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.high
@@ -523,9 +474,6 @@ def test_tls_version_SSL_001(browser, base_url):
         assert True
 
 
-# ============================================================================
-# PASSWORD RESET TESTS (MEDIUM)
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.medium
@@ -544,13 +492,11 @@ def test_password_reset_security_RESET_001(browser, base_url):
     """
     browser.get(base_url)
 
-    # OBSERVE: Check for password reset functionality
     page_source = browser.page_source.lower()
 
     reset_keywords = ['forgot password', 'reset password', 'recover password']
     reset_found = any(keyword in page_source for keyword in reset_keywords)
 
-    # DECIDE: Password reset should exist
     if not reset_found:
         logging.warning("=" * 80)
         logging.warning("SECURITY CONCERN: NO PASSWORD RESET MECHANISM")
@@ -566,9 +512,6 @@ def test_password_reset_security_RESET_001(browser, base_url):
         assert True
 
 
-# ============================================================================
-# SESSION TIMEOUT TESTS (MEDIUM)
-# ============================================================================
 
 @pytest.mark.security
 @pytest.mark.medium
@@ -589,7 +532,6 @@ def test_session_timeout_security_TIMEOUT_001(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Login
     login_page.login("Apolo2025", "apolo2025")
     time.sleep(1)
     login_page.get_alert_text()
@@ -599,16 +541,13 @@ def test_session_timeout_security_TIMEOUT_001(browser, base_url):
 
     logging.info("DISCOVERED: User logged in, waiting 60 seconds for timeout test")
 
-    # EXECUTE: Wait 60 seconds idle
     time.sleep(60)
 
-    # OBSERVE: Check if session expired
     browser.refresh()
     time.sleep(2)
 
     still_logged_in = login_page.is_user_logged_in(timeout=2)
 
-    # DECIDE: Session should timeout
     if still_logged_in:
         logging.warning("=" * 80)
         logging.warning("SECURITY CONCERN: NO SESSION TIMEOUT DETECTED")
@@ -643,7 +582,6 @@ def test_rapid_concurrent_login_attempts_BOT_002(browser, base_url):
     from concurrent.futures import ThreadPoolExecutor, as_completed
     from selenium import webdriver
 
-    # EXECUTE: Attempt concurrent logins
     def attempt_login():
         try:
             driver = webdriver.Chrome()
@@ -661,10 +599,8 @@ def test_rapid_concurrent_login_attempts_BOT_002(browser, base_url):
         results = [f.result() for f in as_completed(futures)]
         successful_attempts = sum(results)
 
-    # OBSERVE: How many attempts succeeded
     logging.info(f"DISCOVERED: {successful_attempts}/20 concurrent requests completed")
 
-    # DECIDE: System should handle or throttle concurrent attempts
     if successful_attempts >= 15:
         logging.warning("=" * 80)
         logging.warning("SECURITY CONCERN: HIGH CONCURRENT ATTEMPT SUCCESS RATE")
@@ -699,7 +635,6 @@ def test_concurrent_session_handling_AUTH_003(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: First login
     login_page.login("Apolo2025", "apolo2025")
     time.sleep(1)
     login_page.get_alert_text(timeout=2)
@@ -707,11 +642,9 @@ def test_concurrent_session_handling_AUTH_003(browser, base_url):
     if not login_page.is_user_logged_in(timeout=3):
         pytest.skip("First login failed - cannot test concurrent sessions")
 
-    # OBSERVE: First session state
     first_session_cookies = browser.get_cookies()
     logging.info("✓ First session established")
 
-    # EXECUTE: Second login from different browser
     second_browser = webdriver.Chrome()
     try:
         second_browser.get(base_url)
@@ -725,12 +658,10 @@ def test_concurrent_session_handling_AUTH_003(browser, base_url):
 
         logging.info("✓ Second session established")
 
-        # OBSERVE: Check if first session still valid
         browser.refresh()
         time.sleep(2)
         first_still_logged_in = login_page.is_user_logged_in(timeout=2)
 
-        # DECIDE: Document behavior (either approach is valid)
         if first_still_logged_in:
             logging.info("✓ DISCOVERED: System allows concurrent sessions")
             logging.info("Note: Both sessions remain active simultaneously")
@@ -763,7 +694,6 @@ def test_verbose_error_messages_INFO_001(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Try malicious input to trigger verbose errors
     malicious_inputs = [
         "test'\"<>",
         "'; DROP TABLE users--",
@@ -777,13 +707,11 @@ def test_verbose_error_messages_INFO_001(browser, base_url):
         browser.get(base_url)
         login_page.login(malicious_input, malicious_input)
 
-        # OBSERVE: Check error messages
         time.sleep(1)
         alert_text = login_page.get_alert_text(timeout=3)
 
         if alert_text:
             alert_lower = alert_text.lower()
-            # Check for dangerous keywords
             dangerous_keywords = [
                 "sql", "database", "mysql", "postgres", "oracle", "mongodb",
                 "exception", "stack trace", "error at line", "syntax error",
@@ -794,7 +722,6 @@ def test_verbose_error_messages_INFO_001(browser, base_url):
             if found:
                 verbose_errors_found.append((malicious_input, alert_text, found))
 
-    # DECIDE: Verbose errors should not exist
     if verbose_errors_found:
         logging.warning("=" * 80)
         logging.warning("SECURITY CONCERN: VERBOSE ERROR MESSAGES DETECTED")
@@ -828,7 +755,6 @@ def test_dangerous_http_methods_HTTP_001(browser, base_url):
 
     Impact: Potential for data manipulation or XST attacks
     """
-    # EXECUTE: Test dangerous HTTP methods
     dangerous_methods = ['PUT', 'DELETE', 'TRACE', 'OPTIONS', 'CONNECT', 'PATCH']
     allowed_methods = []
 
@@ -836,18 +762,12 @@ def test_dangerous_http_methods_HTTP_001(browser, base_url):
         try:
             response = requests.request(method, base_url, timeout=5)
 
-            # OBSERVE: Check response codes
-            # 405 = Method Not Allowed (good)
-            # 501 = Not Implemented (acceptable)
-            # 403 = Forbidden (acceptable)
-            # Anything else = potentially dangerous
             if response.status_code not in [405, 501, 403]:
                 allowed_methods.append(f"{method}: {response.status_code}")
                 logging.warning(f"Method {method} returned: {response.status_code}")
         except Exception as e:
             logging.debug(f"Method {method} failed: {e}")
 
-    # DECIDE: Dangerous methods should be blocked
     if allowed_methods:
         logging.warning("=" * 80)
         logging.warning("SECURITY CONCERN: DANGEROUS HTTP METHODS ALLOWED")
@@ -882,7 +802,6 @@ def test_timing_attack_username_enumeration_TIME_001(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Measure timing for invalid usernames
     invalid_times = []
     for i in range(5):
         start = time.time()
@@ -893,7 +812,6 @@ def test_timing_attack_username_enumeration_TIME_001(browser, base_url):
         logging.info(f"Invalid username attempt {i+1}: {elapsed:.3f}s")
         browser.get(base_url)
 
-    # EXECUTE: Measure timing for valid username (wrong password)
     valid_times = []
     for i in range(5):
         start = time.time()
@@ -904,7 +822,6 @@ def test_timing_attack_username_enumeration_TIME_001(browser, base_url):
         logging.info(f"Valid username attempt {i+1}: {elapsed:.3f}s")
         browser.get(base_url)
 
-    # OBSERVE: Calculate averages
     avg_invalid = sum(invalid_times) / len(invalid_times)
     avg_valid = sum(valid_times) / len(valid_times)
     time_diff = abs(avg_valid - avg_invalid)
@@ -913,7 +830,6 @@ def test_timing_attack_username_enumeration_TIME_001(browser, base_url):
     logging.info(f"Average valid username time: {avg_valid:.3f}s")
     logging.info(f"Time difference: {time_diff:.3f}s")
 
-    # DECIDE: Timing differences should be minimal
     if time_diff > 0.5:
         logging.warning("=" * 80)
         logging.warning("SECURITY CONCERN: TIMING ATTACK POSSIBLE")
@@ -948,7 +864,6 @@ def test_clickjacking_protection_CLICK_001(browser, base_url):
     """
     browser.get(base_url)
 
-    # EXECUTE: Try to embed site in iframe
     browser.execute_script("""
         var iframe = document.createElement('iframe');
         iframe.src = arguments[0];
@@ -960,20 +875,17 @@ def test_clickjacking_protection_CLICK_001(browser, base_url):
 
     time.sleep(3)
 
-    # OBSERVE: Check if iframe loaded
     try:
         from selenium.webdriver.common.by import By
         iframe = browser.find_element(By.ID, "testIframe")
         iframe_loaded = iframe is not None
 
         if iframe_loaded:
-            # Check if iframe actually contains content
             browser.switch_to.frame(iframe)
             body = browser.find_element(By.TAG_NAME, "body")
             has_content = len(body.text) > 0
             browser.switch_to.default_content()
 
-            # DECIDE: Site should not load in iframe
             if has_content:
                 logging.warning("=" * 80)
                 logging.warning("SECURITY CONCERN: CLICKJACKING POSSIBLE")
@@ -1014,10 +926,8 @@ def test_remember_me_security_REMEM_001(browser, base_url):
     browser.get(base_url)
     login_page = LoginPage(browser)
 
-    # EXECUTE: Open login modal
     login_page.open_login_modal()
 
-    # OBSERVE: Check for Remember Me functionality
     page_source = browser.page_source.lower()
     remember_keywords = [
         'remember me', 'keep me logged in', 'stay signed in',
@@ -1031,7 +941,6 @@ def test_remember_me_security_REMEM_001(browser, base_url):
             logging.info(f"✓ DISCOVERED: Remember Me detected - keyword: '{keyword}'")
             break
 
-    # DECIDE: Document behavior and security implications
     if not remember_me_exists:
         logging.info("✓ DISCOVERED: No Remember Me functionality detected")
         logging.info("Note: This is acceptable - reduces session persistence risk")
