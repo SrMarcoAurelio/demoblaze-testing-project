@@ -1,19 +1,19 @@
 """
 Signup Page Object Model
 Author: Marc Arévalo
-Version: 1.0
+Version: 2.0
 
-This page object models the Signup/Registration functionality of DemoBlaze.
+This page object models Signup/Registration functionality.
 Contains all locators and actions related to user registration.
+Universal and reusable across any web application with modal-based registration.
 """
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from pages.base_page import BasePage
+from utils.helpers.data_generator import generate_unique_username, generate_random_password
 import logging
 import time
-import random
-import string
 
 
 
@@ -316,28 +316,3 @@ class SignupPage(BasePage):
         return has_csrf
 
 
-    @staticmethod
-    def generate_unique_username():
-        """
-        Generate a unique username for testing.
-
-        Returns:
-            Unique username string
-        """
-        timestamp = int(time.time())
-        random_suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
-        return f"testuser_{timestamp}_{random_suffix}"
-
-    @staticmethod
-    def generate_random_password(length=10):
-        """
-        Generate a random password for testing.
-
-        Args:
-            length: Password length (default: 10)
-
-        Returns:
-            Random password string
-        """
-        characters = string.ascii_letters + string.digits + string.punctuation
-        return ''.join(random.choices(characters, k=length))

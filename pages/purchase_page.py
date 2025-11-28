@@ -1,10 +1,11 @@
 """
 Purchase/Order Page Object Model
 Author: Marc Arévalo
-Version: 1.0
+Version: 2.0
 
-This page object models the Purchase/Checkout functionality of DemoBlaze.
+This page object models Purchase/Checkout functionality.
 Contains all locators and actions related to order placement and payment.
+Universal and reusable across any web application with checkout features.
 """
 
 from selenium.webdriver.common.by import By
