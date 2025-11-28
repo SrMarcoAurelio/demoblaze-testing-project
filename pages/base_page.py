@@ -13,8 +13,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.remote.webdriver import WebDriver
+from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.common.alert import Alert
 import logging
 import time
+from typing import Optional, List, Tuple, Union
 from config import config
 
 
@@ -38,7 +42,7 @@ class BasePage:
     SLEEP_LONG = 2.0
     SLEEP_MODAL = 1.5
 
-    def __init__(self, driver, base_url=None, timeout=10):
+    def __init__(self, driver: WebDriver, base_url: Optional[str] = None, timeout: int = 10) -> None:
         """
         Initialize the BasePage.
 
@@ -47,14 +51,14 @@ class BasePage:
             base_url: Base URL of the application (optional, defaults to config.BASE_URL)
             timeout: Default timeout for waits (default: 10 seconds)
         """
-        self.driver = driver
-        self.base_url = base_url or config.BASE_URL
-        self.timeout = timeout
-        self.wait = WebDriverWait(driver, timeout)
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self.driver: WebDriver = driver
+        self.base_url: str = base_url or config.BASE_URL
+        self.timeout: int = timeout
+        self.wait: WebDriverWait = WebDriverWait(driver, timeout)
+        self.logger: logging.Logger = logging.getLogger(self.__class__.__name__)
 
 
-    def find_element(self, locator, timeout=None):
+    def find_element(self, locator: Tuple[str, str], timeout: Optional[int] = None) -> WebElement:
         """
         Find an element with explicit wait.
 
@@ -68,9 +72,9 @@ class BasePage:
         Raises:
             TimeoutException if element not found
         """
-        wait_time = timeout if timeout else self.timeout
+        wait_time: int = timeout if timeout else self.timeout
         try:
-            element = WebDriverWait(self.driver, wait_time).until(
+            element: WebElement = WebDriverWait(self.driver, wait_time).until(
                 EC.presence_of_element_located(locator)
             )
             self.logger.debug(f"Element found: {locator}")
@@ -79,7 +83,7 @@ class BasePage:
             self.logger.error(f"Element not found: {locator}")
             raise
 
-    def find_elements(self, locator, timeout=None):
+    def find_elements(self, locator: Tuple[str, str], timeout: Optional[int] = None) -> List[WebElement]:
         """
         Find multiple elements with explicit wait.
 
@@ -90,9 +94,9 @@ class BasePage:
         Returns:
             List of WebElements
         """
-        wait_time = timeout if timeout else self.timeout
+        wait_time: int = timeout if timeout else self.timeout
         try:
-            elements = WebDriverWait(self.driver, wait_time).until(
+            elements: List[WebElement] = WebDriverWait(self.driver, wait_time).until(
                 EC.presence_of_all_elements_located(locator)
             )
             self.logger.debug(f"Found {len(elements)} elements: {locator}")
@@ -101,7 +105,7 @@ class BasePage:
             self.logger.warning(f"No elements found: {locator}")
             return []
 
-    def wait_for_element_visible(self, locator, timeout=None):
+    def wait_for_element_visible(self, locator: Tuple[str, str], timeout: Optional[int] = None) -> WebElement:
         """
         Wait for element to be visible.
 
@@ -112,9 +116,9 @@ class BasePage:
         Returns:
             WebElement if visible
         """
-        wait_time = timeout if timeout else self.timeout
+        wait_time: int = timeout if timeout else self.timeout
         try:
-            element = WebDriverWait(self.driver, wait_time).until(
+            element: WebElement = WebDriverWait(self.driver, wait_time).until(
                 EC.visibility_of_element_located(locator)
             )
             self.logger.debug(f"Element visible: {locator}")
@@ -123,7 +127,7 @@ class BasePage:
             self.logger.error(f"Element not visible: {locator}")
             raise
 
-    def wait_for_element_clickable(self, locator, timeout=None):
+    def wait_for_element_clickable(self, locator: Tuple[str, str], timeout: Optional[int] = None) -> WebElement:
         """
         Wait for element to be clickable.
 
@@ -134,9 +138,9 @@ class BasePage:
         Returns:
             WebElement if clickable
         """
-        wait_time = timeout if timeout else self.timeout
+        wait_time: int = timeout if timeout else self.timeout
         try:
-            element = WebDriverWait(self.driver, wait_time).until(
+            element: WebElement = WebDriverWait(self.driver, wait_time).until(
                 EC.element_to_be_clickable(locator)
             )
             self.logger.debug(f"Element clickable: {locator}")
@@ -167,7 +171,7 @@ class BasePage:
             self.logger.error(f"Element still visible: {locator}")
             raise
 
-    def click(self, locator, timeout=None):
+    def click(self, locator: Tuple[str, str], timeout: Optional[int] = None) -> None:
         """
         Click an element.
 
@@ -175,11 +179,11 @@ class BasePage:
             locator: Tuple (By.TYPE, "value")
             timeout: Optional custom timeout
         """
-        element = self.wait_for_element_clickable(locator, timeout)
+        element: WebElement = self.wait_for_element_clickable(locator, timeout)
         element.click()
         self.logger.info(f"Clicked: {locator}")
 
-    def type(self, locator, text, clear_first=True, timeout=None):
+    def type(self, locator: Tuple[str, str], text: str, clear_first: bool = True, timeout: Optional[int] = None) -> None:
         """
         Type text into an element.
 
@@ -189,13 +193,13 @@ class BasePage:
             clear_first: Clear field before typing (default: True)
             timeout: Optional custom timeout
         """
-        element = self.wait_for_element_visible(locator, timeout)
+        element: WebElement = self.wait_for_element_visible(locator, timeout)
         if clear_first:
             element.clear()
         element.send_keys(text)
         self.logger.info(f"Typed '{text}' into: {locator}")
 
-    def get_text(self, locator, timeout=None):
+    def get_text(self, locator: Tuple[str, str], timeout: Optional[int] = None) -> str:
         """
         Get text from an element.
 
@@ -206,8 +210,8 @@ class BasePage:
         Returns:
             Text content of element
         """
-        element = self.wait_for_element_visible(locator, timeout)
-        text = element.text
+        element: WebElement = self.wait_for_element_visible(locator, timeout)
+        text: str = element.text
         self.logger.debug(f"Got text '{text}' from: {locator}")
         return text
 
@@ -228,7 +232,7 @@ class BasePage:
         self.logger.debug(f"Got attribute '{attribute}' = '{value}' from: {locator}")
         return value
 
-    def is_element_present(self, locator, timeout=2):
+    def is_element_present(self, locator: Tuple[str, str], timeout: int = 2) -> bool:
         """
         Check if element is present (short timeout).
 
@@ -263,7 +267,7 @@ class BasePage:
             return False
 
 
-    def wait_for_alert(self, timeout=5):
+    def wait_for_alert(self, timeout: int = 5) -> Optional[Alert]:
         """
         Wait for alert to be present.
 
@@ -275,14 +279,14 @@ class BasePage:
         """
         try:
             WebDriverWait(self.driver, timeout).until(EC.alert_is_present())
-            alert = self.driver.switch_to.alert
+            alert: Alert = self.driver.switch_to.alert
             self.logger.info(f"Alert present: '{alert.text}'")
             return alert
         except TimeoutException:
             self.logger.debug("No alert present")
             return None
 
-    def get_alert_text(self, timeout=5):
+    def get_alert_text(self, timeout: int = 5) -> Optional[str]:
         """
         Get alert text and accept it.
 
@@ -292,9 +296,9 @@ class BasePage:
         Returns:
             Alert text if present, None otherwise
         """
-        alert = self.wait_for_alert(timeout)
+        alert: Optional[Alert] = self.wait_for_alert(timeout)
         if alert:
-            alert_text = alert.text
+            alert_text: str = alert.text
             alert.accept()
             self.logger.info(f"Alert accepted: '{alert_text}'")
             return alert_text
@@ -325,7 +329,7 @@ class BasePage:
             self.logger.info("Alert dismissed")
 
 
-    def navigate_to(self, url):
+    def navigate_to(self, url: str) -> None:
         """
         Navigate to a URL.
 
@@ -345,25 +349,25 @@ class BasePage:
         self.driver.back()
         self.logger.info("Navigated back")
 
-    def get_current_url(self):
+    def get_current_url(self) -> str:
         """
         Get current URL.
 
         Returns:
             Current URL
         """
-        url = self.driver.current_url
+        url: str = self.driver.current_url
         self.logger.debug(f"Current URL: {url}")
         return url
 
-    def get_page_title(self):
+    def get_page_title(self) -> str:
         """
         Get page title.
 
         Returns:
             Page title
         """
-        title = self.driver.title
+        title: str = self.driver.title
         self.logger.debug(f"Page title: {title}")
         return title
 
@@ -436,7 +440,7 @@ class BasePage:
         self.logger.info(f"Hovered over: {locator}")
 
 
-    def wait(self, seconds):
+    def wait(self, seconds: Union[int, float]) -> None:
         """
         Explicit wait (use sparingly, prefer explicit waits).
 
@@ -446,7 +450,7 @@ class BasePage:
         time.sleep(seconds)
         self.logger.debug(f"Waited {seconds} seconds")
 
-    def wait_for_page_load(self, timeout=30):
+    def wait_for_page_load(self, timeout: int = 30) -> bool:
         """
         Wait for page to finish loading.
 
@@ -471,7 +475,7 @@ class BasePage:
             self.logger.error(f"Page did not load within {timeout} seconds")
             raise
 
-    def take_screenshot(self, filename):
+    def take_screenshot(self, filename: str) -> None:
         """
         Take screenshot.
 
@@ -481,7 +485,7 @@ class BasePage:
         self.driver.save_screenshot(filename)
         self.logger.info(f"Screenshot saved: {filename}")
 
-    def get_page_source(self):
+    def get_page_source(self) -> str:
         """
         Get page source HTML.
 
