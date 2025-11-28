@@ -20,6 +20,12 @@ on:
           - firefox
           - edge
 
+# Required permissions for GitHub Pages deployment
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 env:
   PYTHON_VERSION: '3.11'
   BASE_URL: 'https://www.demoblaze.com/'
