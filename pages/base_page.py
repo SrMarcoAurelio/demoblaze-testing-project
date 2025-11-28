@@ -1,10 +1,11 @@
 """
 Base Page Object Model
 Author: Marc Arévalo
-Version: 1.0
+Version: 2.0
 
 This base class contains common methods used across all page objects.
 All page objects should inherit from this class.
+Universal and reusable across any web application.
 """
 
 from selenium.webdriver.support.ui import WebDriverWait
@@ -14,6 +15,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 import logging
 import time
+from config import config
 
 
 
@@ -27,17 +29,26 @@ class BasePage:
     - Typing text
     - Handling alerts
     - Taking screenshots
+
+    Universal and reusable across any web application.
     """
 
-    def __init__(self, driver, timeout=10):
+    SLEEP_SHORT = 0.5
+    SLEEP_MEDIUM = 1.0
+    SLEEP_LONG = 2.0
+    SLEEP_MODAL = 1.5
+
+    def __init__(self, driver, base_url=None, timeout=10):
         """
         Initialize the BasePage.
 
         Args:
             driver: Selenium WebDriver instance
+            base_url: Base URL of the application (optional, defaults to config.BASE_URL)
             timeout: Default timeout for waits (default: 10 seconds)
         """
         self.driver = driver
+        self.base_url = base_url or config.BASE_URL
         self.timeout = timeout
         self.wait = WebDriverWait(driver, timeout)
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -434,6 +445,31 @@ class BasePage:
         """
         time.sleep(seconds)
         self.logger.debug(f"Waited {seconds} seconds")
+
+    def wait_for_page_load(self, timeout=30):
+        """
+        Wait for page to finish loading.
+
+        Uses JavaScript document.readyState to verify page is fully loaded.
+
+        Args:
+            timeout: Maximum time to wait in seconds (default: 30)
+
+        Returns:
+            True if page loaded successfully
+
+        Raises:
+            TimeoutException: If page doesn't load within timeout
+        """
+        try:
+            WebDriverWait(self.driver, timeout).until(
+                lambda d: d.execute_script('return document.readyState') == 'complete'
+            )
+            self.logger.debug("Page loaded successfully")
+            return True
+        except TimeoutException:
+            self.logger.error(f"Page did not load within {timeout} seconds")
+            raise
 
     def take_screenshot(self, filename):
         """

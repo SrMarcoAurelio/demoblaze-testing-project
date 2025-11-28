@@ -1,10 +1,11 @@
 """
 Login Page Object Model
 Author: Marc Arévalo
-Version: 1.0
+Version: 2.0
 
-This page object models the Login/Authentication functionality of DemoBlaze.
+This page object models Login/Authentication functionality.
 Contains all locators and actions related to login, logout, and signup.
+Universal and reusable across any web application with modal-based authentication.
 """
 
 from selenium.webdriver.common.by import By

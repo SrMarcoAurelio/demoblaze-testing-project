@@ -1,10 +1,11 @@
 """
-Project Configuration - DemoBlaze Test Automation
+Project Configuration - Universal Test Automation Framework
 Author: Marc Arévalo
-Version: 2.0
+Version: 3.0
 
 Centralized configuration management for all test components.
 All configuration values can be overridden via environment variables.
+Universal and reusable across any web application.
 """
 
 import os
@@ -18,7 +19,10 @@ class Config:
     Centralized configuration for the test automation framework.
 
     All values can be overridden using environment variables.
-    Example: export BASE_URL="https://staging.demoblaze.com"
+    Example: export BASE_URL="https://staging.example.com"
+
+    This configuration is universal and can be adapted to any web application
+    by changing the BASE_URL and URL_PATTERNS.
     """
 
     BASE_URL: str = os.getenv('BASE_URL', 'https://www.demoblaze.com/')
@@ -37,6 +41,15 @@ class Config:
     SCREENSHOTS_DIR: str = os.getenv('SCREENSHOTS_DIR', 'results/screenshots')
 
     SLOW_MODE_DELAY: float = float(os.getenv('SLOW_MODE_DELAY', '0'))
+
+    SLEEP_SHORT: float = float(os.getenv('SLEEP_SHORT', '0.5'))
+    SLEEP_MEDIUM: float = float(os.getenv('SLEEP_MEDIUM', '1.0'))
+    SLEEP_LONG: float = float(os.getenv('SLEEP_LONG', '2.0'))
+    SLEEP_MODAL: float = float(os.getenv('SLEEP_MODAL', '1.5'))
+
+    PRODUCT_URL_PATTERN: str = os.getenv('PRODUCT_URL_PATTERN', 'prod.html?idp_={product_id}')
+    PRODUCT_PAGE_IDENTIFIER: str = os.getenv('PRODUCT_PAGE_IDENTIFIER', 'prod.html')
+    CATEGORY_QUERY_PARAM: str = os.getenv('CATEGORY_QUERY_PARAM', 'cat')
 
     def get_timeout_config(self) -> Dict[str, int]:
         """
@@ -69,7 +82,7 @@ config = Config()
 
 if __name__ == '__main__':
     print("=" * 70)
-    print("DEMOBLAZE TEST AUTOMATION - CONFIGURATION")
+    print("UNIVERSAL TEST AUTOMATION FRAMEWORK - CONFIGURATION")
     print("=" * 70)
     print(f"\nBase URL: {config.BASE_URL}")
     print(f"Browser: {config.BROWSER}")
@@ -78,6 +91,12 @@ if __name__ == '__main__':
     print(f"Log Level: {config.LOG_LEVEL}")
     print(f"Reports Directory: {config.REPORTS_ROOT}")
     print(f"\nTimeouts: {config.get_timeout_config()}")
+    print(f"\nSleep Constants:")
+    print(f"  SHORT: {config.SLEEP_SHORT}s")
+    print(f"  MEDIUM: {config.SLEEP_MEDIUM}s")
+    print(f"  LONG: {config.SLEEP_LONG}s")
+    print(f"  MODAL: {config.SLEEP_MODAL}s")
     print("\n" + "=" * 70)
     print("To override: export BASE_URL='your_url'")
+    print("Universal - Adaptable to any web application")
     print("=" * 70)

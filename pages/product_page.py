@@ -1,10 +1,11 @@
 """
 ProductPage - Page Object Model for Product Detail Pages
 Author: Marc Arévalo
-Version: 1.0
+Version: 2.0
 
 This module provides a centralized interface for interacting with product detail pages.
 Follows the Page Object Model (POM) design pattern for maintainable test automation.
+Universal and reusable across any web application.
 """
 
 import time
@@ -18,13 +19,14 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from pages.base_page import BasePage
+from config import config
 
 logger = logging.getLogger(__name__)
 
 
 class ProductPage(BasePage):
     """
-    Page Object Model for DemoBlaze Product Detail Pages
+    Page Object Model for Product Detail Pages
 
     Provides methods for:
     - Product navigation
@@ -116,10 +118,10 @@ class ProductPage(BasePage):
         Returns: bool - success status
         """
         try:
-            url = f"{self.base_url}prod.html?idp_={product_id}"
+            url = f"{self.base_url}{config.PRODUCT_URL_PATTERN}".format(product_id=product_id)
             self.driver.get(url)
             self.wait_for_page_load()
-            time.sleep(2)
+            time.sleep(config.SLEEP_LONG)
             return True
         except Exception as e:
             logger.error(f"Failed to navigate to product ID {product_id}: {e}")

@@ -1,10 +1,11 @@
 """
 CatalogPage - Page Object Model for Catalog/Home Page
 Author: Marc Arévalo
-Version: 1.0
+Version: 2.0
 
 This module provides a centralized interface for interacting with the catalog/home page.
 Includes category navigation, product browsing, pagination, and accessibility features.
+Universal and reusable across any web application.
 """
 
 import time
@@ -18,13 +19,14 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from pages.base_page import BasePage
+from config import config
 
 logger = logging.getLogger(__name__)
 
 
 class CatalogPage(BasePage):
     """
-    Page Object Model for DemoBlaze Catalog/Home Page
+    Page Object Model for Catalog/Home Page
 
     Provides methods for:
     - Category navigation (Phones, Laptops, Monitors, Home)
@@ -106,8 +108,9 @@ class CatalogPage(BasePage):
         """
         try:
             current_url = self.driver.current_url
-            if "cat=" in current_url:
-                return current_url.split("cat=")[1].split("&")[0]
+            cat_param = f"{config.CATEGORY_QUERY_PARAM}="
+            if cat_param in current_url:
+                return current_url.split(cat_param)[1].split("&")[0]
             return "all"
         except Exception as e:
             logger.error(f"Failed to get active category: {e}")
@@ -269,7 +272,7 @@ class CatalogPage(BasePage):
         """
         try:
             self.wait_for_element_visible(self.PRODUCT_DETAIL_NAME, timeout=timeout)
-            return "prod.html" in self.driver.current_url
+            return config.PRODUCT_PAGE_IDENTIFIER in self.driver.current_url
         except TimeoutException:
             return False
 

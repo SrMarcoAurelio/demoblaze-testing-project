@@ -1,10 +1,11 @@
 """
 Cart Page Object Model
 Author: Marc Arévalo
-Version: 1.0
+Version: 2.0
 
-This page object models the Shopping Cart functionality of DemoBlaze.
+This page object models Shopping Cart functionality.
 Contains all locators and actions related to cart operations.
+Universal and reusable across any web application with shopping cart features.
 """
 
 from selenium.webdriver.common.by import By
