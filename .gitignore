@@ -207,13 +207,38 @@ marimo/_lsp/
 __marimo__/
 
 
-# Ignorar carpetas de caché de Python
-__pycache__/
-*.pyc
+# =============================================================================
+# PROJECT-SPECIFIC IGNORES - DemoBlaze Test Automation
+# =============================================================================
 
-# Ignorar la carpeta de caché de pytest (aunque ya la movimos)
-.pytest_cache/
-
-# ¡Ignorar TODOS los resultados generados!
-# Nunca subimos reportes o logs a Git.
+# Test Results & Reports
+results/
 testloginsresults/
+*.html
+*.log
+screenshots/
+
+# Test Data (if sensitive)
+config/local.py
+.env.local
+test_credentials.json
+
+# IDE Specific
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Browser Drivers (managed by webdriver-manager)
+drivers/
+*.exe
+chromedriver
+geckodriver
+msedgedriver
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
