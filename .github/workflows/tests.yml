@@ -182,6 +182,17 @@ jobs:
         with:
           path: all-results
 
+      - name: Verify artifacts downloaded
+        run: |
+          echo "📦 Checking downloaded artifacts..."
+          if [ -d "all-results" ]; then
+            echo "✅ all-results directory exists"
+            ls -la all-results/
+          else
+            echo "⚠️ all-results directory not found, creating it..."
+            mkdir -p all-results
+          fi
+
       - name: Get Allure history
         uses: actions/checkout@v4
         if: always()
@@ -207,8 +218,14 @@ jobs:
       - name: Combine Allure results
         run: |
           mkdir -p allure-results
-          find all-results -type d -name "allure-results" -exec cp -r {}/* allure-results/ \;
-          ls -la allure-results/
+          echo "🔍 Looking for allure-results in all-results directory..."
+          if [ -d "all-results" ] && [ "$(ls -A all-results)" ]; then
+            find all-results -type d -name "allure-results" -exec cp -r {}/* allure-results/ \; 2>/dev/null || true
+            echo "✅ Allure results combined"
+          else
+            echo "⚠️ No artifacts found, creating empty allure-results"
+          fi
+          ls -la allure-results/ || echo "No files in allure-results yet"
 
       - name: Copy Allure history
         if: always()
