@@ -23,7 +23,6 @@ from pages.cart_page import CartPage
 from pages.purchase_page import PurchasePage
 from pages.login_page import LoginPage
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

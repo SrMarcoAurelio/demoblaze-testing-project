@@ -15,7 +15,6 @@ import pytest
 import logging
 from pages.product_page import ProductPage
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 @pytest.mark.business_rules

@@ -19,7 +19,6 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from pages.base_page import BasePage
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

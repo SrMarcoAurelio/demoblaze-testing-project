@@ -15,7 +15,6 @@ from selenium.webdriver.common.action_chains import ActionChains
 import logging
 import time
 
-logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(name)s:%(message)s')
 
 
 class BasePage:

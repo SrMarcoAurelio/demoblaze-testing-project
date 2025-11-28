@@ -18,7 +18,6 @@ import logging
 from pages.signup_page import SignupPage
 from selenium.webdriver.common.keys import Keys
 
-logging.basicConfig(level=logging.INFO)
 
 
 

@@ -22,7 +22,6 @@ import logging
 from pages.login_page import LoginPage
 from selenium.webdriver.common.keys import Keys
 
-logging.basicConfig(level=logging.ERROR)
 
 
 

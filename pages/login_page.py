@@ -12,7 +12,6 @@ from selenium.webdriver.common.keys import Keys
 from pages.base_page import BasePage
 import logging
 
-logging.basicConfig(level=logging.INFO)
 
 
 class LoginPage(BasePage):

@@ -27,7 +27,6 @@ import logging
 import time
 from pages.catalog_page import CatalogPage
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

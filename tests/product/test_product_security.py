@@ -29,7 +29,6 @@ import time
 import re
 from pages.product_page import ProductPage
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

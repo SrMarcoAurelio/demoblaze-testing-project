@@ -14,7 +14,6 @@ import pytest
 import logging
 from pages.login_page import LoginPage
 
-logging.basicConfig(level=logging.INFO)
 
 
 @pytest.mark.functional

@@ -15,7 +15,6 @@ import time
 import random
 import string
 
-logging.basicConfig(level=logging.INFO)
 
 
 class SignupPage(BasePage):

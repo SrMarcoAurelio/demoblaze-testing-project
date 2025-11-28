@@ -41,7 +41,6 @@ import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pages.signup_page import SignupPage
 
-logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
