@@ -190,14 +190,41 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
-      - name: Allure Report action
-        uses: simple-elf/allure-report-action@v1.9
-        if: always()
+      - name: Install Java (required for Allure)
+        uses: actions/setup-java@v4
         with:
-          allure_results: all-results/**/allure-results
-          allure_history: allure-history
-          keep_reports: 20
-          allure_report: allure-report
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install Allure CLI
+        run: |
+          curl -o allure-2.24.0.tgz -L https://github.com/allure-framework/allure2/releases/download/2.24.0/allure-2.24.0.tgz
+          tar -zxvf allure-2.24.0.tgz
+          sudo mv allure-2.24.0 /opt/allure
+          sudo ln -s /opt/allure/bin/allure /usr/bin/allure
+          allure --version
+
+      - name: Combine Allure results
+        run: |
+          mkdir -p allure-results
+          find all-results -type d -name "allure-results" -exec cp -r {}/* allure-results/ \;
+          ls -la allure-results/
+
+      - name: Copy Allure history
+        if: always()
+        continue-on-error: true
+        run: |
+          mkdir -p allure-report/history
+          if [ -d "gh-pages/history" ]; then
+            cp -r gh-pages/history/* allure-report/history/
+          fi
+
+      - name: Generate Allure Report
+        if: always()
+        run: |
+          allure generate allure-results -o allure-report --clean
+          echo "✅ Allure report generated successfully"
+          ls -la allure-report/
 
       - name: Deploy report to GitHub Pages
         if: always()
@@ -205,7 +232,8 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: allure-history
+          publish_dir: allure-report
+          keep_files: false
 
   # Job 6: Test Summary
   test-summary:
