@@ -15,6 +15,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from pages.base_page import BasePage
+from typing import Tuple, Optional, Dict, List, Any
 import time
 import re
 import datetime
@@ -45,7 +46,7 @@ class PurchasePage(BasePage):
     CART_TOTAL_PRICE = (By.ID, "totalp")
 
 
-    def is_order_modal_visible(self):
+    def is_order_modal_visible(self) -> bool:
         """Check if order modal is open"""
         try:
             modal = self.find_element(self.ORDER_MODAL)
@@ -54,7 +55,7 @@ class PurchasePage(BasePage):
             # Modal not found
             return False
 
-    def wait_for_order_modal(self, timeout=10):
+    def wait_for_order_modal(self, timeout: int = 10) -> bool:
         """Wait for order modal to appear"""
         try:
             self.wait_for_element_visible(self.ORDER_NAME_FIELD, timeout=timeout)
@@ -64,7 +65,7 @@ class PurchasePage(BasePage):
             self.logger.error("Order modal did not appear")
             return False
 
-    def close_order_modal_with_x(self):
+    def close_order_modal_with_x(self) -> bool:
         """Close order modal using X button"""
         close_btn = self.find_element(self.CLOSE_ORDER_MODAL_BUTTON)
         close_btn.click()
@@ -78,7 +79,7 @@ class PurchasePage(BasePage):
         except TimeoutException:
             return False
 
-    def close_order_modal_with_close_button(self):
+    def close_order_modal_with_close_button(self) -> bool:
         """Close order modal using Close button"""
         close_btn = self.find_element(self.CLOSE_ORDER_MODAL_BUTTON_TEXT)
         close_btn.click()
@@ -92,7 +93,7 @@ class PurchasePage(BasePage):
         except TimeoutException:
             return False
 
-    def close_order_modal_with_escape(self):
+    def close_order_modal_with_escape(self) -> bool:
         """Close order modal using ESC key"""
         actions = ActionChains(self.driver)
         actions.send_keys(Keys.ESCAPE).perform()
@@ -108,7 +109,7 @@ class PurchasePage(BasePage):
             return False
 
 
-    def fill_order_form(self, name="", country="", city="", card="", month="", year=""):
+    def fill_order_form(self, name: str = "", country: str = "", city: str = "", card: str = "", month: str = "", year: str = "") -> bool:
         """Fill all order form fields"""
         try:
             self.wait_for_element_visible(self.ORDER_NAME_FIELD)
@@ -150,7 +151,7 @@ class PurchasePage(BasePage):
             self.logger.error(f"Failed to fill order form: {str(e)}")
             return False
 
-    def fill_valid_order_form(self, name="QA Tester", country="Spain", city="Barcelona"):
+    def fill_valid_order_form(self, name: str = "QA Tester", country: str = "Spain", city: str = "Barcelona") -> bool:
         """Fill form with valid test data"""
         return self.fill_order_form(
             name=name,
@@ -161,7 +162,7 @@ class PurchasePage(BasePage):
             year="2028"
         )
 
-    def get_form_field_value(self, field_locator):
+    def get_form_field_value(self, field_locator: Tuple[str, str]) -> Optional[str]:
         """Get current value of a form field"""
         try:
             field = self.find_element(field_locator)
@@ -171,7 +172,7 @@ class PurchasePage(BasePage):
             return None
 
 
-    def navigate_form_with_tab(self, fill_data=None):
+    def navigate_form_with_tab(self, fill_data: Optional[List[str]] = None) -> Dict[str, Optional[str]]:
         """
         Navigate through form fields using Tab key
         Optionally fill data as you go
@@ -203,14 +204,14 @@ class PurchasePage(BasePage):
         return filled_values
 
 
-    def click_purchase(self):
+    def click_purchase(self) -> bool:
         """Click Purchase button"""
         purchase_btn = self.find_element(self.PURCHASE_BUTTON)
         purchase_btn.click()
         self.logger.info("Clicked Purchase button")
         return True
 
-    def is_purchase_button_enabled(self):
+    def is_purchase_button_enabled(self) -> bool:
         """Check if Purchase button is enabled"""
         try:
             btn = self.find_element(self.PURCHASE_BUTTON)
@@ -219,7 +220,7 @@ class PurchasePage(BasePage):
             # Button not found
             return False
 
-    def rapid_purchase_clicks(self, times=3):
+    def rapid_purchase_clicks(self, times: int = 3) -> bool:
         """Click Purchase button multiple times rapidly"""
         purchase_btn = self.find_element(self.PURCHASE_BUTTON)
 
@@ -229,8 +230,8 @@ class PurchasePage(BasePage):
 
         return True
 
-    def complete_purchase(self, name="QA Tester", country="Spain", city="Barcelona",
-                         card="1234567890123456", month="12", year="2028"):
+    def complete_purchase(self, name: str = "QA Tester", country: str = "Spain", city: str = "Barcelona",
+                         card: str = "1234567890123456", month: str = "12", year: str = "2028") -> Tuple[bool, Optional[str], Optional[Dict[str, Any]]]:
         """
         Complete entire purchase flow:
         1. Fill form
@@ -277,7 +278,7 @@ class PurchasePage(BasePage):
             return (False, None, None)
 
 
-    def is_purchase_confirmed(self, timeout=10):
+    def is_purchase_confirmed(self, timeout: int = 10) -> bool:
         """Check if purchase confirmation appeared"""
         try:
             WebDriverWait(self.driver, timeout).until(
@@ -287,7 +288,7 @@ class PurchasePage(BasePage):
         except TimeoutException:
             return False
 
-    def get_purchase_confirmation_text(self):
+    def get_purchase_confirmation_text(self) -> Optional[str]:
         """Get full text of purchase confirmation"""
         try:
             confirm_modal = self.find_element(self.PURCHASE_CONFIRM_MODAL)
@@ -296,7 +297,7 @@ class PurchasePage(BasePage):
             # Confirmation modal not found
             return None
 
-    def get_confirmed_amount(self):
+    def get_confirmed_amount(self) -> Optional[int]:
         """Extract confirmed amount from confirmation modal"""
         confirm_text = self.get_purchase_confirmation_text()
         if confirm_text:
@@ -305,7 +306,7 @@ class PurchasePage(BasePage):
                 return int(amount_match.group(1))
         return None
 
-    def close_purchase_confirmation(self):
+    def close_purchase_confirmation(self) -> bool:
         """Click OK on purchase confirmation"""
         try:
             ok_btn = self.find_element(self.CONFIRM_OK_BUTTON)
@@ -322,15 +323,15 @@ class PurchasePage(BasePage):
             return False
 
 
-    def get_current_year(self):
+    def get_current_year(self) -> int:
         """Get current year for validation tests"""
         return datetime.date.today().year
 
-    def get_expired_year(self):
+    def get_expired_year(self) -> str:
         """Get an expired year for validation tests"""
         return str(datetime.date.today().year - 1)
 
-    def create_validation_test_data(self):
+    def create_validation_test_data(self) -> Dict[str, Dict[str, str]]:
         """Create standard test data for validation tests"""
         return {
             'valid': {
@@ -403,7 +404,7 @@ class PurchasePage(BasePage):
     ABOUT_US_VIDEO = (By.ID, "example-video")
     ABOUT_US_CLOSE_BUTTON = (By.XPATH, "//div[@id='videoModal']//button[text()='Close']")
 
-    def send_contact_message(self, email="test@example.com", name="Test User", message="Test message"):
+    def send_contact_message(self, email: str = "test@example.com", name: str = "Test User", message: str = "Test message") -> Optional[str]:
         """Send a contact form message"""
         self.click(self.CONTACT_NAV_LINK)
         self.wait_for_element_visible(self.CONTACT_EMAIL_FIELD)
@@ -419,13 +420,13 @@ class PurchasePage(BasePage):
 
         return alert_text
 
-    def open_about_us(self):
+    def open_about_us(self) -> bool:
         """Open About Us modal"""
         self.click(self.ABOUT_US_NAV_LINK)
         self.wait_for_element_visible(self.ABOUT_US_MODAL)
         return True
 
-    def close_about_us(self):
+    def close_about_us(self) -> bool:
         """Close About Us modal"""
         self.click(self.ABOUT_US_CLOSE_BUTTON)
         try:
