@@ -3,6 +3,7 @@ webdriver-manager==4.0.2
 pytest==8.3.3
 pytest-html==4.1.1
 pytest-xdist==3.5.0
+pytest-rerunfailures==15.0
 allure-pytest==2.13.2
 flake8==7.0.0
 mypy==1.8.0
