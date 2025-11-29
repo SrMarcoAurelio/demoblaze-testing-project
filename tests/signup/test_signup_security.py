@@ -41,10 +41,8 @@ import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pages.signup_page import SignupPage
 
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-
+# Logging is already configured in conftest.py
+# No need for duplicate logging.basicConfig() here
 
 @pytest.mark.security
 @pytest.mark.critical

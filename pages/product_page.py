@@ -13,8 +13,6 @@ import logging
 import re
 import requests
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
@@ -517,7 +515,8 @@ class ProductPage(BasePage):
             alert_text = alert.text
             alert.accept()
             return True, f"Alert executed: {alert_text}"
-        except:
+        except Exception:
+            # No alert present
             pass
 
         return False, None
