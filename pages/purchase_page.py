@@ -15,7 +15,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from pages.base_page import BasePage
-import logging
 import time
 import re
 import datetime
@@ -51,7 +50,8 @@ class PurchasePage(BasePage):
         try:
             modal = self.find_element(self.ORDER_MODAL)
             return modal.is_displayed()
-        except:
+        except Exception:
+            # Modal not found
             return False
 
     def wait_for_order_modal(self, timeout=10):
@@ -166,7 +166,8 @@ class PurchasePage(BasePage):
         try:
             field = self.find_element(field_locator)
             return field.get_attribute("value")
-        except:
+        except Exception:
+            # Field not found
             return None
 
 
@@ -214,7 +215,8 @@ class PurchasePage(BasePage):
         try:
             btn = self.find_element(self.PURCHASE_BUTTON)
             return btn.is_enabled()
-        except:
+        except Exception:
+            # Button not found
             return False
 
     def rapid_purchase_clicks(self, times=3):
@@ -290,7 +292,8 @@ class PurchasePage(BasePage):
         try:
             confirm_modal = self.find_element(self.PURCHASE_CONFIRM_MODAL)
             return confirm_modal.text
-        except:
+        except Exception:
+            # Confirmation modal not found
             return None
 
     def get_confirmed_amount(self):
@@ -314,7 +317,8 @@ class PurchasePage(BasePage):
 
             self.logger.info("Purchase confirmation closed")
             return True
-        except:
+        except Exception:
+            # OK button not found or timeout waiting for modal to close
             return False
 
 

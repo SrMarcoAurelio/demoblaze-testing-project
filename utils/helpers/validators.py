@@ -8,7 +8,6 @@ Universal and reusable across any web application.
 """
 
 import re
-from typing import Union
 from urllib.parse import urlparse
 
 

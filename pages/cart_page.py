@@ -9,11 +9,8 @@ Universal and reusable across any web application with shopping cart features.
 """
 
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from pages.base_page import BasePage
-import logging
 import time
 import re
 
@@ -172,7 +169,8 @@ class CartPage(BasePage):
         try:
             item_name = self.wait_for_element_visible(self.FIRST_ITEM_NAME)
             return item_name.text
-        except:
+        except Exception:
+            # Element not found or timeout
             return None
 
     def is_cart_empty(self):
@@ -222,7 +220,8 @@ class CartPage(BasePage):
         try:
             btn = self.find_element(self.PLACE_ORDER_BUTTON)
             return btn.is_displayed()
-        except:
+        except Exception:
+            # Element not found or not displayed
             return False
 
 

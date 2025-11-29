@@ -11,9 +11,6 @@ Universal and reusable across any web application with modal-based registration.
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from pages.base_page import BasePage
-from utils.helpers.data_generator import generate_unique_username, generate_random_password
-import logging
-import time
 
 
 

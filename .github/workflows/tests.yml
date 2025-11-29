@@ -86,6 +86,8 @@ jobs:
 
       - name: Run unit tests
         run: |
+          # Parallel execution enabled via pytest.ini (-n auto)
+          # pytest-xdist will use all available CPU cores automatically
           pytest tests/test_utils/ -v --maxfail=5 --tb=short
         continue-on-error: false
 
@@ -111,6 +113,8 @@ jobs:
 
       - name: Run functional tests
         run: |
+          # Parallel execution enabled via pytest.ini (-n auto)
+          # For browser tests, parallelization uses multiple browser instances
           pytest tests/ -m functional -v \
             --browser=chrome \
             --html=test_results/functional-chrome.html \
@@ -150,6 +154,8 @@ jobs:
 
       - name: Run security tests
         run: |
+          # Parallel execution enabled via pytest.ini (-n auto)
+          # Security tests benefit greatly from parallelization
           pytest tests/ -m security -v \
             --browser=chrome \
             --html=test_results/security.html \

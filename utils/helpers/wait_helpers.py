@@ -9,7 +9,7 @@ Universal and reusable across any web application.
 
 import time
 import logging
-from typing import Callable, Any, Optional
+from typing import Callable, Any
 from functools import wraps
 
 logger = logging.getLogger(__name__)

@@ -26,10 +26,8 @@ import logging
 from pages.cart_page import CartPage
 from pages.purchase_page import PurchasePage
 
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-
+# Logging is already configured in conftest.py
+# No need for duplicate logging.basicConfig() here
 
 @pytest.fixture
 def cart_page(browser, base_url):
