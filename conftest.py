@@ -131,6 +131,11 @@ def pytest_configure(config):
     )
     config.addinivalue_line("markers", "accessibility: Accessibility tests")
     config.addinivalue_line("markers", "slow: Long-running tests")
+    config.addinivalue_line("markers", "performance: Performance tests")
+    config.addinivalue_line("markers", "critical: Critical priority tests")
+    config.addinivalue_line("markers", "high: High priority tests")
+    config.addinivalue_line("markers", "medium: Medium priority tests")
+    config.addinivalue_line("markers", "low: Low priority tests")
 
 
 @pytest.fixture(scope="session")
@@ -632,6 +637,88 @@ def prepared_checkout(cart_with_product):
     logger.info("✓ Checkout prepared, modal open")
 
     return purchase_page_obj
+
+
+# ============================================================================
+# PERFORMANCE FIXTURES (Phase 7) - Performance Testing
+# ============================================================================
+
+
+@pytest.fixture(scope="function")
+def performance_collector():
+    """
+    Provide performance metrics collector for tests.
+
+    Automatically clears metrics before each test and can generate
+    reports after test completion.
+
+    Example:
+        >>> def test_login_performance(login_page, performance_collector):
+        ...     performance_collector.start_timer("login")
+        ...     login_page.login("user", "pass")
+        ...     duration = performance_collector.stop_timer("login", category="auth")
+        ...     assert performance_collector.check_threshold("login", duration)
+    """
+    from utils.performance.metrics import get_collector
+
+    collector = get_collector()
+    collector.clear_metrics()
+
+    yield collector
+
+    # Optional: Auto-save report on failure
+    # Can be enabled by setting environment variable
+
+
+@pytest.fixture(scope="function")
+def performance_timer():
+    """
+    Provide performance timer context manager.
+
+    Example:
+        >>> def test_page_load(browser, performance_timer):
+        ...     with performance_timer("page_load", category="navigation"):
+        ...         browser.get("https://example.com")
+    """
+    from utils.performance.decorators import performance_timer as timer
+
+    return timer
+
+
+@pytest.fixture(scope="session", autouse=True)
+def performance_report_cleanup(request):
+    """Generate and save performance report at end of session."""
+    yield
+
+    try:
+        from utils.performance.metrics import get_collector
+
+        collector = get_collector()
+        if len(collector) > 0:
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            report_dir = os.path.join(
+                config.REPORTS_ROOT, "performance", timestamp
+            )
+            os.makedirs(report_dir, exist_ok=True)
+
+            report_file = os.path.join(report_dir, "performance_report.json")
+            collector.save_report(report_file)
+
+            logger.info(f"\n{'='*70}")
+            logger.info(f"PERFORMANCE REPORT SAVED: {report_file}")
+            logger.info(f"Total metrics collected: {len(collector)}")
+
+            violations = collector.get_threshold_violations()
+            if violations:
+                logger.warning(
+                    f"⚠ Performance threshold violations: {len(violations)}"
+                )
+            else:
+                logger.info("✓ All performance checks passed")
+
+            logger.info(f"{'='*70}\n")
+    except Exception as e:
+        logger.warning(f"Could not generate performance report: {e}")
 
 
 @pytest.hookimpl(tryfirst=True)
