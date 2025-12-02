@@ -9,14 +9,16 @@ Universal and reusable across any web application with shopping cart features.
 """
 
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from pages.base_page import BasePage
+from typing import Optional, Tuple
 import time
 import re
 
+
 class CartPage(BasePage):
     """Cart Page Object - handles all cart-related operations"""
-
 
     CART_NAV_LINK = (By.ID, "cartur")
     HOME_NAV_LINK = (By.XPATH, "//a[contains(text(), 'Home')]")
@@ -39,22 +41,22 @@ class CartPage(BasePage):
 
     CATEGORY_LAPTOPS_LINK = (By.XPATH, "//a[text()='Laptops']")
 
-
-    def open_cart(self):
+    def open_cart(self) -> bool:
         """Navigate to cart page"""
         self.click(self.CART_NAV_LINK)
         self.wait_for_element_visible(self.PLACE_ORDER_BUTTON)
         self.logger.info("Opened cart page")
         return True
 
-    def go_home(self):
+    def go_home(self) -> bool:
         """Navigate to home page"""
         self.click(self.HOME_NAV_LINK)
         self.wait_for_element_visible(self.FIRST_PRODUCT_LINK)
         return True
 
-
-    def add_product_to_cart(self, product_locator=None):
+    def add_product_to_cart(
+        self, product_locator: Optional[Tuple[str, str]] = None
+    ) -> Tuple[str, int]:
         """
         Add a product to cart and return to home page
         Returns: (product_name, product_price)
@@ -73,7 +75,9 @@ class CartPage(BasePage):
         price_text = price_element.text
         price = self._parse_price(price_text)
 
-        add_to_cart_btn = self.wait_for_element_clickable(self.ADD_TO_CART_BUTTON)
+        add_to_cart_btn = self.wait_for_element_clickable(
+            self.ADD_TO_CART_BUTTON
+        )
         add_to_cart_btn.click()
 
         self.get_alert_text(timeout=5)
@@ -83,26 +87,34 @@ class CartPage(BasePage):
         self.logger.info(f"Added product '{product_name}' to cart (${price})")
         return (product_name, price)
 
-    def add_first_product(self):
+    def add_first_product(self) -> Tuple[str, int]:
         """Add first product to cart"""
         return self.add_product_to_cart(self.FIRST_PRODUCT_LINK)
 
-    def add_second_product(self):
+    def add_second_product(self) -> Tuple[str, int]:
         """Add second product to cart"""
         return self.add_product_to_cart(self.SECOND_PRODUCT_LINK)
 
-    def add_product_from_category(self, category_locator, product_name):
+    def add_product_from_category(
+        self, category_locator: Tuple[str, str], product_name: str
+    ) -> Tuple[str, int]:
         """Add product from specific category"""
         self.click(category_locator)
         time.sleep(1)
 
-        product_link = self.wait_for_element_clickable((By.LINK_TEXT, product_name))
+        product_link = self.wait_for_element_clickable(
+            (By.LINK_TEXT, product_name)
+        )
         product_link.click()
 
-        price_element = self.wait_for_element_visible(self.PRODUCT_PRICE_HEADER)
+        price_element = self.wait_for_element_visible(
+            self.PRODUCT_PRICE_HEADER
+        )
         price = self._parse_price(price_element.text)
 
-        add_to_cart_btn = self.wait_for_element_clickable(self.ADD_TO_CART_BUTTON)
+        add_to_cart_btn = self.wait_for_element_clickable(
+            self.ADD_TO_CART_BUTTON
+        )
         add_to_cart_btn.click()
 
         self.get_alert_text(timeout=5)
@@ -110,7 +122,9 @@ class CartPage(BasePage):
         self.logger.info(f"Added '{product_name}' from category (${price})")
         return (product_name, price)
 
-    def rapid_add_to_cart(self, product_locator, times=3):
+    def rapid_add_to_cart(
+        self, product_locator: Tuple[str, str], times: int = 3
+    ) -> int:
         """
         Rapidly click Add to Cart multiple times
         Used for testing duplicate handling
@@ -121,7 +135,9 @@ class CartPage(BasePage):
         price_element = self.find_element(self.PRODUCT_PRICE_HEADER)
         price = self._parse_price(price_element.text)
 
-        add_to_cart_btn = self.wait_for_element_clickable(self.ADD_TO_CART_BUTTON)
+        add_to_cart_btn = self.wait_for_element_clickable(
+            self.ADD_TO_CART_BUTTON
+        )
 
         for i in range(times):
             add_to_cart_btn.click()
@@ -131,8 +147,7 @@ class CartPage(BasePage):
 
         return price
 
-
-    def get_cart_item_count(self):
+    def get_cart_item_count(self) -> int:
         """Get number of items in cart"""
         try:
             items = self.find_elements(self.CART_ITEMS)
@@ -142,16 +157,19 @@ class CartPage(BasePage):
         except NoSuchElementException:
             return 0
 
-    def get_cart_total(self, timeout=10):
+    def get_cart_total(self, timeout: int = 10) -> int:
         """
         Get cart total price
         Waits for total to update before returning
         """
         try:
-            total_element = self.wait_for_element_visible(self.CART_TOTAL_PRICE, timeout=timeout)
+            total_element = self.wait_for_element_visible(
+                self.CART_TOTAL_PRICE, timeout=timeout
+            )
 
             WebDriverWait(self.driver, timeout).until(
-                lambda d: d.find_element(*self.CART_TOTAL_PRICE).text.strip() != ""
+                lambda d: d.find_element(*self.CART_TOTAL_PRICE).text.strip()
+                != ""
             )
 
             total_text = total_element.text
@@ -164,7 +182,7 @@ class CartPage(BasePage):
             self.logger.warning("Cart total did not update in time")
             return 0
 
-    def get_first_item_name(self):
+    def get_first_item_name(self) -> Optional[str]:
         """Get name of first item in cart"""
         try:
             item_name = self.wait_for_element_visible(self.FIRST_ITEM_NAME)
@@ -173,13 +191,12 @@ class CartPage(BasePage):
             # Element not found or timeout
             return None
 
-    def is_cart_empty(self):
+    def is_cart_empty(self) -> bool:
         """Check if cart is empty"""
         count = self.get_cart_item_count()
         return count == 0
 
-
-    def delete_first_item(self):
+    def delete_first_item(self) -> bool:
         """Delete first item from cart"""
         initial_count = self.get_cart_item_count()
 
@@ -188,7 +205,8 @@ class CartPage(BasePage):
 
         try:
             WebDriverWait(self.driver, 10).until(
-                lambda d: len(d.find_elements(*self.CART_ITEMS)) < initial_count
+                lambda d: len(d.find_elements(*self.CART_ITEMS))
+                < initial_count
             )
             self.logger.info("Deleted first item from cart")
             return True
@@ -196,7 +214,7 @@ class CartPage(BasePage):
             self.logger.warning("Item deletion timeout")
             return False
 
-    def delete_all_items(self):
+    def delete_all_items(self) -> bool:
         """Delete all items from cart"""
         initial_count = self.get_cart_item_count()
 
@@ -207,15 +225,16 @@ class CartPage(BasePage):
         self.logger.info("Deleted all items from cart")
         return True
 
-
-    def click_place_order(self):
+    def click_place_order(self) -> bool:
         """Click Place Order button to open checkout modal"""
-        place_order_btn = self.wait_for_element_clickable(self.PLACE_ORDER_BUTTON)
+        place_order_btn = self.wait_for_element_clickable(
+            self.PLACE_ORDER_BUTTON
+        )
         place_order_btn.click()
         self.logger.info("Clicked Place Order button")
         return True
 
-    def is_place_order_visible(self):
+    def is_place_order_visible(self) -> bool:
         """Check if Place Order button is visible"""
         try:
             btn = self.find_element(self.PLACE_ORDER_BUTTON)
@@ -224,32 +243,36 @@ class CartPage(BasePage):
             # Element not found or not displayed
             return False
 
-
-    def _parse_price(self, price_str):
+    def _parse_price(self, price_str: str) -> int:
         """
         Parse price from string
         Examples: "$360" -> 360, "360 *includes tax" -> 360
         """
-        match = re.search(r'\d+', price_str)
+        match = re.search(r"\d+", price_str)
         if match:
             return int(match.group(0))
         return 0
 
-    def wait_for_cart_to_update(self, expected_count, timeout=10):
+    def wait_for_cart_to_update(
+        self, expected_count: int, timeout: int = 10
+    ) -> bool:
         """Wait for cart to have expected number of items"""
         try:
             WebDriverWait(self.driver, timeout).until(
-                lambda d: len(d.find_elements(*self.CART_ITEMS)) == expected_count
+                lambda d: len(d.find_elements(*self.CART_ITEMS))
+                == expected_count
             )
             return True
         except TimeoutException:
             return False
 
-    def measure_cart_total_calculation_time(self):
+    def measure_cart_total_calculation_time(self) -> float:
         """Measure how long it takes for cart total to be calculated"""
         start_time = time.time()
         total = self.get_cart_total(timeout=5)
         calculation_time = time.time() - start_time
 
-        self.logger.info(f"Cart total calculated in {calculation_time:.2f} seconds")
+        self.logger.info(
+            f"Cart total calculated in {calculation_time:.2f} seconds"
+        )
         return calculation_time

@@ -5,6 +5,7 @@ Version: 6.0
 
 Centralized pytest configuration using config.py for all settings.
 """
+
 import pytest
 import os
 import datetime
@@ -20,8 +21,8 @@ from config import config
 
 logging.basicConfig(
     level=getattr(logging, config.LOG_LEVEL),
-    format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 
 logger = logging.getLogger(__name__)
@@ -33,20 +34,20 @@ def pytest_addoption(parser):
         "--browser",
         action="store",
         default=config.BROWSER,
-        help="Browser: chrome, firefox, or edge"
+        help="Browser: chrome, firefox, or edge",
     )
     parser.addoption(
         "--headless",
         action="store_true",
         default=config.HEADLESS,
-        help="Run in headless mode"
+        help="Run in headless mode",
     )
     parser.addoption(
         "--slow",
         action="store",
         default=config.SLOW_MODE_DELAY,
         type=float,
-        help="Delay between commands (seconds)"
+        help="Delay between commands (seconds)",
     )
 
 
@@ -67,19 +68,19 @@ def pytest_configure(config):
             norm_path = os.path.normpath(test_path_str)
             path_parts = norm_path.split(os.sep)
 
-            if 'tests' in path_parts:
-                tests_idx = path_parts.index('tests')
+            if "tests" in path_parts:
+                tests_idx = path_parts.index("tests")
 
                 if len(path_parts) > tests_idx + 1:
                     module_name = path_parts[tests_idx + 1].lower()
 
                 if len(path_parts) > tests_idx + 2:
                     filename = path_parts[-1]
-                    if 'functional' in filename:
+                    if "functional" in filename:
                         test_type = "functional"
-                    elif 'business' in filename:
+                    elif "business" in filename:
                         test_type = "business"
-                    elif 'security' in filename:
+                    elif "security" in filename:
                         test_type = "security"
 
             logger.info(f"Detected module: {module_name}, type: {test_type}")
@@ -92,7 +93,9 @@ def pytest_configure(config):
     from config import config as cfg
 
     if module_name != "general" and test_type != "general":
-        report_dir = os.path.join(cfg.REPORTS_ROOT, module_name, test_type, date_folder)
+        report_dir = os.path.join(
+            cfg.REPORTS_ROOT, module_name, test_type, date_folder
+        )
     elif module_name != "general":
         report_dir = os.path.join(cfg.REPORTS_ROOT, module_name, date_folder)
     else:
@@ -112,7 +115,9 @@ def pytest_configure(config):
     logger.info(f"{'='*70}")
     logger.info(f"TEST SESSION STARTED")
     logger.info(f"Module: {module_name.upper()} | Type: {test_type.upper()}")
-    logger.info(f"Browser: {browser_name.upper()} | Headless: {config.getoption('--headless')}")
+    logger.info(
+        f"Browser: {browser_name.upper()} | Headless: {config.getoption('--headless')}"
+    )
     logger.info(f"Report: {report_path}")
     logger.info(f"{'='*70}")
 
@@ -120,7 +125,9 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "regression: Full regression suite")
     config.addinivalue_line("markers", "functional: Functional tests")
     config.addinivalue_line("markers", "security: Security tests")
-    config.addinivalue_line("markers", "business_rules: Business rules validation")
+    config.addinivalue_line(
+        "markers", "business_rules: Business rules validation"
+    )
     config.addinivalue_line("markers", "accessibility: Accessibility tests")
     config.addinivalue_line("markers", "slow: Long-running tests")
 
@@ -141,11 +148,11 @@ def timeout_config():
 def test_config(request):
     """Provide test configuration."""
     return {
-        'browser': request.config.getoption("--browser"),
-        'headless': request.config.getoption("--headless"),
-        'slow_mode': request.config.getoption("--slow"),
-        'base_url': config.BASE_URL,
-        'timeouts': config.get_timeout_config()
+        "browser": request.config.getoption("--browser"),
+        "headless": request.config.getoption("--headless"),
+        "slow_mode": request.config.getoption("--slow"),
+        "base_url": config.BASE_URL,
+        "timeouts": config.get_timeout_config(),
     }
 
 
@@ -164,7 +171,9 @@ def browser(request):
     driver = None
 
     logger.info(f"\n{'='*70}")
-    logger.info(f"WebDriver: {browser_name.upper()} | Test: {request.node.name}")
+    logger.info(
+        f"WebDriver: {browser_name.upper()} | Test: {request.node.name}"
+    )
     if slow_mode > 0:
         logger.info(f"Slow Mode: {slow_mode}s delay")
     logger.info(f"{'='*70}")
@@ -176,44 +185,50 @@ def browser(request):
             service = Service(ChromeDriverManager().install())
             options = webdriver.ChromeOptions()
             if headless:
-                options.add_argument('--headless=new')
-                options.add_argument('--no-sandbox')
-                options.add_argument('--disable-dev-shm-usage')
-                options.add_argument('--disable-gpu')
-                options.add_argument('--window-size=1920,1080')
-            options.add_argument('--disable-blink-features=AutomationControlled')
-            options.add_experimental_option("excludeSwitches", ["enable-automation"])
-            options.add_experimental_option('useAutomationExtension', False)
+                options.add_argument("--headless=new")
+                options.add_argument("--no-sandbox")
+                options.add_argument("--disable-dev-shm-usage")
+                options.add_argument("--disable-gpu")
+                options.add_argument("--window-size=1920,1080")
+            options.add_argument(
+                "--disable-blink-features=AutomationControlled"
+            )
+            options.add_experimental_option(
+                "excludeSwitches", ["enable-automation"]
+            )
+            options.add_experimental_option("useAutomationExtension", False)
             driver = webdriver.Chrome(service=service, options=options)
 
         elif browser_name == "firefox":
             service = Service(GeckoDriverManager().install())
             options = webdriver.FirefoxOptions()
             if headless:
-                options.add_argument('--headless')
-                options.add_argument('--width=1920')
-                options.add_argument('--height=1080')
+                options.add_argument("--headless")
+                options.add_argument("--width=1920")
+                options.add_argument("--height=1080")
             driver = webdriver.Firefox(service=service, options=options)
 
         elif browser_name == "edge":
             service = Service(EdgeChromiumDriverManager().install())
             options = webdriver.EdgeOptions()
             if headless:
-                options.add_argument('--headless=new')
-                options.add_argument('--no-sandbox')
-                options.add_argument('--disable-dev-shm-usage')
-                options.add_argument('--window-size=1920,1080')
+                options.add_argument("--headless=new")
+                options.add_argument("--no-sandbox")
+                options.add_argument("--disable-dev-shm-usage")
+                options.add_argument("--window-size=1920,1080")
             driver = webdriver.Edge(service=service, options=options)
 
         else:
-            pytest.fail(f"Browser '{browser_name}' not supported. Use: chrome, firefox, edge")
+            pytest.fail(
+                f"Browser '{browser_name}' not supported. Use: chrome, firefox, edge"
+            )
 
         driver.maximize_window()
         driver.implicitly_wait(config.TIMEOUT_DEFAULT)
         driver.test_config = {
-            'slow_mode': slow_mode,
-            'browser_name': browser_name,
-            'headless': headless
+            "slow_mode": slow_mode,
+            "browser_name": browser_name,
+            "headless": headless,
         }
 
         init_time = time.time() - start_time
@@ -228,7 +243,7 @@ def browser(request):
     yield driver
 
     try:
-        if hasattr(request.node, 'rep_call') and request.node.rep_call.failed:
+        if hasattr(request.node, "rep_call") and request.node.rep_call.failed:
             _take_failure_screenshot(driver, request)
         driver.quit()
         cleanup_time = time.time() - start_time
@@ -254,9 +269,11 @@ def log_test_info(request):
 def slow_down(request, browser):
     """Provide delay function for slow mode testing."""
     slow_mode = request.config.getoption("--slow")
+
     def delay():
         if slow_mode > 0:
             time.sleep(slow_mode)
+
     return delay
 
 
@@ -265,14 +282,16 @@ def _take_failure_screenshot(driver, request):
     try:
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         test_name = request.node.name
-        browser_name = driver.test_config['browser_name']
+        browser_name = driver.test_config["browser_name"]
         safe_test_name = "".join(c if c.isalnum() else "_" for c in test_name)
-        screenshot_name = f"FAIL_{browser_name}_{safe_test_name}_{timestamp}.png"
+        screenshot_name = (
+            f"FAIL_{browser_name}_{safe_test_name}_{timestamp}.png"
+        )
         screenshot_path = os.path.join(config.SCREENSHOTS_DIR, screenshot_name)
         driver.save_screenshot(screenshot_path)
         logger.error(f"📸 Screenshot saved: {screenshot_path}")
-        if hasattr(request.config, '_html'):
-            extra = getattr(request.node, 'extra', [])
+        if hasattr(request.config, "_html"):
+            extra = getattr(request.node, "extra", [])
             extra.append(pytest.html.extra.image(screenshot_path))
             request.node.extra = extra
     except Exception as e:
@@ -288,7 +307,7 @@ def pytest_runtest_makereport(item, call):
     if report.when == "call":
         if report.failed:
             logger.error(f"❌ FAILED: {item.name}")
-            if hasattr(report, 'longreprtext'):
+            if hasattr(report, "longreprtext"):
                 logger.error(f"   Error: {report.longreprtext[:200]}")
         elif report.passed:
             logger.info(f"✓ PASSED: {item.name}")
@@ -303,11 +322,13 @@ def pytest_html_report_title(report):
 
 def pytest_html_results_summary(prefix, summary, postfix):
     """Add custom information to HTML report summary."""
-    prefix.extend([
-        "<h2>Test Environment</h2>",
-        f"<p><strong>Application URL:</strong> {config.BASE_URL}</p>",
-        f"<p><strong>Test Date:</strong> {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>",
-    ])
+    prefix.extend(
+        [
+            "<h2>Test Environment</h2>",
+            f"<p><strong>Application URL:</strong> {config.BASE_URL}</p>",
+            f"<p><strong>Test Date:</strong> {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>",
+        ]
+    )
 
 
 @pytest.hookimpl(tryfirst=True)
@@ -315,8 +336,8 @@ def pytest_sessionfinish(session, exitstatus):
     """Log session finish information."""
     logger.info(f"\n{'='*70}")
     logger.info(f"TEST SESSION FINISHED | Exit Status: {exitstatus}")
-    if hasattr(session, 'testscollected'):
+    if hasattr(session, "testscollected"):
         logger.info(f"Total Tests: {session.testscollected}")
-    if hasattr(session, 'testsfailed'):
+    if hasattr(session, "testsfailed"):
         logger.info(f"Failed Tests: {session.testsfailed}")
     logger.info(f"{'='*70}\n")

@@ -30,7 +30,7 @@ def validate_email(email: str) -> bool:
     if not email:
         return False
 
-    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
     return bool(re.match(email_pattern, email))
 
 
@@ -76,7 +76,7 @@ def validate_credit_card(card_number: str) -> bool:
         >>> validate_credit_card("1234567890123456")
         False
     """
-    card_number = re.sub(r'[\s\-]', '', card_number)
+    card_number = re.sub(r"[\s\-]", "", card_number)
 
     if not card_number.isdigit():
         return False
@@ -115,10 +115,10 @@ def validate_phone_number(phone: str, country_code: str = "US") -> bool:
         >>> validate_phone_number("123")
         False
     """
-    phone = re.sub(r'[\s\-\(\)\.]', '', phone)
+    phone = re.sub(r"[\s\-\(\)\.]", "", phone)
 
     if country_code == "US":
-        return bool(re.match(r'^\+?1?\d{10}$', phone))
+        return bool(re.match(r"^\+?1?\d{10}$", phone))
 
     return len(phone) >= 10 and phone.isdigit()
 
@@ -154,17 +154,17 @@ def validate_password_strength(password: str, min_length: int = 8) -> dict:
     else:
         score += 1
 
-    if re.search(r'[a-z]', password):
+    if re.search(r"[a-z]", password):
         score += 1
     else:
         feedback.append("Include lowercase letters")
 
-    if re.search(r'[A-Z]', password):
+    if re.search(r"[A-Z]", password):
         score += 1
     else:
         feedback.append("Include uppercase letters")
 
-    if re.search(r'\d', password):
+    if re.search(r"\d", password):
         score += 1
     else:
         feedback.append("Include numbers")
@@ -175,13 +175,15 @@ def validate_password_strength(password: str, min_length: int = 8) -> dict:
         feedback.append("Include special characters")
 
     return {
-        'valid': len(password) >= min_length and score >= 3,
-        'score': score,
-        'feedback': feedback
+        "valid": len(password) >= min_length and score >= 3,
+        "score": score,
+        "feedback": feedback,
     }
 
 
-def validate_date_format(date_string: str, format_pattern: str = r'^\d{4}-\d{2}-\d{2}$') -> bool:
+def validate_date_format(
+    date_string: str, format_pattern: str = r"^\d{4}-\d{2}-\d{2}$"
+) -> bool:
     """
     Validate date string format.
 
@@ -222,16 +224,18 @@ def validate_postal_code(postal_code: str, country_code: str = "US") -> bool:
         True
     """
     patterns = {
-        "US": r'^\d{5}(-\d{4})?$',
-        "UK": r'^[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}$',
-        "CA": r'^[A-Z]\d[A-Z]\s?\d[A-Z]\d$',
+        "US": r"^\d{5}(-\d{4})?$",
+        "UK": r"^[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}$",
+        "CA": r"^[A-Z]\d[A-Z]\s?\d[A-Z]\d$",
     }
 
-    pattern = patterns.get(country_code, r'^\w+$')
+    pattern = patterns.get(country_code, r"^\w+$")
     return bool(re.match(pattern, postal_code.upper()))
 
 
-def validate_username(username: str, min_length: int = 3, max_length: int = 20) -> dict:
+def validate_username(
+    username: str, min_length: int = 3, max_length: int = 20
+) -> dict:
     """
     Validate username format and provide feedback.
 
@@ -259,15 +263,14 @@ def validate_username(username: str, min_length: int = 3, max_length: int = 20) 
         feedback.append(f"Username must not exceed {max_length} characters")
         valid = False
 
-    if not re.match(r'^[a-zA-Z0-9_]+$', username):
-        feedback.append("Username can only contain letters, numbers, and underscores")
+    if not re.match(r"^[a-zA-Z0-9_]+$", username):
+        feedback.append(
+            "Username can only contain letters, numbers, and underscores"
+        )
         valid = False
 
     if username and username[0].isdigit():
         feedback.append("Username cannot start with a number")
         valid = False
 
-    return {
-        'valid': valid,
-        'feedback': feedback
-    }
+    return {"valid": valid, "feedback": feedback}

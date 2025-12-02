@@ -11,8 +11,10 @@ Universal and reusable across any web application.
 import time
 import logging
 import re
-import requests
+import requests  # type: ignore[import-untyped]
+from typing import Optional, Tuple, List, Dict, Any, Callable
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
@@ -35,7 +37,6 @@ class CatalogPage(BasePage):
     - Performance measurement (load time, category switch time)
     """
 
-
     HOME_LINK = (By.ID, "nava")
     LOGO_LINK = (By.CSS_SELECTOR, ".navbar-brand")
 
@@ -56,50 +57,54 @@ class CatalogPage(BasePage):
 
     PRODUCT_DETAIL_NAME = (By.CSS_SELECTOR, "h2.name")
 
-
-    def go_to_catalog(self):
+    def go_to_catalog(self) -> None:
         """Navigate to catalog/home page"""
         self.driver.get(self.base_url)
         self.wait_for_page_load()
         time.sleep(1)
 
-    def click_home(self):
+    def click_home(self) -> None:
         """Click Home link to show all products"""
         home_link = self.wait_for_element_clickable(self.HOME_LINK, timeout=10)
         home_link.click()
         self.wait_for_page_load()
         time.sleep(1)
 
-    def click_logo(self):
+    def click_logo(self) -> None:
         """Click logo to return to home"""
         logo = self.wait_for_element_clickable(self.LOGO_LINK, timeout=10)
         logo.click()
         self.wait_for_page_load()
         time.sleep(1)
 
-
-    def click_phones_category(self):
+    def click_phones_category(self) -> bool:
         """Click Phones category link"""
-        phones = self.wait_for_element_clickable(self.PHONES_CATEGORY, timeout=10)
+        phones = self.wait_for_element_clickable(
+            self.PHONES_CATEGORY, timeout=10
+        )
         phones.click()
         time.sleep(2)  # Wait for products to load
         return True
 
-    def click_laptops_category(self):
+    def click_laptops_category(self) -> bool:
         """Click Laptops category link"""
-        laptops = self.wait_for_element_clickable(self.LAPTOPS_CATEGORY, timeout=10)
+        laptops = self.wait_for_element_clickable(
+            self.LAPTOPS_CATEGORY, timeout=10
+        )
         laptops.click()
         time.sleep(2)
         return True
 
-    def click_monitors_category(self):
+    def click_monitors_category(self) -> bool:
         """Click Monitors category link"""
-        monitors = self.wait_for_element_clickable(self.MONITORS_CATEGORY, timeout=10)
+        monitors = self.wait_for_element_clickable(
+            self.MONITORS_CATEGORY, timeout=10
+        )
         monitors.click()
         time.sleep(2)
         return True
 
-    def get_active_category(self):
+    def get_active_category(self) -> Optional[str]:
         """
         Get the currently active category
         Returns: str or None
@@ -114,7 +119,7 @@ class CatalogPage(BasePage):
             logger.error(f"Failed to get active category: {e}")
             return None
 
-    def is_category_active(self, category_name):
+    def is_category_active(self, category_name: str) -> bool:
         """
         Check if a category link has active state styling
         Args:
@@ -139,8 +144,7 @@ class CatalogPage(BasePage):
         except NoSuchElementException:
             return False
 
-
-    def get_all_product_cards(self, timeout=10):
+    def get_all_product_cards(self, timeout: int = 10) -> List[WebElement]:
         """
         Get all product cards currently displayed
         Returns: list of WebElement
@@ -153,7 +157,7 @@ class CatalogPage(BasePage):
             logger.warning("No product cards found")
             return []
 
-    def get_product_count(self, timeout=10):
+    def get_product_count(self, timeout: int = 10) -> int:
         """
         Count how many products are currently displayed
         Returns: int
@@ -161,7 +165,7 @@ class CatalogPage(BasePage):
         cards = self.get_all_product_cards(timeout=timeout)
         return len(cards)
 
-    def get_all_product_names(self, timeout=10):
+    def get_all_product_names(self, timeout: int = 10) -> List[str]:
         """
         Get all product names from current page
         Returns: list of str
@@ -173,7 +177,7 @@ class CatalogPage(BasePage):
         except TimeoutException:
             return []
 
-    def get_all_product_prices(self, timeout=10):
+    def get_all_product_prices(self, timeout: int = 10) -> List[str]:
         """
         Get all product prices from current page
         Returns: list of str
@@ -185,7 +189,7 @@ class CatalogPage(BasePage):
         except TimeoutException:
             return []
 
-    def get_all_product_images(self, timeout=10):
+    def get_all_product_images(self, timeout: int = 10) -> List[WebElement]:
         """
         Get all product image elements
         Returns: list of WebElement
@@ -197,7 +201,7 @@ class CatalogPage(BasePage):
         except TimeoutException:
             return []
 
-    def get_all_product_links(self, timeout=10):
+    def get_all_product_links(self, timeout: int = 10) -> List[WebElement]:
         """
         Get all product clickable links
         Returns: list of WebElement
@@ -209,15 +213,14 @@ class CatalogPage(BasePage):
         except TimeoutException:
             return []
 
-    def are_products_displayed(self, timeout=10):
+    def are_products_displayed(self, timeout: int = 10) -> bool:
         """
         Check if any products are visible on page
         Returns: bool
         """
         return self.get_product_count(timeout=timeout) > 0
 
-
-    def click_first_product(self):
+    def click_first_product(self) -> Tuple[bool, Optional[str]]:
         """
         Click on the first product link
         Returns: (success, product_name)
@@ -239,7 +242,7 @@ class CatalogPage(BasePage):
             logger.error(f"Failed to click first product: {e}")
             return False, None
 
-    def click_product_by_index(self, index):
+    def click_product_by_index(self, index: int) -> Tuple[bool, Optional[str]]:
         """
         Click on a product by its index (0-based)
         Args:
@@ -263,19 +266,20 @@ class CatalogPage(BasePage):
             logger.error(f"Failed to click product {index}: {e}")
             return False, None
 
-    def is_on_product_detail_page(self, timeout=5):
+    def is_on_product_detail_page(self, timeout: int = 5) -> bool:
         """
         Check if currently on a product detail page
         Returns: bool
         """
         try:
-            self.wait_for_element_visible(self.PRODUCT_DETAIL_NAME, timeout=timeout)
+            self.wait_for_element_visible(
+                self.PRODUCT_DETAIL_NAME, timeout=timeout
+            )
             return config.PRODUCT_PAGE_IDENTIFIER in self.driver.current_url
         except TimeoutException:
             return False
 
-
-    def is_next_button_visible(self, timeout=5):
+    def is_next_button_visible(self, timeout: int = 5) -> bool:
         """Check if Next button is visible"""
         try:
             self.wait_for_element_visible(self.NEXT_BUTTON, timeout=timeout)
@@ -283,7 +287,7 @@ class CatalogPage(BasePage):
         except TimeoutException:
             return False
 
-    def is_prev_button_visible(self, timeout=5):
+    def is_prev_button_visible(self, timeout: int = 5) -> bool:
         """Check if Previous button is visible"""
         try:
             self.wait_for_element_visible(self.PREV_BUTTON, timeout=timeout)
@@ -291,7 +295,7 @@ class CatalogPage(BasePage):
         except TimeoutException:
             return False
 
-    def is_next_button_enabled(self):
+    def is_next_button_enabled(self) -> bool:
         """Check if Next button is enabled (not disabled)"""
         try:
             button = self.find_element(self.NEXT_BUTTON)
@@ -299,7 +303,7 @@ class CatalogPage(BasePage):
         except NoSuchElementException:
             return False
 
-    def is_prev_button_enabled(self):
+    def is_prev_button_enabled(self) -> bool:
         """Check if Previous button is enabled"""
         try:
             button = self.find_element(self.PREV_BUTTON)
@@ -307,13 +311,15 @@ class CatalogPage(BasePage):
         except NoSuchElementException:
             return False
 
-    def click_next_page(self):
+    def click_next_page(self) -> bool:
         """
         Click Next pagination button
         Returns: bool - success status
         """
         try:
-            next_btn = self.wait_for_element_clickable(self.NEXT_BUTTON, timeout=10)
+            next_btn = self.wait_for_element_clickable(
+                self.NEXT_BUTTON, timeout=10
+            )
             next_btn.click()
             time.sleep(2)  # Wait for new products to load
             return True
@@ -321,13 +327,15 @@ class CatalogPage(BasePage):
             logger.warning("Next button not clickable")
             return False
 
-    def click_prev_page(self):
+    def click_prev_page(self) -> bool:
         """
         Click Previous pagination button
         Returns: bool - success status
         """
         try:
-            prev_btn = self.wait_for_element_clickable(self.PREV_BUTTON, timeout=10)
+            prev_btn = self.wait_for_element_clickable(
+                self.PREV_BUTTON, timeout=10
+            )
             prev_btn.click()
             time.sleep(2)
             return True
@@ -335,8 +343,7 @@ class CatalogPage(BasePage):
             logger.warning("Previous button not clickable")
             return False
 
-
-    def validate_all_products_have_names(self):
+    def validate_all_products_have_names(self) -> Tuple[bool, int]:
         """
         Validate that all displayed products have names
         Returns: (all_have_names, missing_count)
@@ -349,7 +356,7 @@ class CatalogPage(BasePage):
 
         return all_have_names, missing
 
-    def validate_all_products_have_prices(self):
+    def validate_all_products_have_prices(self) -> Tuple[bool, int]:
         """
         Validate that all displayed products have prices
         Returns: (all_have_prices, missing_count)
@@ -362,7 +369,7 @@ class CatalogPage(BasePage):
 
         return all_have_prices, missing
 
-    def validate_price_format(self, price_text):
+    def validate_price_format(self, price_text: str) -> bool:
         """
         Validate price follows expected format: "$XXX"
         Args:
@@ -372,10 +379,10 @@ class CatalogPage(BasePage):
         if not price_text:
             return False
 
-        pattern = r'^\$\d+(\.\d{2})?$'
+        pattern = r"^\$\d+(\.\d{2})?$"
         return bool(re.match(pattern, price_text))
 
-    def validate_all_prices_format(self):
+    def validate_all_prices_format(self) -> Tuple[bool, List[str]]:
         """
         Validate all prices follow correct format
         Returns: (all_valid, invalid_prices)
@@ -390,7 +397,9 @@ class CatalogPage(BasePage):
         all_valid = len(invalid) == 0
         return all_valid, invalid
 
-    def validate_image_loads(self, image_url):
+    def validate_image_loads(
+        self, image_url: str
+    ) -> Tuple[bool, Optional[int]]:
         """
         Validate image URL loads successfully
         Args:
@@ -406,7 +415,9 @@ class CatalogPage(BasePage):
             logger.error(f"Image validation failed: {e}")
             return False, None
 
-    def validate_all_images_load(self):
+    def validate_all_images_load(
+        self,
+    ) -> Tuple[bool, List[Tuple[str, Optional[int]]]]:
         """
         Validate all product images load successfully
         Returns: (all_load, failed_images)
@@ -415,7 +426,7 @@ class CatalogPage(BasePage):
         failed = []
 
         for img in images:
-            img_src = img.get_attribute('src')
+            img_src = img.get_attribute("src")
             if img_src:
                 loads, status = self.validate_image_loads(img_src)
                 if not loads:
@@ -424,7 +435,9 @@ class CatalogPage(BasePage):
         all_load = len(failed) == 0
         return all_load, failed
 
-    def validate_product_link_not_broken(self, link_url):
+    def validate_product_link_not_broken(
+        self, link_url: str
+    ) -> Tuple[bool, Optional[int]]:
         """
         Validate product link is not broken (returns 200)
         Args:
@@ -440,45 +453,48 @@ class CatalogPage(BasePage):
             logger.error(f"Link validation failed: {e}")
             return False, None
 
-
-    def measure_catalog_load_time(self):
+    def measure_catalog_load_time(self) -> Dict[str, Any]:
         """
         Measure catalog page load time using Navigation Timing API
         Returns: dict with timing metrics (in seconds)
         """
         try:
-            timing = self.driver.execute_script("""
+            timing = self.driver.execute_script(
+                """
                 var timing = window.performance.timing;
                 return {
                     navigationStart: timing.navigationStart,
                     domContentLoaded: timing.domContentLoadedEventEnd,
                     loadComplete: timing.loadEventEnd
                 };
-            """)
+            """
+            )
 
-            nav_start = timing['navigationStart']
-            dom_loaded = timing['domContentLoaded']
-            load_complete = timing['loadComplete']
+            nav_start = timing["navigationStart"]
+            dom_loaded = timing["domContentLoaded"]
+            load_complete = timing["loadComplete"]
 
             if nav_start and dom_loaded and load_complete:
                 dom_load_time = (dom_loaded - nav_start) / 1000.0
                 total_load_time = (load_complete - nav_start) / 1000.0
 
                 return {
-                    'dom_load_time': dom_load_time,
-                    'total_load_time': total_load_time,
-                    'success': True
+                    "dom_load_time": dom_load_time,
+                    "total_load_time": total_load_time,
+                    "success": True,
                 }
         except Exception as e:
             logger.error(f"Failed to measure load time: {e}")
 
         return {
-            'dom_load_time': None,
-            'total_load_time': None,
-            'success': False
+            "dom_load_time": None,
+            "total_load_time": None,
+            "success": False,
         }
 
-    def measure_category_switch_time(self, category_method):
+    def measure_category_switch_time(
+        self, category_method: Callable[[], bool]
+    ) -> float:
         """
         Measure time to switch categories
         Args:
@@ -491,17 +507,16 @@ class CatalogPage(BasePage):
 
         return end_time - start_time
 
-
-    def test_keyboard_navigation_categories(self):
+    def test_keyboard_navigation_categories(self) -> Dict[str, bool]:
         """
         Test keyboard navigation through category links
         Returns: dict with navigation results
         """
         results = {
-            'phones_focusable': False,
-            'laptops_focusable': False,
-            'monitors_focusable': False,
-            'tab_navigation_works': False
+            "phones_focusable": False,
+            "laptops_focusable": False,
+            "monitors_focusable": False,
+            "tab_navigation_works": False,
         }
 
         try:
@@ -517,33 +532,35 @@ class CatalogPage(BasePage):
                 active_element = self.driver.switch_to.active_element
                 text = active_element.text
 
-                if 'Phones' in text:
-                    results['phones_focusable'] = True
-                if 'Laptops' in text:
-                    results['laptops_focusable'] = True
-                if 'Monitors' in text:
-                    results['monitors_focusable'] = True
+                if "Phones" in text:
+                    results["phones_focusable"] = True
+                if "Laptops" in text:
+                    results["laptops_focusable"] = True
+                if "Monitors" in text:
+                    results["monitors_focusable"] = True
 
-            results['tab_navigation_works'] = any([
-                results['phones_focusable'],
-                results['laptops_focusable'],
-                results['monitors_focusable']
-            ])
+            results["tab_navigation_works"] = any(
+                [
+                    results["phones_focusable"],
+                    results["laptops_focusable"],
+                    results["monitors_focusable"],
+                ]
+            )
 
         except Exception as e:
             logger.error(f"Keyboard navigation test failed: {e}")
 
         return results
 
-    def check_category_aria_labels(self):
+    def check_category_aria_labels(self) -> Dict[str, bool]:
         """
         Check if category links have ARIA labels
         Returns: dict with ARIA label presence
         """
         results = {
-            'phones_has_aria': False,
-            'laptops_has_aria': False,
-            'monitors_has_aria': False
+            "phones_has_aria": False,
+            "laptops_has_aria": False,
+            "monitors_has_aria": False,
         }
 
         try:
@@ -551,55 +568,69 @@ class CatalogPage(BasePage):
             laptops = self.find_element(self.LAPTOPS_CATEGORY)
             monitors = self.find_element(self.MONITORS_CATEGORY)
 
-            results['phones_has_aria'] = bool(phones.get_attribute('aria-label'))
-            results['laptops_has_aria'] = bool(laptops.get_attribute('aria-label'))
-            results['monitors_has_aria'] = bool(monitors.get_attribute('aria-label'))
+            results["phones_has_aria"] = bool(
+                phones.get_attribute("aria-label")
+            )
+            results["laptops_has_aria"] = bool(
+                laptops.get_attribute("aria-label")
+            )
+            results["monitors_has_aria"] = bool(
+                monitors.get_attribute("aria-label")
+            )
 
         except NoSuchElementException as e:
             logger.error(f"Category not found: {e}")
 
         return results
 
-    def check_focus_indicators(self):
+    def check_focus_indicators(self) -> Dict[str, bool]:
         """
         Check if focus indicators are visible on interactive elements
         Returns: dict with focus indicator status
         """
         results = {
-            'categories_have_focus': False,
-            'products_have_focus': False
+            "categories_have_focus": False,
+            "products_have_focus": False,
         }
 
         try:
             phones = self.find_element(self.PHONES_CATEGORY)
             phones.click()
 
-            has_outline = self.driver.execute_script("""
+            has_outline = self.driver.execute_script(
+                """
                 var element = arguments[0];
                 var styles = window.getComputedStyle(element, ':focus');
                 return styles.outlineWidth !== '0px' && styles.outlineStyle !== 'none';
-            """, phones)
+            """,
+                phones,
+            )
 
-            results['categories_have_focus'] = has_outline
+            results["categories_have_focus"] = has_outline
 
             links = self.get_all_product_links()
             if links:
                 first_link = links[0]
-                has_product_outline = self.driver.execute_script("""
+                has_product_outline = self.driver.execute_script(
+                    """
                     var element = arguments[0];
                     element.focus();
                     var styles = window.getComputedStyle(element, ':focus');
                     return styles.outlineWidth !== '0px' && styles.outlineStyle !== 'none';
-                """, first_link)
+                """,
+                    first_link,
+                )
 
-                results['products_have_focus'] = has_product_outline
+                results["products_have_focus"] = has_product_outline
 
         except Exception as e:
             logger.error(f"Focus indicator check failed: {e}")
 
         return results
 
-    def get_product_image_alt_texts(self):
+    def get_product_image_alt_texts(
+        self,
+    ) -> List[Tuple[Optional[str], Optional[str]]]:
         """
         Get alt text for all product images
         Returns: list of (image_src, alt_text) tuples
@@ -608,13 +639,13 @@ class CatalogPage(BasePage):
         alt_data = []
 
         for img in images:
-            src = img.get_attribute('src')
-            alt = img.get_attribute('alt')
+            src = img.get_attribute("src")
+            alt = img.get_attribute("alt")
             alt_data.append((src, alt))
 
         return alt_data
 
-    def validate_all_images_have_alt_text(self):
+    def validate_all_images_have_alt_text(self) -> Tuple[bool, int]:
         """
         Validate all product images have alt text
         Returns: (all_have_alt, missing_count)
@@ -629,8 +660,7 @@ class CatalogPage(BasePage):
         all_have_alt = missing == 0
         return all_have_alt, missing
 
-
-    def check_for_sql_error_indicators(self):
+    def check_for_sql_error_indicators(self) -> Tuple[bool, List[str]]:
         """
         Check page source for SQL error disclosure
         Returns: (has_error, error_indicators_found)
@@ -638,15 +668,15 @@ class CatalogPage(BasePage):
         page_source = self.driver.page_source.lower()
 
         sql_error_patterns = [
-            'sql syntax',
-            'mysql',
-            'postgresql',
-            'sqlite',
-            'database error',
-            'odbc',
-            'jdbc',
-            'syntax error near',
-            'unclosed quotation mark'
+            "sql syntax",
+            "mysql",
+            "postgresql",
+            "sqlite",
+            "database error",
+            "odbc",
+            "jdbc",
+            "syntax error near",
+            "unclosed quotation mark",
         ]
 
         found_indicators = []
@@ -657,7 +687,7 @@ class CatalogPage(BasePage):
         has_error = len(found_indicators) > 0
         return has_error, found_indicators
 
-    def check_for_directory_listing(self):
+    def check_for_directory_listing(self) -> Tuple[bool, List[str]]:
         """
         Check for directory listing exposure
         Returns: (has_listing, indicators_found)
@@ -665,11 +695,11 @@ class CatalogPage(BasePage):
         page_source = self.driver.page_source.lower()
 
         listing_indicators = [
-            'index of /',
-            'parent directory',
-            'directory listing',
-            'last modified',
-            'apache server at'
+            "index of /",
+            "parent directory",
+            "directory listing",
+            "last modified",
+            "apache server at",
         ]
 
         found = []
@@ -680,7 +710,7 @@ class CatalogPage(BasePage):
         has_listing = len(found) > 0
         return has_listing, found
 
-    def check_for_verbose_errors(self):
+    def check_for_verbose_errors(self) -> Tuple[bool, List[str]]:
         """
         Check for verbose error messages in page source
         Returns: (has_verbose_errors, errors_found)
@@ -688,13 +718,13 @@ class CatalogPage(BasePage):
         page_source = self.driver.page_source.lower()
 
         error_patterns = [
-            'stack trace',
-            'exception',
-            'fatal error',
-            'warning:',
-            'notice:',
-            'deprecated:',
-            'parse error'
+            "stack trace",
+            "exception",
+            "fatal error",
+            "warning:",
+            "notice:",
+            "deprecated:",
+            "parse error",
         ]
 
         found = []

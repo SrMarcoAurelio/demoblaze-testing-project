@@ -9,8 +9,9 @@ Universal and reusable across any web application.
 
 import time
 import logging
-from typing import Callable, Any
+from typing import Callable, Any, Tuple, Type
 from functools import wraps
+from selenium.webdriver.remote.webdriver import WebDriver
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ def wait_for_condition(
     condition_func: Callable[[], bool],
     timeout: float = 10,
     poll_frequency: float = 0.5,
-    error_message: str = "Condition not met within timeout"
+    error_message: str = "Condition not met within timeout",
 ) -> bool:
     """
     Wait for a condition to become true.
@@ -56,8 +57,8 @@ def retry_on_failure(
     max_attempts: int = 3,
     delay: float = 1.0,
     exponential_backoff: bool = False,
-    exceptions: tuple = (Exception,)
-):
+    exceptions: Tuple[Type[BaseException], ...] = (Exception,),
+) -> Callable:
     """
     Decorator to retry a function on failure.
 
@@ -75,16 +76,19 @@ def retry_on_failure(
         ... def click_flaky_button():
         ...     driver.find_element(By.ID, "btn").click()
     """
-    def decorator(func: Callable) -> Callable:
+
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
-        def wrapper(*args, **kwargs) -> Any:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             current_delay = delay
             for attempt in range(1, max_attempts + 1):
                 try:
                     return func(*args, **kwargs)
                 except exceptions as e:
                     if attempt == max_attempts:
-                        logger.error(f"{func.__name__} failed after {max_attempts} attempts")
+                        logger.error(
+                            f"{func.__name__} failed after {max_attempts} attempts"
+                        )
                         raise
                     logger.warning(
                         f"{func.__name__} attempt {attempt}/{max_attempts} failed: {e}. "
@@ -93,11 +97,13 @@ def retry_on_failure(
                     time.sleep(current_delay)
                     if exponential_backoff:
                         current_delay *= 2
+
         return wrapper
+
     return decorator
 
 
-def wait_with_timeout(timeout: float = 30):
+def wait_with_timeout(timeout: float = 30) -> Callable:
     """
     Decorator to add timeout to a function.
 
@@ -117,9 +123,10 @@ def wait_with_timeout(timeout: float = 30):
         ...     time.sleep(5)
         ...     return "Done"
     """
-    def decorator(func: Callable) -> Callable:
+
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
-        def wrapper(*args, **kwargs) -> Any:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             start_time = time.time()
             result = func(*args, **kwargs)
             elapsed = time.time() - start_time
@@ -128,11 +135,13 @@ def wait_with_timeout(timeout: float = 30):
                     f"{func.__name__} took {elapsed:.2f}s (timeout: {timeout}s)"
                 )
             return result
+
         return wrapper
+
     return decorator
 
 
-def wait_for_page_ready(driver, timeout: float = 30) -> bool:
+def wait_for_page_ready(driver: WebDriver, timeout: float = 30) -> bool:
     """
     Wait for page to be fully loaded (document.readyState === 'complete').
 
@@ -147,17 +156,20 @@ def wait_for_page_ready(driver, timeout: float = 30) -> bool:
         >>> wait_for_page_ready(driver, timeout=10)
         True
     """
-    def page_is_ready():
-        return driver.execute_script('return document.readyState') == 'complete'
+
+    def page_is_ready() -> bool:
+        return (
+            driver.execute_script("return document.readyState") == "complete"
+        )
 
     return wait_for_condition(
         page_is_ready,
         timeout=timeout,
-        error_message="Page did not load within timeout"
+        error_message="Page did not load within timeout",
     )
 
 
-def wait_for_ajax(driver, timeout: float = 10) -> bool:
+def wait_for_ajax(driver: WebDriver, timeout: float = 10) -> bool:
     """
     Wait for all AJAX requests to complete (jQuery).
 
@@ -174,9 +186,10 @@ def wait_for_ajax(driver, timeout: float = 10) -> bool:
         >>> wait_for_ajax(driver, timeout=5)
         True
     """
-    def ajax_is_complete():
+
+    def ajax_is_complete() -> bool:
         try:
-            jquery_active = driver.execute_script('return jQuery.active == 0')
+            jquery_active = driver.execute_script("return jQuery.active == 0")
             return jquery_active
         except Exception:
             return True
@@ -184,5 +197,5 @@ def wait_for_ajax(driver, timeout: float = 10) -> bool:
     return wait_for_condition(
         ajax_is_complete,
         timeout=timeout,
-        error_message="AJAX requests did not complete within timeout"
+        error_message="AJAX requests did not complete within timeout",
     )

@@ -30,7 +30,9 @@ def generate_unique_username(prefix: str = "testuser", length: int = 4) -> str:
         testuser_1701234567_a1b2
     """
     timestamp = int(time.time())
-    random_suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
+    random_suffix = "".join(
+        random.choices(string.ascii_lowercase + string.digits, k=length)
+    )
     return f"{prefix}_{timestamp}_{random_suffix}"
 
 
@@ -38,7 +40,7 @@ def generate_random_password(
     length: int = 12,
     include_uppercase: bool = True,
     include_numbers: bool = True,
-    include_special: bool = True
+    include_special: bool = True,
 ) -> str:
     """
     Generate a random password for testing.
@@ -65,7 +67,7 @@ def generate_random_password(
     if include_special:
         characters += string.punctuation
 
-    return ''.join(random.choices(characters, k=length))
+    return "".join(random.choices(characters, k=length))
 
 
 def generate_random_email(domain: str = "testmail.com") -> str:
@@ -108,12 +110,14 @@ def generate_credit_card_number(card_type: str = "visa") -> str:
     test_cards = {
         "visa": "4532015112830366",
         "mastercard": "5425233430109903",
-        "amex": "374245455400126"
+        "amex": "374245455400126",
     }
     return test_cards.get(card_type.lower(), test_cards["visa"])
 
 
-def generate_random_string(length: int = 10, charset: Optional[str] = None) -> str:
+def generate_random_string(
+    length: int = 10, charset: Optional[str] = None
+) -> str:
     """
     Generate a random string of specified length.
 
@@ -131,4 +135,4 @@ def generate_random_string(length: int = 10, charset: Optional[str] = None) -> s
     """
     if charset is None:
         charset = string.ascii_letters + string.digits
-    return ''.join(random.choices(charset, k=length))
+    return "".join(random.choices(charset, k=length))

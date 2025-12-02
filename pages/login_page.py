@@ -8,10 +8,10 @@ Contains all locators and actions related to login, logout, and signup.
 Universal and reusable across any web application with modal-based authentication.
 """
 
+from typing import Optional, List, Dict, Any
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from pages.base_page import BasePage
-
 
 
 class LoginPage(BasePage):
@@ -26,31 +26,44 @@ class LoginPage(BasePage):
     - Signup modal (basic support)
     """
 
-
     LOGIN_BUTTON_NAV = (By.ID, "login2")
     SIGNUP_BUTTON_NAV = (By.ID, "signin2")
     LOGOUT_BUTTON_NAV = (By.ID, "logout2")
     HOME_NAV_LINK = (By.XPATH, "//a[contains(text(), 'Home')]")
 
     LOGIN_MODAL = (By.ID, "logInModal")
-    LOGIN_MODAL_TITLE = (By.XPATH, "//div[@id='logInModal']//h5[@class='modal-title']")
+    LOGIN_MODAL_TITLE = (
+        By.XPATH,
+        "//div[@id='logInModal']//h5[@class='modal-title']",
+    )
     LOGIN_USERNAME_FIELD = (By.ID, "loginusername")
     LOGIN_PASSWORD_FIELD = (By.ID, "loginpassword")
     LOGIN_SUBMIT_BUTTON = (By.XPATH, "//button[text()='Log in']")
-    LOGIN_CLOSE_BUTTON = (By.XPATH, "//div[@id='logInModal']//button[@class='close']")
-    LOGIN_CLOSE_FOOTER_BUTTON = (By.XPATH, "//div[@id='logInModal']//button[text()='Close']")
+    LOGIN_CLOSE_BUTTON = (
+        By.XPATH,
+        "//div[@id='logInModal']//button[@class='close']",
+    )
+    LOGIN_CLOSE_FOOTER_BUTTON = (
+        By.XPATH,
+        "//div[@id='logInModal']//button[text()='Close']",
+    )
 
     SIGNUP_MODAL = (By.ID, "signInModal")
-    SIGNUP_MODAL_TITLE = (By.XPATH, "//div[@id='signInModal']//h5[@class='modal-title']")
+    SIGNUP_MODAL_TITLE = (
+        By.XPATH,
+        "//div[@id='signInModal']//h5[@class='modal-title']",
+    )
     SIGNUP_USERNAME_FIELD = (By.ID, "sign-username")
     SIGNUP_PASSWORD_FIELD = (By.ID, "sign-password")
     SIGNUP_SUBMIT_BUTTON = (By.XPATH, "//button[text()='Sign up']")
-    SIGNUP_CLOSE_BUTTON = (By.XPATH, "//div[@id='signInModal']//button[@class='close']")
+    SIGNUP_CLOSE_BUTTON = (
+        By.XPATH,
+        "//div[@id='signInModal']//button[@class='close']",
+    )
 
     WELCOME_USER_TEXT = (By.ID, "nameofuser")
 
-
-    def open_login_modal(self):
+    def open_login_modal(self) -> bool:
         """
         Open the login modal.
 
@@ -63,25 +76,25 @@ class LoginPage(BasePage):
         self.logger.info("Login modal opened")
         return True
 
-    def close_login_modal(self):
+    def close_login_modal(self) -> None:
         """Close the login modal using close button."""
         self.click(self.LOGIN_CLOSE_BUTTON)
         self.wait_for_element_invisible(self.LOGIN_MODAL)
         self.logger.info("Login modal closed")
 
-    def close_login_modal_footer(self):
+    def close_login_modal_footer(self) -> None:
         """Close the login modal using footer close button."""
         self.click(self.LOGIN_CLOSE_FOOTER_BUTTON)
         self.wait_for_element_invisible(self.LOGIN_MODAL)
         self.logger.info("Login modal closed via footer button")
 
-    def close_login_modal_esc(self):
+    def close_login_modal_esc(self) -> None:
         """Close the login modal using ESC key."""
         self.press_key(Keys.ESCAPE)
         self.wait_for_element_invisible(self.LOGIN_MODAL, timeout=3)
         self.logger.info("Login modal closed via ESC key")
 
-    def is_login_modal_visible(self):
+    def is_login_modal_visible(self) -> bool:
         """
         Check if login modal is visible.
 
@@ -90,8 +103,9 @@ class LoginPage(BasePage):
         """
         return self.is_element_visible(self.LOGIN_MODAL, timeout=2)
 
-
-    def fill_login_username(self, username, clear_first=True):
+    def fill_login_username(
+        self, username: str, clear_first: bool = True
+    ) -> None:
         """
         Fill the username field in login modal.
 
@@ -102,7 +116,9 @@ class LoginPage(BasePage):
         self.type(self.LOGIN_USERNAME_FIELD, username, clear_first=clear_first)
         self.logger.info(f"Entered username: {username}")
 
-    def fill_login_password(self, password, clear_first=True):
+    def fill_login_password(
+        self, password: str, clear_first: bool = True
+    ) -> None:
         """
         Fill the password field in login modal.
 
@@ -113,17 +129,19 @@ class LoginPage(BasePage):
         self.type(self.LOGIN_PASSWORD_FIELD, password, clear_first=clear_first)
         self.logger.info("Entered password")
 
-    def click_login_submit(self):
+    def click_login_submit(self) -> None:
         """Click the login submit button."""
         self.click(self.LOGIN_SUBMIT_BUTTON)
         self.logger.info("Clicked login submit button")
 
-    def submit_login_with_enter(self):
+    def submit_login_with_enter(self) -> None:
         """Submit login form using ENTER key."""
         self.send_keys(self.LOGIN_PASSWORD_FIELD, Keys.ENTER)
         self.logger.info("Submitted login via ENTER key")
 
-    def login(self, username, password, use_enter_key=False):
+    def login(
+        self, username: str, password: str, use_enter_key: bool = False
+    ) -> bool:
         """
         Complete login flow: open modal, fill fields, submit.
 
@@ -147,8 +165,7 @@ class LoginPage(BasePage):
         self.logger.info(f"Login attempted for user: {username}")
         return True
 
-
-    def logout(self):
+    def logout(self) -> bool:
         """
         Logout the current user.
 
@@ -160,7 +177,7 @@ class LoginPage(BasePage):
         self.logger.info("Logout completed")
         return True
 
-    def is_logout_button_visible(self):
+    def is_logout_button_visible(self) -> bool:
         """
         Check if logout button is visible.
 
@@ -169,8 +186,7 @@ class LoginPage(BasePage):
         """
         return self.is_element_visible(self.LOGOUT_BUTTON_NAV, timeout=2)
 
-
-    def open_signup_modal(self):
+    def open_signup_modal(self) -> bool:
         """
         Open the signup modal.
 
@@ -183,13 +199,15 @@ class LoginPage(BasePage):
         self.logger.info("Signup modal opened")
         return True
 
-    def close_signup_modal(self):
+    def close_signup_modal(self) -> None:
         """Close the signup modal."""
         self.click(self.SIGNUP_CLOSE_BUTTON)
         self.wait_for_element_invisible(self.SIGNUP_MODAL)
         self.logger.info("Signup modal closed")
 
-    def fill_signup_username(self, username, clear_first=True):
+    def fill_signup_username(
+        self, username: str, clear_first: bool = True
+    ) -> None:
         """
         Fill the username field in signup modal.
 
@@ -197,10 +215,14 @@ class LoginPage(BasePage):
             username: Username to enter
             clear_first: Clear field before typing (default: True)
         """
-        self.type(self.SIGNUP_USERNAME_FIELD, username, clear_first=clear_first)
+        self.type(
+            self.SIGNUP_USERNAME_FIELD, username, clear_first=clear_first
+        )
         self.logger.info(f"Entered signup username: {username}")
 
-    def fill_signup_password(self, password, clear_first=True):
+    def fill_signup_password(
+        self, password: str, clear_first: bool = True
+    ) -> None:
         """
         Fill the password field in signup modal.
 
@@ -208,15 +230,17 @@ class LoginPage(BasePage):
             password: Password to enter
             clear_first: Clear field before typing (default: True)
         """
-        self.type(self.SIGNUP_PASSWORD_FIELD, password, clear_first=clear_first)
+        self.type(
+            self.SIGNUP_PASSWORD_FIELD, password, clear_first=clear_first
+        )
         self.logger.info("Entered signup password")
 
-    def click_signup_submit(self):
+    def click_signup_submit(self) -> None:
         """Click the signup submit button."""
         self.click(self.SIGNUP_SUBMIT_BUTTON)
         self.logger.info("Clicked signup submit button")
 
-    def signup(self, username, password):
+    def signup(self, username: str, password: str) -> bool:
         """
         Complete signup flow: open modal, fill fields, submit.
 
@@ -234,8 +258,7 @@ class LoginPage(BasePage):
         self.logger.info(f"Signup attempted for user: {username}")
         return True
 
-
-    def is_user_logged_in(self, timeout=3):
+    def is_user_logged_in(self, timeout: int = 3) -> bool:
         """
         Check if user is currently logged in.
 
@@ -247,14 +270,16 @@ class LoginPage(BasePage):
         Returns:
             True if user is logged in, False otherwise
         """
-        is_logged_in = self.is_element_visible(self.WELCOME_USER_TEXT, timeout=timeout)
+        is_logged_in = self.is_element_visible(
+            self.WELCOME_USER_TEXT, timeout=timeout
+        )
         if is_logged_in:
             self.logger.info("User is logged in")
         else:
             self.logger.info("User is not logged in")
         return is_logged_in
 
-    def get_welcome_message(self):
+    def get_welcome_message(self) -> Optional[str]:
         """
         Get the welcome message text (e.g., "Welcome Apolo2025").
 
@@ -267,7 +292,7 @@ class LoginPage(BasePage):
             return text
         return None
 
-    def get_logged_in_username(self):
+    def get_logged_in_username(self) -> Optional[str]:
         """
         Extract username from welcome message.
 
@@ -281,43 +306,41 @@ class LoginPage(BasePage):
             return username
         return None
 
-
-    def get_login_username_value(self):
+    def get_login_username_value(self) -> Optional[str]:
         """Get current value of login username field."""
         return self.get_attribute(self.LOGIN_USERNAME_FIELD, "value")
 
-    def get_login_password_value(self):
+    def get_login_password_value(self) -> Optional[str]:
         """Get current value of login password field."""
         return self.get_attribute(self.LOGIN_PASSWORD_FIELD, "value")
 
-    def get_login_username_placeholder(self):
+    def get_login_username_placeholder(self) -> Optional[str]:
         """Get placeholder text of login username field."""
         return self.get_attribute(self.LOGIN_USERNAME_FIELD, "placeholder")
 
-    def get_login_password_placeholder(self):
+    def get_login_password_placeholder(self) -> Optional[str]:
         """Get placeholder text of login password field."""
         return self.get_attribute(self.LOGIN_PASSWORD_FIELD, "placeholder")
 
-    def is_login_username_field_enabled(self):
+    def is_login_username_field_enabled(self) -> bool:
         """Check if login username field is enabled."""
         enabled = self.get_attribute(self.LOGIN_USERNAME_FIELD, "disabled")
         return enabled is None
 
-    def is_login_password_field_enabled(self):
+    def is_login_password_field_enabled(self) -> bool:
         """Check if login password field is enabled."""
         enabled = self.get_attribute(self.LOGIN_PASSWORD_FIELD, "disabled")
         return enabled is None
 
-
-    def get_login_username_aria_label(self):
+    def get_login_username_aria_label(self) -> Optional[str]:
         """Get aria-label of login username field (for accessibility testing)."""
         return self.get_attribute(self.LOGIN_USERNAME_FIELD, "aria-label")
 
-    def get_login_password_aria_label(self):
+    def get_login_password_aria_label(self) -> Optional[str]:
         """Get aria-label of login password field (for accessibility testing)."""
         return self.get_attribute(self.LOGIN_PASSWORD_FIELD, "aria-label")
 
-    def tab_through_login_form(self):
+    def tab_through_login_form(self) -> bool:
         """
         Tab through login form fields (for keyboard navigation testing).
 
@@ -333,8 +356,7 @@ class LoginPage(BasePage):
         self.logger.info("Tabbed through login form")
         return True
 
-
-    def inject_sql_payload_username(self, payload):
+    def inject_sql_payload_username(self, payload: str) -> bool:
         """
         Inject SQL payload into username field (for security testing).
 
@@ -351,7 +373,7 @@ class LoginPage(BasePage):
         self.logger.warning(f"SQL injection payload tested: {payload}")
         return True
 
-    def inject_xss_payload_username(self, payload):
+    def inject_xss_payload_username(self, payload: str) -> bool:
         """
         Inject XSS payload into username field (for security testing).
 
@@ -368,7 +390,7 @@ class LoginPage(BasePage):
         self.logger.warning(f"XSS payload tested: {payload}")
         return True
 
-    def check_for_csrf_token(self):
+    def check_for_csrf_token(self) -> bool:
         """
         Check if login form has CSRF token (for security testing).
 
@@ -378,7 +400,9 @@ class LoginPage(BasePage):
         self.open_login_modal()
         page_source = self.get_page_source()
 
-        has_csrf = 'csrf' in page_source.lower() or 'token' in page_source.lower()
+        has_csrf = (
+            "csrf" in page_source.lower() or "token" in page_source.lower()
+        )
 
         if has_csrf:
             self.logger.info("CSRF token detected")
@@ -387,7 +411,7 @@ class LoginPage(BasePage):
 
         return has_csrf
 
-    def get_session_cookies(self):
+    def get_session_cookies(self) -> List[Dict[str, Any]]:
         """
         Get all session-related cookies (for security testing).
 
@@ -395,6 +419,8 @@ class LoginPage(BasePage):
             List of cookie dictionaries
         """
         cookies = self.driver.get_cookies()
-        session_cookies = [c for c in cookies if 'session' in c.get('name', '').lower()]
+        session_cookies = [
+            c for c in cookies if "session" in c.get("name", "").lower()
+        ]
         self.logger.info(f"Found {len(session_cookies)} session cookies")
         return session_cookies
