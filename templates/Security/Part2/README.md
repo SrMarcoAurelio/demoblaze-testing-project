@@ -24,7 +24,7 @@ Antes de empezar, déjame confirmar algunos detalles:
    - Módulo: Login/Authentication
    - Tipo de aplicación: Banking
    - ¿Ya existen tests funcionales de login? [YES/NO]
-   
+
 2. **Vectores de Ataque a Testear:**
    Basándome en la matriz de research, para Login debo testear:
    - ✅ SQL Injection en username/password
@@ -33,7 +33,7 @@ Antes de empezar, déjame confirmar algunos detalles:
    - ✅ Weak password policy
    - ✅ Rate limiting
    - ✅ Account enumeration
-   
+
    ¿Confirmas que quieres todos estos, o alguno específico?
 
 3. **Entorno de Testing:**
@@ -46,7 +46,7 @@ Antes de empezar, déjame confirmar algunos detalles:
    - SQL Injection (CVSS 9.8)
    - Brute force sin rate limiting (CVSS 8.1)
    - Session fixation (CVSS 8.1)
-   
+
    ¿Confirmas prioridades?
 
 5. **Deliverables:**
@@ -66,7 +66,7 @@ Perfecto, procediendo con la generación:
 PASO 1 - RESEARCH:
 Investigando estándares para Login/Authentication:
 - OWASP ASVS v5.0 Chapter 2 (Authentication)
-- NIST SP 800-63B (Digital Identity Guidelines)  
+- NIST SP 800-63B (Digital Identity Guidelines)
 - ISO 27001 A.9.4 (Access Control)
 - OWASP Top 10 2021 - A07 (Auth Failures)
 
@@ -243,7 +243,7 @@ This is your quick reference for what to test based on module type.
    Standard: OWASP Top 10 - A03, OWASP ASVS v5.0-1.2.5
 
 2. No Brute Force Protection
-   CVSS: 8.1 HIGH  
+   CVSS: 8.1 HIGH
    Test: Attempt 100+ login attempts rapidly
    Discovery: If no rate limiting/lockout = vulnerable
    Standard: OWASP ASVS v5.0-2.2.1, NIST 800-63B
@@ -433,7 +433,7 @@ if sum(results) == 10:
    Standard: OWASP Top 10 - A03
 
 4. LDAP Injection
-   CVSS: 9.1 CRITICAL  
+   CVSS: 9.1 CRITICAL
    Test: Search for "*)(objectClass=*"
    Discovery: If LDAP query manipulation = injection
    Standard: CWE-90
@@ -650,20 +650,20 @@ if contains_sensitive_fields(response, ["ssn", "password_hash"]):
 
 def test_vulnerability(browser):
     """TC-SEC-[MOD]-[CAT]-001: Vulnerability Name
-    
+
     Severity: CRITICAL/HIGH/MEDIUM/LOW
     CVSS: X.X
     Standard: [Specific standard]
-    
+
     Discovers if [vulnerability] exists by [exploitation method]
     """
-    
+
     # STEP 1: EXECUTE the exploit
     attempt_exploitation(browser, payload)
-    
+
     # STEP 2: OBSERVE the response
     result = capture_response(browser)
-    
+
     # STEP 3: DECIDE if vulnerable
     if result.indicates_vulnerability():
         # DISCOVERED: Vulnerable

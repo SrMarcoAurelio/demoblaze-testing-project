@@ -1,8 +1,8 @@
 # Test Suite: Signup & Registration Functionality
 
-**Module:** `test_signup_functionality.py`  
-**Author:** QA Testing Team  
-**Application Under Test:** DemoBlaze (https://www.demoblaze.com/)  
+**Module:** `test_signup_functionality.py`
+**Author:** QA Testing Team
+**Application Under Test:** DemoBlaze (https://www.demoblaze.com/)
 **Current Version:** 1.0
 
 ---
@@ -514,8 +514,8 @@ def perform_logout(browser, timeout=TIMEOUT):
 
 #### TC-SIGNUP-FUNC-001: Valid Signup with Unique Credentials
 
-**Priority:** CRITICAL  
-**Category:** Functional  
+**Priority:** CRITICAL
+**Category:** Functional
 **Purpose:** Verify happy path signup flow
 
 **Steps:**
@@ -540,8 +540,8 @@ def perform_logout(browser, timeout=TIMEOUT):
 
 #### TC-SIGNUP-FUNC-002: Duplicate Username Rejected
 
-**Priority:** CRITICAL  
-**Category:** Functional  
+**Priority:** CRITICAL
+**Category:** Functional
 **Purpose:** Verify duplicate username prevention
 
 **Steps:**
@@ -565,9 +565,9 @@ See inline test documentation for remaining functional tests.
 
 #### TC-SIGNUP-BR-011: SQL Injection Prevention
 
-**Priority:** CRITICAL  
-**Category:** Security  
-**Standard:** OWASP ASVS v5.0 Section 1.2.5  
+**Priority:** CRITICAL
+**Category:** Security
+**Standard:** OWASP ASVS v5.0 Section 1.2.5
 **CVSS Score:** 9.8 (CRITICAL)
 
 **Payloads Tested:**
@@ -594,9 +594,9 @@ See inline test documentation for remaining functional tests.
 
 #### TC-SIGNUP-BR-012: XSS Prevention
 
-**Priority:** CRITICAL  
-**Category:** Security  
-**Standard:** OWASP ASVS v5.0 Section 1.4.1  
+**Priority:** CRITICAL
+**Category:** Security
+**Standard:** OWASP ASVS v5.0 Section 1.4.1
 **CVSS Score:** 7.1 (HIGH)
 
 **Payloads Tested:**
@@ -619,9 +619,9 @@ See inline test documentation for remaining functional tests.
 
 #### TC-SIGNUP-BR-013: Password Complexity Enforcement
 
-**Priority:** CRITICAL  
-**Category:** Security  
-**Standard:** NIST SP 800-63B Section 5.1.1.2  
+**Priority:** CRITICAL
+**Category:** Security
+**Standard:** NIST SP 800-63B Section 5.1.1.2
 **CVSS Score:** 6.5 (MEDIUM)
 
 **Weak Passwords Tested:**
@@ -644,9 +644,9 @@ See inline test documentation for remaining functional tests.
 
 #### TC-SIGNUP-BR-014: Signup Rate Limiting
 
-**Priority:** CRITICAL  
-**Category:** Security  
-**Standard:** OWASP ASVS v5.0 Section 2.2.1  
+**Priority:** CRITICAL
+**Category:** Security
+**Standard:** OWASP ASVS v5.0 Section 2.2.1
 **CVSS Score:** 7.5 (HIGH)
 
 **Test Method:**
@@ -665,9 +665,9 @@ See inline test documentation for remaining functional tests.
 
 #### TC-SIGNUP-BR-015: CAPTCHA Protection
 
-**Priority:** HIGH  
-**Category:** Security  
-**Standard:** OWASP ASVS v5.0 Section 2.2.3  
+**Priority:** HIGH
+**Category:** Security
+**Standard:** OWASP ASVS v5.0 Section 2.2.3
 **CVSS Score:** 6.1 (MEDIUM)
 
 **Test Method:**
@@ -688,9 +688,9 @@ See inline test documentation for remaining functional tests.
 
 #### TC-SIGNUP-BR-016: Email Verification Requirement
 
-**Priority:** HIGH  
-**Category:** Security  
-**Standard:** OWASP ASVS v5.0 Section 2.1.12  
+**Priority:** HIGH
+**Category:** Security
+**Standard:** OWASP ASVS v5.0 Section 2.1.12
 **CVSS Score:** 5.3 (MEDIUM)
 
 **Test Method:**
@@ -885,7 +885,7 @@ test_signup_functionality.py::test_captcha_protection_BR_015 FAILED
 **Issue 1: ChromeDriver Version Mismatch**
 
 ```
-Error: SessionNotCreatedException: session not created: 
+Error: SessionNotCreatedException: session not created:
 This version of ChromeDriver only supports Chrome version XX
 ```
 

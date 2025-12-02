@@ -7,10 +7,11 @@ Helper functions for waiting and retrying operations.
 Universal and reusable across any web application.
 """
 
-import time
 import logging
-from typing import Callable, Any, Tuple, Type
+import time
 from functools import wraps
+from typing import Any, Callable, Tuple, Type
+
 from selenium.webdriver.remote.webdriver import WebDriver
 
 logger = logging.getLogger(__name__)

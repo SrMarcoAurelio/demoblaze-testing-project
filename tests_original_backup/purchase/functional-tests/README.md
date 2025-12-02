@@ -1,8 +1,8 @@
 # Test Suite: Purchase & Cart Functionality
 
-**Module:** `test_purchase.py`  
-**Author:** Arévalo, Marc  
-**Application Under Test:** DemoBlaze (https://www.demoblaze.com/)  
+**Module:** `test_purchase.py`
+**Author:** Arévalo, Marc
+**Application Under Test:** DemoBlaze (https://www.demoblaze.com/)
 **Current Version:** 4.0
 
 ---
@@ -248,7 +248,7 @@ Locators organized by functionality:
 
 ### `browser` (from conftest.py)
 
-**Scope:** Function-level  
+**Scope:** Function-level
 **Purpose:** Provides browser instance with cross-browser support
 
 **Configuration:**
@@ -396,9 +396,9 @@ expected_total = price1 + price2
 
 **Usage:**
 ```python
-fill_order_form(browser, 
+fill_order_form(browser,
     name="John Doe",
-    country="USA", 
+    country="USA",
     city="NYC",
     card="4111111111111111",
     month="12",
@@ -469,7 +469,7 @@ total = browser.find_element(*CART_TOTAL_PRICE).text
 
 #### TC-PURCH-001: Successful Purchase with Price Verification
 
-**Priority:** Critical  
+**Priority:** Critical
 **Type:** End-to-End Positive Test
 
 **Purpose:**
@@ -504,7 +504,7 @@ assert confirmed_price == expected_price
 
 #### TC-PURCH-002: Multiple Items Total Calculation
 
-**Priority:** High  
+**Priority:** High
 **Type:** Calculation Validation
 
 **Purpose:**
@@ -533,7 +533,7 @@ total_price = wait_for_cart_total_update(browser)
 
 #### TC-PURCH-012: Purchase as Logged-In User
 
-**Priority:** Medium  
+**Priority:** Medium
 **Type:** User Scenario Test
 
 **Purpose:**
@@ -563,7 +563,7 @@ assert name_field.get_attribute("value") == ""
 
 #### TC-PURCH-003: Delete Item from Cart
 
-**Priority:** High  
+**Priority:** High
 **Type:** Basic Cart Operation
 
 **Test Steps:**
@@ -586,7 +586,7 @@ WebDriverWait(browser, TIMEOUT).until(
 
 #### TC-PURCH-003B: Delete Item and Recalculate Total
 
-**Priority:** High  
+**Priority:** High
 **Type:** Dynamic Calculation Test
 
 **Purpose:**
@@ -617,7 +617,7 @@ total_after = wait_for_cart_total_update(browser)
 
 #### TC-PURCH-015: Add Same Product Multiple Times
 
-**Priority:** High  
+**Priority:** High
 **Type:** Quantity Handling Test
 
 **Purpose:**
@@ -640,7 +640,7 @@ DemoBlaze has no quantity selector - creates duplicate cart entries.
 
 #### TC-PURCH-017: Cart Empty After Purchase
 
-**Priority:** High  
+**Priority:** High
 **Type:** Session Management Test
 
 **Purpose:**
@@ -663,7 +663,7 @@ Ensure cart clears after successful purchase.
 
 #### TC-PURCH-018: Add Many Products to Cart
 
-**Priority:** Medium  
+**Priority:** Medium
 **Type:** Boundary Test
 
 **Purpose:**
@@ -686,7 +686,7 @@ Validate cart handles multiple items (10 products).
 
 #### TC-PURCH-019: Delete All Items From Cart
 
-**Priority:** Medium  
+**Priority:** Medium
 **Type:** Bulk Operation Test
 
 **Purpose:**
@@ -706,7 +706,7 @@ Verify all items can be removed sequentially.
 
 #### TC-PURCH-013: Order Modal Close Button
 
-**Priority:** Low  
+**Priority:** Low
 **Type:** UI Interaction Test
 
 **Test Steps:**
@@ -721,7 +721,7 @@ Verify all items can be removed sequentially.
 
 #### TC-PURCH-016: Navigation After Purchase
 
-**Priority:** Medium  
+**Priority:** Medium
 **Type:** Navigation Test
 
 **Purpose:**
@@ -739,7 +739,7 @@ Verify no unexpected redirects after purchase.
 
 #### TC-PURCH-020: Open/Close Modal Multiple Times
 
-**Priority:** Low  
+**Priority:** Low
 **Type:** Robustness Test
 
 **Purpose:**
@@ -757,7 +757,7 @@ Ensure modal can be toggled without issues.
 
 #### TC-PURCH-021: Access Empty Cart
 
-**Priority:** Medium  
+**Priority:** Medium
 **Type:** Edge Case Test
 
 **Purpose:**
@@ -776,7 +776,7 @@ Verify empty cart page accessible.
 
 #### TC-PURCH-026: Cart Persistence Across Navigation
 
-**Priority:** High  
+**Priority:** High
 **Type:** Session Management
 
 **Purpose:**
@@ -796,7 +796,7 @@ Verify cart contents persist during navigation.
 
 #### TC-PURCH-031: Close Modal with ESC Key
 
-**Priority:** Low  
+**Priority:** Low
 **Type:** Keyboard Navigation
 
 **Purpose:**
@@ -816,7 +816,7 @@ May not work (DemoBlaze limitation) - test documents behavior.
 
 #### TC-PURCH-032: Browser Refresh on Modal
 
-**Priority:** Medium  
+**Priority:** Medium
 **Type:** State Management
 
 **Purpose:**
@@ -833,7 +833,7 @@ Verify modal state after browser refresh.
 
 #### TC-PURCH-039: Homepage Pagination
 
-**Priority:** Medium  
+**Priority:** Medium
 **Type:** Navigation
 
 **Purpose:**
@@ -854,7 +854,7 @@ Verify pagination next/previous buttons work.
 
 #### TC-PURCH-027: Rapid Add to Cart Clicks
 
-**Priority:** Medium  
+**Priority:** Medium
 **Type:** Race Condition Test
 
 **Purpose:**
@@ -872,7 +872,7 @@ Test rapid clicking "Add to cart".
 
 #### TC-PURCH-033: Cart After Logout
 
-**Priority:** Medium  
+**Priority:** Medium
 **Type:** Session Test
 
 **Purpose:**
@@ -892,7 +892,7 @@ Verify cart behavior after logout.
 
 #### TC-PURCH-038: Add Product from Category
 
-**Priority:** Medium  
+**Priority:** Medium
 **Type:** Navigation Flow
 
 **Purpose:**
@@ -912,8 +912,8 @@ Verify adding product from category page.
 
 #### TC-PURCH-BR-001: Empty Cart Purchase Prevention
 
-**Priority:** CRITICAL  
-**Standard:** ISO 25010  
+**Priority:** CRITICAL
+**Standard:** ISO 25010
 **Status:** ⚠️ Expected Fail (Bug #13)
 
 **Business Rule:**
@@ -943,7 +943,7 @@ Purchase completes with $0 total
 
 #### TC-PURCH-BR-002: Credit Card Format Validation
 
-**Priority:** CRITICAL  
+**Priority:** CRITICAL
 **Standard:** PCI-DSS 3.2.1
 
 **Business Rule:**
@@ -963,7 +963,7 @@ Credit cards must be numeric only.
 
 #### TC-PURCH-BR-003: Card Length Validation
 
-**Priority:** CRITICAL  
+**Priority:** CRITICAL
 **Standard:** PCI-DSS
 
 **Business Rule:**
@@ -981,7 +981,7 @@ Credit cards must be 16 digits.
 
 #### TC-PURCH-BR-004: Expired Card Rejection
 
-**Priority:** CRITICAL  
+**Priority:** CRITICAL
 **Standard:** PCI-DSS
 
 **Business Rule:**
@@ -999,7 +999,7 @@ System must reject expired cards.
 
 #### TC-PURCH-BR-005: Month Range Validation
 
-**Priority:** HIGH  
+**Priority:** HIGH
 **Standard:** ISO 8601
 
 **Business Rule:**
@@ -1017,7 +1017,7 @@ Month must be 01-12.
 
 #### TC-PURCH-BR-006: SQL Injection Protection
 
-**Priority:** CRITICAL  
+**Priority:** CRITICAL
 **Standard:** OWASP A03:2021
 
 **Business Rule:**
@@ -1037,7 +1037,7 @@ System must sanitize SQL injection attempts.
 
 #### TC-PURCH-BR-007: XSS Protection
 
-**Priority:** CRITICAL  
+**Priority:** CRITICAL
 **Standard:** OWASP A03:2021
 
 **Business Rule:**
@@ -1057,7 +1057,7 @@ System must prevent XSS attacks.
 
 #### TC-PURCH-BR-008: Name Maximum Length
 
-**Priority:** MEDIUM  
+**Priority:** MEDIUM
 **Standard:** OWASP - Input Validation
 
 **Business Rule:**
@@ -1075,7 +1075,7 @@ Name should have reasonable length limit.
 
 #### TC-PURCH-BR-009: Whitespace-Only Input
 
-**Priority:** MEDIUM  
+**Priority:** MEDIUM
 **Standard:** ISO 25010 - Data Quality
 
 **Business Rule:**
@@ -1093,7 +1093,7 @@ Fields should reject whitespace-only input.
 
 #### TC-PURCH-BR-010: Contact Form Validation
 
-**Priority:** MEDIUM  
+**Priority:** MEDIUM
 **Standard:** ISO 25010 - Usability
 
 **Business Rule:**
@@ -1285,8 +1285,8 @@ alert_text = wait_for_alert_and_get_text(browser, timeout=2)
 
 ### Bug #13: Empty Cart Purchase
 
-**Severity:** HIGH  
-**Test Case:** TC-PURCH-BR-001  
+**Severity:** HIGH
+**Test Case:** TC-PURCH-BR-001
 **Status:** OPEN
 
 **Description:**

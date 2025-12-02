@@ -2,11 +2,11 @@
 
 ## Executive Summary
 
-**Project:** DemoBlaze E-commerce Testing  
-**URL:** https://www.demoblaze.com  
-**Test Period:** November 1-5, 2025  
-**Tester:** Marc Arévalo  
-**Report Date:** November 5, 2025  
+**Project:** DemoBlaze E-commerce Testing
+**URL:** https://www.demoblaze.com
+**Test Period:** November 1-5, 2025
+**Tester:** Marc Arévalo
+**Report Date:** November 5, 2025
 **Version:** 1.0
 
 ---
@@ -137,10 +137,10 @@ This report summarizes the manual testing activities conducted on the DemoBlaze 
 
 ## 6. Test Environment
 
-**Application URL:** https://www.demoblaze.com  
-**Browser:** Google Chrome (latest), Mozilla Firefox (latest)  
-**Operating System:** Windows 11  
-**Testing Type:** Manual Functional Testing  
+**Application URL:** https://www.demoblaze.com
+**Browser:** Google Chrome (latest), Mozilla Firefox (latest)
+**Operating System:** Windows 11
+**Testing Type:** Manual Functional Testing
 **Test Data:** Created test users, sample products from catalog
 
 ---
@@ -258,7 +258,7 @@ User journey maps available in: `docs/users-flow.md`
 
 ---
 
-**Report Prepared By:** Marc Arévalo  
-**Date:** November 5, 2025  
-**Version:** 1.0  
+**Report Prepared By:** Marc Arévalo
+**Date:** November 5, 2025
+**Version:** 1.0
 **Status:** Phase 2 Complete - Ready for Automation

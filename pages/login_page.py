@@ -8,9 +8,11 @@ Contains all locators and actions related to login, logout, and signup.
 Universal and reusable across any web application with modal-based authentication.
 """
 
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+
 from pages.base_page import BasePage
 
 

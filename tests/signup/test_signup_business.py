@@ -12,13 +12,13 @@ Expected Pass Rate: ~70% (some tests SHOULD fail to reveal missing features)
 Standards: OWASP ASVS v5.0, NIST SP 800-63B, ISO 27001, ISO 25010, WCAG 2.1
 """
 
-import pytest
-import time
 import logging
-from pages.signup_page import SignupPage
+import time
+
+import pytest
 from selenium.webdriver.common.keys import Keys
 
-
+from pages.signup_page import SignupPage
 
 
 @pytest.mark.business_rules
@@ -45,7 +45,9 @@ def test_username_max_length_BR_001(browser, base_url):
     alert_text = signup_page.get_alert_text(timeout=5)
 
     if alert_text:
-        logging.info(f"✓ BR-001 PASSED: System handled long username. Alert: '{alert_text}'")
+        logging.info(
+            f"✓ BR-001 PASSED: System handled long username. Alert: '{alert_text}'"
+        )
     else:
         logging.warning("No alert for extremely long username")
 
@@ -77,7 +79,9 @@ def test_password_max_length_BR_002(browser, base_url):
     alert_text = signup_page.get_alert_text(timeout=5)
 
     if alert_text:
-        logging.info(f"✓ BR-002: System response to long password: '{alert_text}'")
+        logging.info(
+            f"✓ BR-002: System response to long password: '{alert_text}'"
+        )
 
     assert True
 
@@ -148,7 +152,9 @@ def test_password_whitespace_significance_BR_004(browser, base_url):
     signup_page.signup(unique_username, password_with_spaces)
 
     alert_text = signup_page.get_alert_text(timeout=5)
-    logging.info(f"✓ BR-004: Tested password with spaces. Result: {alert_text}")
+    logging.info(
+        f"✓ BR-004: Tested password with spaces. Result: {alert_text}"
+    )
 
     assert True
 
@@ -177,7 +183,9 @@ def test_special_characters_in_username_BR_005(browser, base_url):
     alert_text = signup_page.get_alert_text(timeout=5)
 
     if alert_text:
-        logging.info(f"✓ BR-005: System handled special chars. Alert: '{alert_text}'")
+        logging.info(
+            f"✓ BR-005: System handled special chars. Alert: '{alert_text}'"
+        )
 
     assert True
 
@@ -206,7 +214,9 @@ def test_numeric_only_username_BR_006(browser, base_url):
     alert_text = signup_page.get_alert_text(timeout=5)
 
     if alert_text:
-        logging.info(f"✓ BR-006: System response to numeric username: '{alert_text}'")
+        logging.info(
+            f"✓ BR-006: System response to numeric username: '{alert_text}'"
+        )
 
     assert True
 
@@ -240,9 +250,13 @@ def test_unicode_characters_BR_007(browser, base_url):
         signup_page.signup(unicode_username, "ValidPass123")
 
         alert_text = signup_page.get_alert_text(timeout=3)
-        logging.info(f"✓ {description}: {alert_text if alert_text else 'No alert'}")
+        logging.info(
+            f"✓ {description}: {alert_text if alert_text else 'No alert'}"
+        )
 
-    logging.info("Standard: ISO 25010 recommends international character support")
+    logging.info(
+        "Standard: ISO 25010 recommends international character support"
+    )
     assert True
 
 
@@ -342,21 +356,25 @@ def test_identical_username_password_BR_010(browser, base_url):
             logging.warning("⚠ System allows identical username/password")
             logging.warning("Standard: NIST 800-63B recommends rejecting this")
         else:
-            logging.info(f"✓ BR-010: System rejected identical user/pass: '{alert_text}'")
+            logging.info(
+                f"✓ BR-010: System rejected identical user/pass: '{alert_text}'"
+            )
 
     assert True
-
 
 
 @pytest.mark.business_rules
 @pytest.mark.security
 @pytest.mark.critical
-@pytest.mark.parametrize("sql_payload", [
-    "' OR '1'='1",
-    "admin'--",
-    "' OR '1'='1'--",
-    "') OR ('1'='1",
-])
+@pytest.mark.parametrize(
+    "sql_payload",
+    [
+        "' OR '1'='1",
+        "admin'--",
+        "' OR '1'='1'--",
+        "') OR ('1'='1",
+    ],
+)
 def test_sql_injection_prevention_BR_011(browser, base_url, sql_payload):
     """
     TC-SIGNUP-BR-011: SQL Injection Prevention
@@ -377,7 +395,9 @@ def test_sql_injection_prevention_BR_011(browser, base_url, sql_payload):
     alert_text = signup_page.get_alert_text(timeout=3)
 
     if alert_text and "success" in alert_text.lower():
-        logging.critical(f"VIOLATION: SQL payload may have succeeded: {sql_payload}")
+        logging.critical(
+            f"VIOLATION: SQL payload may have succeeded: {sql_payload}"
+        )
         pytest.fail(f"DISCOVERED: Possible SQL injection - {sql_payload}")
     else:
         logging.info(f"✓ SQL injection blocked: {sql_payload}")
@@ -387,12 +407,15 @@ def test_sql_injection_prevention_BR_011(browser, base_url, sql_payload):
 @pytest.mark.business_rules
 @pytest.mark.security
 @pytest.mark.high
-@pytest.mark.parametrize("xss_payload", [
-    "<script>alert('XSS')</script>",
-    "<img src=x onerror=alert('XSS')>",
-    "javascript:alert('XSS')",
-    "<svg onload=alert('XSS')>",
-])
+@pytest.mark.parametrize(
+    "xss_payload",
+    [
+        "<script>alert('XSS')</script>",
+        "<img src=x onerror=alert('XSS')>",
+        "javascript:alert('XSS')",
+        "<svg onload=alert('XSS')>",
+    ],
+)
 def test_xss_prevention_BR_012(browser, base_url, xss_payload):
     """
     TC-SIGNUP-BR-012: XSS (Cross-Site Scripting) Prevention
@@ -424,15 +447,20 @@ def test_xss_prevention_BR_012(browser, base_url, xss_payload):
 @pytest.mark.business_rules
 @pytest.mark.security
 @pytest.mark.medium
-@pytest.mark.parametrize("weak_password", [
-    "123456",
-    "password",
-    "abc",
-    "test",
-    "qwerty",
-    "12345678",
-])
-def test_password_complexity_enforcement_BR_013(browser, base_url, weak_password):
+@pytest.mark.parametrize(
+    "weak_password",
+    [
+        "123456",
+        "password",
+        "abc",
+        "test",
+        "qwerty",
+        "12345678",
+    ],
+)
+def test_password_complexity_enforcement_BR_013(
+    browser, base_url, weak_password
+):
     """
     TC-SIGNUP-BR-013: Password Complexity Enforcement
 
@@ -489,7 +517,11 @@ def test_signup_rate_limiting_BR_014(browser, base_url):
 
         alert_text = signup_page.get_alert_text(timeout=2)
 
-        if alert_text and ("rate" in alert_text.lower() or "limit" in alert_text.lower() or "wait" in alert_text.lower()):
+        if alert_text and (
+            "rate" in alert_text.lower()
+            or "limit" in alert_text.lower()
+            or "wait" in alert_text.lower()
+        ):
             rate_limited = True
             logging.info(f"✓ Rate limiting detected at attempt {i+1}")
             break
@@ -501,10 +533,14 @@ def test_signup_rate_limiting_BR_014(browser, base_url):
         logging.warning("=" * 80)
         logging.warning("SECURITY CONCERN: NO SIGNUP RATE LIMITING")
         logging.warning("Standard: OWASP ASVS v5.0 Section 2.2.3")
-        logging.warning(f"Completed {attempts} signup attempts without rate limiting")
+        logging.warning(
+            f"Completed {attempts} signup attempts without rate limiting"
+        )
         logging.warning("Impact: Automated mass account creation possible")
         logging.warning("=" * 80)
-        pytest.fail(f"DISCOVERED: NO RATE LIMITING - {attempts} signups without throttling")
+        pytest.fail(
+            f"DISCOVERED: NO RATE LIMITING - {attempts} signups without throttling"
+        )
     else:
         assert True
 
@@ -530,8 +566,16 @@ def test_captcha_protection_BR_015(browser, base_url):
     signup_page.open_signup_modal()
 
     page_source = browser.page_source.lower()
-    captcha_keywords = ['captcha', 'recaptcha', 'hcaptcha', 'bot protection', 'g-recaptcha']
-    captcha_detected = any(keyword in page_source for keyword in captcha_keywords)
+    captcha_keywords = [
+        "captcha",
+        "recaptcha",
+        "hcaptcha",
+        "bot protection",
+        "g-recaptcha",
+    ]
+    captcha_detected = any(
+        keyword in page_source for keyword in captcha_keywords
+    )
 
     if not captcha_detected:
         logging.warning("SECURITY CONCERN: NO CAPTCHA/BOT PROTECTION")
@@ -563,17 +607,18 @@ def test_email_verification_requirement_BR_016(browser, base_url):
     signup_page.open_signup_modal()
     page_source = browser.page_source.lower()
 
-    email_keywords = ['email', 'e-mail', 'verification', 'verify']
+    email_keywords = ["email", "e-mail", "verification", "verify"]
     email_detected = any(keyword in page_source for keyword in email_keywords)
 
     if not email_detected:
         logging.info("✓ No email verification detected")
-        logging.info("Note: Email verification recommended per OWASP ASVS 2.1.8")
+        logging.info(
+            "Note: Email verification recommended per OWASP ASVS 2.1.8"
+        )
     else:
         logging.info("✓ Email verification appears present")
 
     assert True
-
 
 
 @pytest.mark.business_rules
@@ -607,8 +652,12 @@ def test_keyboard_navigation_BR_017(browser, base_url):
 
     alert_text = signup_page.get_alert_text(timeout=5)
 
-    assert alert_text is not None, "Should receive feedback via keyboard submission"
-    logging.info("✓ BR-017 PASSED: Keyboard navigation works (WCAG 2.1 SC 2.1.1)")
+    assert (
+        alert_text is not None
+    ), "Should receive feedback via keyboard submission"
+    logging.info(
+        "✓ BR-017 PASSED: Keyboard navigation works (WCAG 2.1 SC 2.1.1)"
+    )
 
 
 @pytest.mark.business_rules
@@ -639,7 +688,9 @@ def test_form_labels_accessibility_BR_018(browser, base_url):
     username_has_label = username_placeholder or username_aria
     password_has_label = password_placeholder or password_aria
 
-    assert username_placeholder or password_placeholder, "Form fields should have accessibility labeling"
+    assert (
+        username_placeholder or password_placeholder
+    ), "Form fields should have accessibility labeling"
 
     logging.info(f"✓ BR-018 PASSED: Form has accessibility labels")
     logging.info(f"  Username: '{username_placeholder}'")
@@ -677,7 +728,10 @@ def test_username_enumeration_via_signup_BR_019(browser, base_url):
     logging.info(f"New user: {new_msg}")
 
     if existing_msg and new_msg:
-        if "exist" in existing_msg.lower() or "already" in existing_msg.lower():
+        if (
+            "exist" in existing_msg.lower()
+            or "already" in existing_msg.lower()
+        ):
             logging.warning("SECURITY CONCERN: Username enumeration possible")
             logging.warning("Recommendation: Use generic messages")
             pytest.fail("DISCOVERED: Username enumeration via signup messages")

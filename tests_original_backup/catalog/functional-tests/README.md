@@ -1,9 +1,9 @@
 # Catalog & Product Browsing Functionality Testing Suite
 
-**Module:** `test_catalog_functionality.py`  
-**Author:** QA Testing Team  
-**Application Under Test:** DemoBlaze (https://www.demoblaze.com/)  
-**Current Version:** 1.0  
+**Module:** `test_catalog_functionality.py`
+**Author:** QA Testing Team
+**Application Under Test:** DemoBlaze (https://www.demoblaze.com/)
+**Current Version:** 1.0
 **Test Type:** Functional and Business Rules Testing
 
 ---
@@ -108,10 +108,10 @@ def test_pagination():
 def test_pagination_required_for_large_catalogs_BR_009(browser):
     # EXECUTE: Count products
     product_count = len(get_displayed_products(browser))
-    
+
     # OBSERVE: Check for pagination
     has_pagination = browser.find_elements(*NEXT_BUTTON)
-    
+
     # DECIDE: Against ISO 25010 and ISO 9241-110
     if product_count > 15 and not has_pagination:
         logging.error("USABILITY VIOLATION: MISSING PAGINATION")
@@ -138,10 +138,10 @@ def test_all_products_have_description_BR_003(browser):
     # EXECUTE: Navigate to each product detail page
     for product_url in product_urls:
         browser.get(product_url)
-        
+
         # OBSERVE: Check for description
         description = browser.find_elements(*DESCRIPTION_LOCATOR)
-        
+
         # DECIDE: Against ISO 25010
         if not description or len(description[0].text) < 10:
             logging.error("DATA COMPLETENESS VIOLATION")
@@ -661,7 +661,7 @@ Recommendation: Optimize images, use CDN, implement lazy loading
 
 #### TC-CATALOG-BR-009: Pagination Required for Large Catalogs
 
-**Standard:** ISO 25010 Section 4.2.2 (Usability - Operability)  
+**Standard:** ISO 25010 Section 4.2.2 (Usability - Operability)
 **Standard:** ISO 9241-110 Principle 3 (User Control and Freedom)
 
 **Severity:** HIGH

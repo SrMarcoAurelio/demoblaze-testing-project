@@ -46,13 +46,13 @@ def test_login():
 # ✅ CORRECT APPROACH
 def test_2fa_enforcement():
     """NIST 800-63B Section 5.2.3: MFA should be required"""
-    
+
     # EXECUTE: Perform login action
     perform_login(username, password)
-    
+
     # OBSERVE: Check if 2FA prompt appears
     mfa_prompt_exists = check_for_mfa_elements()
-    
+
     # DECIDE: Based on NIST 800-63B standard
     if not mfa_prompt_exists:
         logging.critical("SECURITY VIOLATION: NO 2FA/MFA")
@@ -72,7 +72,7 @@ def test_2fa_enforcement():
 <a name="core-principle"></a>
 ## 2. The Core Principle
 
-> **Tests DISCOVER behavior by EXECUTING actions and OBSERVING results.**  
+> **Tests DISCOVER behavior by EXECUTING actions and OBSERVING results.**
 > **Tests NEVER ASSUME how the application will behave.**
 
 ### Key Concepts
@@ -151,7 +151,7 @@ BASE_URL = "https://government.gov/"    # Works on gov site
 ### Tests are Honest
 
 - ✅ Don't hide missing security features
-- ✅ Report violations against industry standards  
+- ✅ Report violations against industry standards
 - ✅ Provide clear evidence for security assessments
 - ✅ Help developers understand what needs fixing
 
@@ -176,7 +176,7 @@ def test_2fa():
     """Test 2FA functionality"""
     # PROBLEM: Assumes app doesn't have 2FA
     pytest.skip("DemoBlaze doesn't implement 2FA")
-    
+
 # Result: No test runs, no discovery, feature absence unreported
 ```
 
@@ -191,14 +191,14 @@ def test_2fa():
 def test_2fa_enforcement_BR_016():
     """
     NIST 800-63B Section 5.2.3: Multi-Factor Authentication
-    
+
     Discovers whether the system enforces MFA/2FA.
     This test EXECUTES login, OBSERVES response, and DECIDES based on standards.
     """
     # EXECUTE: Perform login with valid credentials
     perform_login(browser, TEST_USERNAME, TEST_PASSWORD)
     wait_for_page_load(browser)
-    
+
     # OBSERVE: Check if 2FA prompt appears
     mfa_elements = [
         "//input[@id='mfa-code']",
@@ -206,7 +206,7 @@ def test_2fa_enforcement_BR_016():
         "//input[@type='tel' and @placeholder='Enter code']",
         "//button[contains(text(), 'Verify')]"
     ]
-    
+
     mfa_prompt_exists = False
     for locator in mfa_elements:
         try:
@@ -216,7 +216,7 @@ def test_2fa_enforcement_BR_016():
                 break
         except NoSuchElementException:
             continue
-    
+
     # DECIDE: Based on NIST 800-63B Section 5.2.3
     if not mfa_prompt_exists:
         logging.critical("=" * 80)
@@ -229,7 +229,7 @@ def test_2fa_enforcement_BR_016():
         logging.critical("Impact: Account takeover vulnerability")
         logging.critical("Recommendation: Implement TOTP, SMS, or hardware token MFA")
         logging.critical("=" * 80)
-        
+
         pytest.fail("DISCOVERED: NO 2FA/MFA enforcement - Violates NIST 800-63B 5.2.3")
     else:
         logging.info("✓ DISCOVERED: 2FA/MFA is enforced (complies with NIST 800-63B)")
@@ -253,7 +253,7 @@ def test_rate_limiting():
     """Test for rate limiting"""
     # PROBLEM: Assumes rate limiting doesn't exist
     pytest.skip("Out of scope - DemoBlaze doesn't have rate limiting")
-    
+
 # Result: Brute force vulnerability unreported
 ```
 
@@ -267,17 +267,17 @@ def test_rate_limiting():
 def test_account_lockout_enforcement_BR_013():
     """
     OWASP ASVS 2.2.1: Account Lockout Controls
-    
+
     Discovers whether system implements rate limiting / account lockout.
     Tests by executing multiple failed login attempts.
     """
     # EXECUTE: Attempt multiple failed logins
     failed_attempts = 10
     lockout_detected = False
-    
+
     for attempt in range(failed_attempts):
         perform_login(browser, TEST_USERNAME, "WRONG_PASSWORD")
-        
+
         # OBSERVE: Check for lockout indicators
         lockout_indicators = [
             "account locked",
@@ -285,18 +285,18 @@ def test_account_lockout_enforcement_BR_013():
             "temporarily disabled",
             "wait before trying again"
         ]
-        
+
         page_text = browser.find_element(By.TAG_NAME, "body").text.lower()
-        
+
         for indicator in lockout_indicators:
             if indicator in page_text:
                 lockout_detected = True
                 logging.info(f"✓ DISCOVERED: Lockout after {attempt + 1} attempts")
                 break
-        
+
         if lockout_detected:
             break
-    
+
     # DECIDE: Based on OWASP ASVS 2.2.1
     if not lockout_detected:
         logging.critical("=" * 80)
@@ -310,7 +310,7 @@ def test_account_lockout_enforcement_BR_013():
         logging.critical("Impact: Brute force attacks possible")
         logging.critical("Recommendation: Implement progressive delays or CAPTCHA")
         logging.critical("=" * 80)
-        
+
         pytest.fail(f"DISCOVERED: NO rate limiting after {failed_attempts} attempts - Violates OWASP ASVS 2.2.1")
     else:
         assert True
@@ -332,7 +332,7 @@ def test_password_complexity():
     """Test password strength requirements"""
     # PROBLEM: Doesn't test because "app allows weak passwords"
     pass  # Not implemented - DemoBlaze accepts any password
-    
+
 # Result: Security gap unreported
 ```
 
@@ -341,7 +341,7 @@ def test_password_complexity():
 def test_password_complexity_enforcement_BR_015():
     """
     NIST 800-63B Section 5.1.1.2: Password Strength
-    
+
     Discovers whether system enforces password complexity requirements.
     """
     weak_passwords = [
@@ -350,13 +350,13 @@ def test_password_complexity_enforcement_BR_015():
         "12345678",      # Sequential numbers
         "aaaaaaaa"       # Repeated characters
     ]
-    
+
     complexity_enforced = False
-    
+
     for weak_password in weak_passwords:
         # EXECUTE: Attempt signup/password change with weak password
         result = attempt_password_set(browser, TEST_USERNAME, weak_password)
-        
+
         # OBSERVE: Check if rejected
         rejection_indicators = [
             "password too weak",
@@ -364,11 +364,11 @@ def test_password_complexity_enforcement_BR_015():
             "minimum length",
             "complexity requirement"
         ]
-        
+
         if any(indicator in result.lower() for indicator in rejection_indicators):
             complexity_enforced = True
             break
-    
+
     # DECIDE: Based on NIST 800-63B
     if not complexity_enforced:
         logging.critical("=" * 80)
@@ -382,7 +382,7 @@ def test_password_complexity_enforcement_BR_015():
         logging.critical("Impact: Weak credentials allowed, easy to crack")
         logging.critical("Recommendation: Enforce 8+ chars, check against common passwords")
         logging.critical("=" * 80)
-        
+
         pytest.fail("DISCOVERED: Weak passwords accepted - Violates NIST 800-63B 5.1.1.2")
 ```
 
@@ -397,15 +397,15 @@ def test_password_complexity_enforcement_BR_015():
 def test_feature_name():
     """
     STANDARD: [Standard name and section]
-    
+
     Brief description of what this test discovers.
     """
     # 1. EXECUTE
     # Perform the action being tested
-    
+
     # 2. OBSERVE
     # Capture actual system response
-    
+
     # 3. DECIDE
     # Compare to standard and report result
 ```
@@ -449,14 +449,14 @@ def test_captcha():
 ```python
 def test_captcha_protection_BR_017():
     """OWASP ASVS 2.2.3: Anti-automation Controls"""
-    
+
     # Execute multiple rapid logins
     for i in range(5):
         perform_login(browser, "user", "pass")
-    
+
     # Observe for CAPTCHA
     captcha_present = check_for_captcha_elements(browser)
-    
+
     # Decide based on OWASP ASVS 2.2.3
     if not captcha_present:
         pytest.fail("DISCOVERED: NO CAPTCHA - Violates OWASP ASVS 2.2.3")
@@ -642,9 +642,9 @@ If ever in doubt, ask yourself:
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** November 2025  
-**Status:** Mandatory for all QA testing  
+**Document Version:** 1.0
+**Last Updated:** November 2025
+**Status:** Mandatory for all QA testing
 **Author:** QA Testing Standards Committee
 
 ---

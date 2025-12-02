@@ -1,7 +1,7 @@
 # User Flows - DemoBlaze
 
 ## Flow 1: Guest User Purchase (No Registration)
-**Actor:** Guest user  
+**Actor:** Guest user
 **Objective:** Purchase a product without creating an account
 
 **Steps:**
@@ -24,7 +24,7 @@
 ---
 
 ## Flow 2: New User Registration
-**Actor:** New user  
+**Actor:** New user
 **Objective:** Create a new account
 
 **Steps:**
@@ -42,7 +42,7 @@
 ---
 
 ## Flow 3: Registered User Login
-**Actor:** Registered user  
+**Actor:** Registered user
 **Objective:** Log in to existing account
 
 **Steps:**
@@ -60,7 +60,7 @@
 ---
 
 ## Flow 4: Login with Invalid Credentials (Negative Test)
-**Actor:** Any user  
+**Actor:** Any user
 **Objective:** Attempt login with wrong credentials
 
 **Steps:**
@@ -78,7 +78,7 @@
 ---
 
 ## Flow 5: Add Multiple Products to Cart
-**Actor:** Any user  
+**Actor:** Any user
 **Objective:** Add multiple different products to cart
 
 **Steps:**
@@ -99,7 +99,7 @@
 ---
 
 ## Flow 6: Remove Product from Cart
-**Actor:** Any user  
+**Actor:** Any user
 **Objective:** Delete a product from the shopping cart
 
 **Steps:**
@@ -116,7 +116,7 @@
 ---
 
 ## Flow 7: Browse Products by Category
-**Actor:** Any user  
+**Actor:** Any user
 **Objective:** Filter products by category
 
 **Steps:**
@@ -135,7 +135,7 @@
 ---
 
 ## Flow 8: Contact Form Submission
-**Actor:** Any user  
+**Actor:** Any user
 **Objective:** Send a message through contact form
 
 **Steps:**
@@ -154,7 +154,7 @@
 ---
 
 ## Flow 9: Product Pagination/Navigation
-**Actor:** Any user  
+**Actor:** Any user
 **Objective:** Navigate through multiple pages of products
 
 **Steps:**
@@ -172,7 +172,7 @@
 ---
 
 ## Flow 10: Logged-in User Logout
-**Actor:** Logged-in user  
+**Actor:** Logged-in user
 **Objective:** Log out from the account
 
 **Steps:**

@@ -6,11 +6,12 @@ Version: 6.0
 Centralized pytest configuration using config.py for all settings.
 """
 
-import pytest
-import os
 import datetime
 import logging
+import os
 import time
+
+import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
@@ -130,6 +131,11 @@ def pytest_configure(config):
     )
     config.addinivalue_line("markers", "accessibility: Accessibility tests")
     config.addinivalue_line("markers", "slow: Long-running tests")
+    config.addinivalue_line("markers", "performance: Performance tests")
+    config.addinivalue_line("markers", "critical: Critical priority tests")
+    config.addinivalue_line("markers", "high: High priority tests")
+    config.addinivalue_line("markers", "medium: Medium priority tests")
+    config.addinivalue_line("markers", "low: Low priority tests")
 
 
 @pytest.fixture(scope="session")
@@ -329,6 +335,390 @@ def pytest_html_results_summary(prefix, summary, postfix):
             f"<p><strong>Test Date:</strong> {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>",
         ]
     )
+
+
+# ============================================================================
+# DATA FIXTURES (Phase 6) - Test Data Management
+# ============================================================================
+
+
+@pytest.fixture(scope="session")
+def valid_user():
+    """
+    Provide valid user credentials for login tests.
+
+    Returns:
+        dict: Valid username and password
+
+    Example:
+        >>> def test_login(browser, base_url, valid_user):
+        ...     login_page.login(**valid_user)
+    """
+    from tests.test_data import Users
+
+    return Users.VALID.copy()
+
+
+@pytest.fixture(scope="session")
+def invalid_user_username():
+    """Provide user with invalid username."""
+    from tests.test_data import Users
+
+    return Users.INVALID_USERNAME.copy()
+
+
+@pytest.fixture(scope="session")
+def invalid_user_password():
+    """Provide user with invalid password."""
+    from tests.test_data import Users
+
+    return Users.INVALID_PASSWORD.copy()
+
+
+@pytest.fixture(scope="function")
+def new_user():
+    """
+    Generate unique user credentials for signup tests.
+
+    Creates a new username on each call to avoid conflicts.
+
+    Returns:
+        dict: Unique username and password
+
+    Example:
+        >>> def test_signup(browser, base_url, new_user):
+        ...     signup_page.signup(**new_user)
+    """
+    from utils.helpers.data_generator import generate_random_username
+
+    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
+    return {
+        "username": f"user_{timestamp}",
+        "password": generate_random_username(length=12),
+    }
+
+
+@pytest.fixture(scope="function")
+def purchase_data():
+    """
+    Provide valid purchase/checkout data.
+
+    Returns:
+        dict: Valid credit card and billing info
+
+    Example:
+        >>> def test_checkout(browser, purchase_data):
+        ...     purchase_page.fill_form(**purchase_data)
+    """
+    from tests.test_data import PurchaseData
+
+    return PurchaseData.VALID_PURCHASE.copy()
+
+
+@pytest.fixture(scope="function")
+def minimal_purchase_data():
+    """Provide minimal valid purchase data."""
+    from tests.test_data import PurchaseData
+
+    return PurchaseData.MINIMAL_PURCHASE.copy()
+
+
+# ============================================================================
+# PAGE OBJECT FIXTURES (Phase 6) - Initialized Page Objects
+# ============================================================================
+
+
+@pytest.fixture(scope="function")
+def login_page(browser, base_url):
+    """
+    Provide initialized LoginPage instance.
+
+    Automatically navigates to base_url before returning page object.
+
+    Example:
+        >>> def test_login(login_page, valid_user):
+        ...     login_page.login(**valid_user)
+        ...     assert login_page.is_user_logged_in()
+    """
+    from pages.login_page import LoginPage
+
+    browser.get(base_url)
+    return LoginPage(browser)
+
+
+@pytest.fixture(scope="function")
+def signup_page(browser, base_url):
+    """Provide initialized SignupPage instance."""
+    from pages.signup_page import SignupPage
+
+    browser.get(base_url)
+    return SignupPage(browser)
+
+
+@pytest.fixture(scope="function")
+def catalog_page(browser, base_url):
+    """Provide initialized CatalogPage instance."""
+    from pages.catalog_page import CatalogPage
+
+    browser.get(base_url)
+    return CatalogPage(browser)
+
+
+@pytest.fixture(scope="function")
+def product_page(browser, base_url):
+    """Provide initialized ProductPage instance."""
+    from pages.product_page import ProductPage
+
+    browser.get(base_url)
+    return ProductPage(browser)
+
+
+@pytest.fixture(scope="function")
+def cart_page(browser, base_url):
+    """Provide initialized CartPage instance."""
+    from pages.cart_page import CartPage
+
+    browser.get(base_url)
+    return CartPage(browser)
+
+
+@pytest.fixture(scope="function")
+def purchase_page(browser, base_url):
+    """Provide initialized PurchasePage instance."""
+    from pages.purchase_page import PurchasePage
+
+    browser.get(base_url)
+    return PurchasePage(browser)
+
+
+# ============================================================================
+# PRODUCT FIXTURES (Phase 6) - Product Test Data
+# ============================================================================
+
+
+@pytest.fixture(scope="session")
+def product_phone():
+    """Provide phone product name."""
+    from tests.test_data import Products
+
+    return Products.SAMSUNG_GALAXY_S6
+
+
+@pytest.fixture(scope="session")
+def product_laptop():
+    """Provide laptop product name."""
+    from tests.test_data import Products
+
+    return Products.LAPTOPS["SONY_VAIO_I5"]
+
+
+@pytest.fixture(scope="session")
+def product_monitor():
+    """Provide monitor product name."""
+    from tests.test_data import Products
+
+    return Products.MONITORS["APPLE_MONITOR_24"]
+
+
+@pytest.fixture(scope="function")
+def random_product():
+    """Provide random product from available products."""
+    import random
+
+    from tests.test_data import Products
+
+    all_products = [
+        Products.SAMSUNG_GALAXY_S6,
+        Products.NOKIA_LUMIA_1520,
+        Products.NEXUS_6,
+        Products.IPHONE_6_32GB,
+    ]
+    return random.choice(all_products)
+
+
+# ============================================================================
+# STATE FIXTURES (Phase 6) - Pre-configured Test States
+# ============================================================================
+
+
+@pytest.fixture(scope="function")
+def logged_in_user(login_page, valid_user):
+    """
+    Provide logged-in user session.
+
+    Performs login automatically and yields the page.
+    User is logged out after test completion.
+
+    Example:
+        >>> def test_add_to_cart(logged_in_user, catalog_page):
+        ...     catalog_page.select_product("Samsung galaxy s6")
+        ...     # User is already logged in
+    """
+    login_page.login(**valid_user)
+
+    if not login_page.is_user_logged_in():
+        alert = login_page.get_alert_text(timeout=3)
+        if alert:
+            logger.warning(f"Login failed with alert: {alert}")
+        pytest.fail("Failed to login with valid credentials in fixture")
+
+    logger.info(f"✓ User logged in: {valid_user['username']}")
+
+    yield login_page
+
+    try:
+        if login_page.is_user_logged_in():
+            login_page.logout()
+            logger.info("✓ User logged out (fixture cleanup)")
+    except Exception as e:
+        logger.warning(f"Logout cleanup failed: {e}")
+
+
+@pytest.fixture(scope="function")
+def cart_with_product(logged_in_user, catalog_page, product_phone):
+    """
+    Provide cart with one product already added.
+
+    User is logged in, product is added to cart.
+
+    Returns:
+        tuple: (cart_page, product_name)
+
+    Example:
+        >>> def test_checkout(cart_with_product):
+        ...     cart_page, product = cart_with_product
+        ...     cart_page.click_place_order()
+    """
+    from pages.cart_page import CartPage
+    from pages.product_page import ProductPage
+
+    catalog_page.select_product(product_phone)
+
+    product_page_obj = ProductPage(catalog_page.driver)
+    product_page_obj.add_to_cart()
+
+    alert = product_page_obj.get_alert_text(timeout=3)
+    if alert and "added" in alert.lower():
+        product_page_obj.accept_alert()
+
+    cart_page_obj = CartPage(catalog_page.driver)
+    cart_page_obj.go_to_cart()
+
+    logger.info(f"✓ Product added to cart: {product_phone}")
+
+    return (cart_page_obj, product_phone)
+
+
+@pytest.fixture(scope="function")
+def prepared_checkout(cart_with_product):
+    """
+    Provide checkout state ready for purchase.
+
+    Cart has product, purchase modal is opened.
+
+    Returns:
+        purchase_page: PurchasePage with modal already open
+
+    Example:
+        >>> def test_purchase(prepared_checkout, purchase_data):
+        ...     prepared_checkout.fill_form(**purchase_data)
+        ...     prepared_checkout.confirm_purchase()
+    """
+    from pages.purchase_page import PurchasePage
+
+    cart_page_obj, _ = cart_with_product
+    cart_page_obj.click_place_order()
+
+    purchase_page_obj = PurchasePage(cart_page_obj.driver)
+
+    if not purchase_page_obj.is_modal_open():
+        pytest.fail("Purchase modal did not open")
+
+    logger.info("✓ Checkout prepared, modal open")
+
+    return purchase_page_obj
+
+
+# ============================================================================
+# PERFORMANCE FIXTURES (Phase 7) - Performance Testing
+# ============================================================================
+
+
+@pytest.fixture(scope="function")
+def performance_collector():
+    """
+    Provide performance metrics collector for tests.
+
+    Automatically clears metrics before each test and can generate
+    reports after test completion.
+
+    Example:
+        >>> def test_login_performance(login_page, performance_collector):
+        ...     performance_collector.start_timer("login")
+        ...     login_page.login("user", "pass")
+        ...     duration = performance_collector.stop_timer("login", category="auth")
+        ...     assert performance_collector.check_threshold("login", duration)
+    """
+    from utils.performance.metrics import get_collector
+
+    collector = get_collector()
+    collector.clear_metrics()
+
+    yield collector
+
+    # Optional: Auto-save report on failure
+    # Can be enabled by setting environment variable
+
+
+@pytest.fixture(scope="function")
+def performance_timer():
+    """
+    Provide performance timer context manager.
+
+    Example:
+        >>> def test_page_load(browser, performance_timer):
+        ...     with performance_timer("page_load", category="navigation"):
+        ...         browser.get("https://example.com")
+    """
+    from utils.performance.decorators import performance_timer as timer
+
+    return timer
+
+
+@pytest.fixture(scope="session", autouse=True)
+def performance_report_cleanup(request):
+    """Generate and save performance report at end of session."""
+    yield
+
+    try:
+        from utils.performance.metrics import get_collector
+
+        collector = get_collector()
+        if len(collector) > 0:
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            report_dir = os.path.join(
+                config.REPORTS_ROOT, "performance", timestamp
+            )
+            os.makedirs(report_dir, exist_ok=True)
+
+            report_file = os.path.join(report_dir, "performance_report.json")
+            collector.save_report(report_file)
+
+            logger.info(f"\n{'='*70}")
+            logger.info(f"PERFORMANCE REPORT SAVED: {report_file}")
+            logger.info(f"Total metrics collected: {len(collector)}")
+
+            violations = collector.get_threshold_violations()
+            if violations:
+                logger.warning(
+                    f"⚠ Performance threshold violations: {len(violations)}"
+                )
+            else:
+                logger.info("✓ All performance checks passed")
+
+            logger.info(f"{'='*70}\n")
+    except Exception as e:
+        logger.warning(f"Could not generate performance report: {e}")
 
 
 @pytest.hookimpl(tryfirst=True)

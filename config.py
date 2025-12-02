@@ -25,31 +25,35 @@ class Config:
     by changing the BASE_URL and URL_PATTERNS.
     """
 
-    BASE_URL: str = os.getenv('BASE_URL', 'https://www.demoblaze.com/')
+    BASE_URL: str = os.getenv("BASE_URL", "https://www.demoblaze.com/")
 
-    TIMEOUT_DEFAULT: int = int(os.getenv('TIMEOUT_DEFAULT', '10'))
-    TIMEOUT_SHORT: int = int(os.getenv('TIMEOUT_SHORT', '5'))
-    TIMEOUT_MEDIUM: int = int(os.getenv('TIMEOUT_MEDIUM', '15'))
-    TIMEOUT_LONG: int = int(os.getenv('TIMEOUT_LONG', '30'))
+    TIMEOUT_DEFAULT: int = int(os.getenv("TIMEOUT_DEFAULT", "10"))
+    TIMEOUT_SHORT: int = int(os.getenv("TIMEOUT_SHORT", "5"))
+    TIMEOUT_MEDIUM: int = int(os.getenv("TIMEOUT_MEDIUM", "15"))
+    TIMEOUT_LONG: int = int(os.getenv("TIMEOUT_LONG", "30"))
 
-    HEADLESS: bool = os.getenv('HEADLESS', 'false').lower() == 'true'
-    BROWSER: str = os.getenv('BROWSER', 'chrome').lower()
+    HEADLESS: bool = os.getenv("HEADLESS", "false").lower() == "true"
+    BROWSER: str = os.getenv("BROWSER", "chrome").lower()
 
-    LOG_LEVEL: str = os.getenv('LOG_LEVEL', 'INFO').upper()
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
 
-    REPORTS_ROOT: str = os.getenv('REPORTS_ROOT', 'results')
-    SCREENSHOTS_DIR: str = os.getenv('SCREENSHOTS_DIR', 'results/screenshots')
+    REPORTS_ROOT: str = os.getenv("REPORTS_ROOT", "results")
+    SCREENSHOTS_DIR: str = os.getenv("SCREENSHOTS_DIR", "results/screenshots")
 
-    SLOW_MODE_DELAY: float = float(os.getenv('SLOW_MODE_DELAY', '0'))
+    SLOW_MODE_DELAY: float = float(os.getenv("SLOW_MODE_DELAY", "0"))
 
-    SLEEP_SHORT: float = float(os.getenv('SLEEP_SHORT', '0.5'))
-    SLEEP_MEDIUM: float = float(os.getenv('SLEEP_MEDIUM', '1.0'))
-    SLEEP_LONG: float = float(os.getenv('SLEEP_LONG', '2.0'))
-    SLEEP_MODAL: float = float(os.getenv('SLEEP_MODAL', '1.5'))
+    SLEEP_SHORT: float = float(os.getenv("SLEEP_SHORT", "0.5"))
+    SLEEP_MEDIUM: float = float(os.getenv("SLEEP_MEDIUM", "1.0"))
+    SLEEP_LONG: float = float(os.getenv("SLEEP_LONG", "2.0"))
+    SLEEP_MODAL: float = float(os.getenv("SLEEP_MODAL", "1.5"))
 
-    PRODUCT_URL_PATTERN: str = os.getenv('PRODUCT_URL_PATTERN', 'prod.html?idp_={product_id}')
-    PRODUCT_PAGE_IDENTIFIER: str = os.getenv('PRODUCT_PAGE_IDENTIFIER', 'prod.html')
-    CATEGORY_QUERY_PARAM: str = os.getenv('CATEGORY_QUERY_PARAM', 'cat')
+    PRODUCT_URL_PATTERN: str = os.getenv(
+        "PRODUCT_URL_PATTERN", "prod.html?idp_={product_id}"
+    )
+    PRODUCT_PAGE_IDENTIFIER: str = os.getenv(
+        "PRODUCT_PAGE_IDENTIFIER", "prod.html"
+    )
+    CATEGORY_QUERY_PARAM: str = os.getenv("CATEGORY_QUERY_PARAM", "cat")
 
     def get_timeout_config(self) -> Dict[str, int]:
         """
@@ -59,10 +63,10 @@ class Config:
             Dict with timeout values
         """
         return {
-            'default': self.TIMEOUT_DEFAULT,
-            'short': self.TIMEOUT_SHORT,
-            'medium': self.TIMEOUT_MEDIUM,
-            'long': self.TIMEOUT_LONG
+            "default": self.TIMEOUT_DEFAULT,
+            "short": self.TIMEOUT_SHORT,
+            "medium": self.TIMEOUT_MEDIUM,
+            "long": self.TIMEOUT_LONG,
         }
 
     def __str__(self) -> str:
@@ -80,7 +84,7 @@ class Config:
 config = Config()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print("=" * 70)
     print("UNIVERSAL TEST AUTOMATION FRAMEWORK - CONFIGURATION")
     print("=" * 70)

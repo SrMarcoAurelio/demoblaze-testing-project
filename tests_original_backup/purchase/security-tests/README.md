@@ -1,9 +1,9 @@
 # Security & Exploitation Test Suite
 
-**Module:** `test_purchase_security.py`  
-**Author:** Arévalo, Marc  
-**Application Under Test:** DemoBlaze (https://www.demoblaze.com/)  
-**Current Version:** 1.0  
+**Module:** `test_purchase_security.py`
+**Author:** Arévalo, Marc
+**Application Under Test:** DemoBlaze (https://www.demoblaze.com/)
+**Current Version:** 1.0
 **Test Type:** Security, Exploitation, Penetration Testing
 
 ---
@@ -303,7 +303,7 @@ Locators identical to functional tests, reused for exploitation:
 
 ### `browser` (from conftest.py)
 
-**Scope:** Function-level  
+**Scope:** Function-level
 **Purpose:** Provides browser instance for exploitation tests
 
 **Usage:**
@@ -429,8 +429,8 @@ fill_checkout_form(browser, card="4111111111111111")
 
 #### TC-SEC-BL-001: Negative Quantity Exploit
 
-**Severity:** CRITICAL  
-**CVSS Score:** 9.1 (Critical)  
+**Severity:** CRITICAL
+**CVSS Score:** 9.1 (Critical)
 **Standard:** OWASP WSTG-BUSL-10
 
 **Vulnerability:**
@@ -472,8 +472,8 @@ Cart accepts negative quantity, total becomes negative or zero
 
 #### TC-SEC-BL-002: Decimal Quantity Exploit
 
-**Severity:** CRITICAL  
-**CVSS Score:** 8.7  
+**Severity:** CRITICAL
+**CVSS Score:** 8.7
 **Standard:** OWASP WSTG-BUSL-10
 
 **Vulnerability:**
@@ -507,8 +507,8 @@ browser.execute_script("""
 
 #### TC-SEC-BL-003: Integer Overflow Quantity
 
-**Severity:** CRITICAL  
-**CVSS Score:** 8.9  
+**Severity:** CRITICAL
+**CVSS Score:** 8.9
 **Standard:** OWASP WSTG-BUSL-10
 
 **Vulnerability:**
@@ -541,8 +541,8 @@ for val in overflow_values:
 
 #### TC-SEC-BL-004: Zero Price Manipulation
 
-**Severity:** CRITICAL  
-**CVSS Score:** 9.8 (Critical)  
+**Severity:** CRITICAL
+**CVSS Score:** 9.8 (Critical)
 **Standard:** OWASP WSTG-BUSL-10
 
 **Vulnerability:**
@@ -590,8 +590,8 @@ browser.find_element(*PURCHASE_BUTTON).click()
 
 #### TC-SEC-BL-005: Multiple Coupon Stacking
 
-**Severity:** CRITICAL  
-**CVSS Score:** 8.2  
+**Severity:** CRITICAL
+**CVSS Score:** 8.2
 **Standard:** OWASP WSTG-BUSL-10
 
 **Vulnerability:**
@@ -631,8 +631,8 @@ for code in coupon_codes:
 
 #### TC-SEC-BL-006: Race Condition Double Discount
 
-**Severity:** CRITICAL  
-**CVSS Score:** 8.5  
+**Severity:** CRITICAL
+**CVSS Score:** 8.5
 **Standard:** OWASP WSTG-BUSL-10
 
 **Vulnerability:**
@@ -678,8 +678,8 @@ with ThreadPoolExecutor(max_workers=50) as executor:
 
 #### TC-SEC-BOT-001: No Rate Limiting on Add-to-Cart
 
-**Severity:** CRITICAL  
-**CVSS Score:** 8.9  
+**Severity:** CRITICAL
+**CVSS Score:** 8.9
 **Standard:** OWASP API6:2023
 
 **Vulnerability:**
@@ -698,7 +698,7 @@ for i in range(1000):
         });
     """)
     requests_sent += 1
-    
+
     if time.time() - start > 1:  # Stop after 1 second
         break
 
@@ -725,8 +725,8 @@ assert requests_sent > 100  # If >100 requests/sec, no rate limit
 
 #### TC-SEC-BOT-002: No CAPTCHA on Checkout
 
-**Severity:** CRITICAL  
-**CVSS Score:** 8.7  
+**Severity:** CRITICAL
+**CVSS Score:** 8.7
 **Standard:** OWASP API6:2023
 
 **Vulnerability:**
@@ -741,14 +741,14 @@ for i in range(100):
     add_to_cart_simple(browser)
     browser.find_element(*CART_NAV_LINK).click()
     browser.find_element(*PLACE_ORDER_BUTTON).click()
-    
+
     # Check if CAPTCHA present
     try:
         browser.find_element(By.XPATH, "//*[contains(text(), 'CAPTCHA')]")
         captcha_present = True
     except:
         captcha_present = False
-    
+
     if not captcha_present:
         successful_purchases += 1
 ```
@@ -774,8 +774,8 @@ for i in range(100):
 
 #### TC-SEC-BOT-003: Contact Form Spam (No CAPTCHA)
 
-**Severity:** HIGH  
-**CVSS Score:** 7.2  
+**Severity:** HIGH
+**CVSS Score:** 7.2
 **Standard:** OWASP API6:2023
 
 **Vulnerability:**
@@ -794,7 +794,7 @@ for i in range(1000):
             })
         });
     """)
-    
+
     if i > 100:  # Stop after 100 for testing
         break
 ```
@@ -818,8 +818,8 @@ for i in range(1000):
 
 #### TC-SEC-BOT-004: No Bot Detection Mechanisms
 
-**Severity:** HIGH  
-**CVSS Score:** 7.5  
+**Severity:** HIGH
+**CVSS Score:** 7.5
 **Standard:** OWASP API6:2023
 
 **Vulnerability:**
@@ -829,7 +829,7 @@ Headless browsers (Selenium) not detected, enabling bot automation.
 ```python
 # Check if browser is detectable as automation
 is_headless = browser.execute_script("""
-    return navigator.webdriver || 
+    return navigator.webdriver ||
            window.navigator.webdriver ||
            !navigator.plugins.length ||
            navigator.languages == '';
@@ -870,8 +870,8 @@ Bot detection checks for:
 
 #### TC-SEC-BOT-005: API Endpoint Enumeration
 
-**Severity:** MEDIUM  
-**CVSS Score:** 6.5  
+**Severity:** MEDIUM
+**CVSS Score:** 6.5
 **Standard:** OWASP API6:2023
 
 **Vulnerability:**
@@ -919,8 +919,8 @@ for endpoint in endpoints:
 
 #### TC-SEC-PCI-001: Payment Script Integrity (SRI)
 
-**Severity:** CRITICAL  
-**CVSS Score:** 9.3  
+**Severity:** CRITICAL
+**CVSS Score:** 9.3
 **Standard:** PCI-DSS 11.6.1
 
 **Vulnerability:**
@@ -934,7 +934,7 @@ vulnerable_scripts = 0
 for script in scripts:
     src = script.get_attribute("src")
     integrity = script.get_attribute("integrity")
-    
+
     if src and not integrity:
         vulnerable_scripts += 1
         logging.error(f"No SRI: {src}")
@@ -974,8 +974,8 @@ SRI prevents:
 
 #### TC-SEC-PCI-002: Client-Side Card Data Exposure
 
-**Severity:** CRITICAL  
-**CVSS Score:** 10.0 (Critical)  
+**Severity:** CRITICAL
+**CVSS Score:** 10.0 (Critical)
 **Standard:** PCI-DSS 3.2
 
 **Vulnerability:**
@@ -1025,8 +1025,8 @@ for pattern in sensitive_patterns:
 
 #### TC-SEC-PCI-003: CVV Storage Prohibition
 
-**Severity:** CRITICAL  
-**CVSS Score:** 10.0  
+**Severity:** CRITICAL
+**CVSS Score:** 10.0
 **Standard:** PCI-DSS 3.2
 
 **Vulnerability:**
@@ -1069,8 +1069,8 @@ CVV must NEVER be stored after authorization, even if encrypted.
 
 #### TC-SEC-PCI-004: TLS Version Requirement
 
-**Severity:** HIGH  
-**CVSS Score:** 8.1  
+**Severity:** HIGH
+**CVSS Score:** 8.1
 **Standard:** PCI-DSS 4.2
 
 **Vulnerability:**
@@ -1107,8 +1107,8 @@ if hasattr(response, 'raw') and hasattr(response.raw, 'version'):
 
 #### TC-SEC-AUTH-001: Session Fixation Vulnerability
 
-**Severity:** HIGH  
-**CVSS Score:** 8.2  
+**Severity:** HIGH
+**CVSS Score:** 8.2
 **Standard:** OWASP A07:2021
 
 **Vulnerability:**
@@ -1158,8 +1158,8 @@ session_after = [c for c in cookies_after if 'session' in c['name'].lower()]
 
 #### TC-SEC-AUTHZ-001: IDOR - Insecure Direct Object Reference
 
-**Severity:** CRITICAL  
-**CVSS Score:** 9.1  
+**Severity:** CRITICAL
+**CVSS Score:** 9.1
 **Standard:** OWASP A01:2021
 
 **Vulnerability:**
@@ -1198,8 +1198,8 @@ for order_id in order_ids:
 
 #### TC-SEC-DATA-001: Sensitive Data in URL
 
-**Severity:** MEDIUM  
-**CVSS Score:** 6.5  
+**Severity:** MEDIUM
+**CVSS Score:** 6.5
 **Standard:** OWASP A02:2021
 
 **Vulnerability:**
@@ -1235,8 +1235,8 @@ for pattern in sensitive_patterns:
 
 #### TC-SEC-INFO-001: Verbose Error Messages
 
-**Severity:** LOW  
-**CVSS Score:** 5.3  
+**Severity:** LOW
+**CVSS Score:** 5.3
 **Standard:** OWASP A05:2021
 
 **Vulnerability:**
@@ -1280,8 +1280,8 @@ for pattern in dangerous_patterns:
 
 #### TC-SEC-CSRF-001: CSRF Token Validation
 
-**Severity:** HIGH  
-**CVSS Score:** 7.5  
+**Severity:** HIGH
+**CVSS Score:** 7.5
 **Standard:** OWASP A01:2021
 
 **Vulnerability:**
@@ -1324,8 +1324,8 @@ browser.find_element(*PURCHASE_BUTTON).click()
 
 #### TC-SEC-COOKIE-001: Cookie Security Flags
 
-**Severity:** MEDIUM  
-**CVSS Score:** 6.1  
+**Severity:** MEDIUM
+**CVSS Score:** 6.1
 **Standard:** OWASP A05:2021
 
 **Vulnerability:**
@@ -1357,8 +1357,8 @@ for cookie in cookies:
 
 #### TC-SEC-HTTP-001: Dangerous HTTP Methods
 
-**Severity:** MEDIUM  
-**CVSS Score:** 5.8  
+**Severity:** MEDIUM
+**CVSS Score:** 5.8
 **Standard:** OWASP A05:2021
 
 **Vulnerability:**
@@ -1388,8 +1388,8 @@ for method in dangerous_methods:
 
 #### TC-SEC-HEADERS-001: Security Headers
 
-**Severity:** HIGH  
-**CVSS Score:** 7.4  
+**Severity:** HIGH
+**CVSS Score:** 7.4
 **Standard:** OWASP A05:2021
 
 **Vulnerability:**
@@ -1429,8 +1429,8 @@ for header, expected_values in required_headers.items():
 
 #### TC-SEC-ACC-001: Keyboard-Only Checkout
 
-**Severity:** MEDIUM  
-**WCAG:** 2.1.1 Keyboard  
+**Severity:** MEDIUM
+**WCAG:** 2.1.1 Keyboard
 **Level:** A
 
 **Vulnerability:**
@@ -1464,8 +1464,8 @@ actions.send_keys(Keys.ENTER).perform()
 
 #### TC-SEC-ACC-002: Form Labels for Screen Readers
 
-**Severity:** MEDIUM  
-**WCAG:** 1.3.1 Info and Relationships  
+**Severity:** MEDIUM
+**WCAG:** 1.3.1 Info and Relationships
 **Level:** A
 
 **Vulnerability:**
@@ -1479,7 +1479,7 @@ unlabeled_inputs = 0
 for input_elem in form_inputs:
     input_id = input_elem.get_attribute("id")
     aria_label = input_elem.get_attribute("aria-label")
-    
+
     if input_id:
         try:
             browser.find_element(By.XPATH, f"//label[@for='{input_id}']")
@@ -1501,8 +1501,8 @@ Screen reader users can't identify fields
 
 #### TC-SEC-ACC-003: Color Contrast Validation
 
-**Severity:** LOW  
-**WCAG:** 1.4.3 Contrast (Minimum)  
+**Severity:** LOW
+**WCAG:** 1.4.3 Contrast (Minimum)
 **Level:** AA
 
 **Vulnerability:**
@@ -1535,7 +1535,7 @@ for elem in elements[:20]:
 
 #### TC-SEC-PERF-001: Concurrent Checkout Stress
 
-**Severity:** HIGH  
+**Severity:** HIGH
 **Type:** Load Testing
 
 **Vulnerability:**
@@ -1570,7 +1570,7 @@ with ThreadPoolExecutor(max_workers=10) as executor:
 
 #### TC-SEC-PERF-002: Cart Capacity Limit
 
-**Severity:** MEDIUM  
+**Severity:** MEDIUM
 **Type:** Boundary Testing
 
 **Vulnerability:**
@@ -1585,7 +1585,7 @@ for i in range(10000):
             body: JSON.stringify({id: 1})
         });
     """)
-    
+
     if i > 100:  # Stop after 100 for testing
         break
 ```
@@ -1869,7 +1869,7 @@ Reduce `max_workers` from 50 to 10
 - [Test Plan](../../docs/test-plan.md)
 - [Test Summary Report](../../docs/Test_Summary_Report.md)
 
-**Author:** Arévalo, Marc  
-**Contact:** [Your contact info]  
-**Date:** November 2025  
+**Author:** Arévalo, Marc
+**Contact:** [Your contact info]
+**Date:** November 2025
 **Disclaimer:** These tests are for educational and authorized security testing only.

@@ -1,9 +1,9 @@
 # Signup & Registration Security Testing Suite
 
-**Module:** `test_signup_security.py`  
-**Author:** QA Testing Team  
-**Application Under Test:** DemoBlaze (https://www.demoblaze.com/)  
-**Current Version:** 1.0  
+**Module:** `test_signup_security.py`
+**Author:** QA Testing Team
+**Application Under Test:** DemoBlaze (https://www.demoblaze.com/)
+**Current Version:** 1.0
 **Test Type:** Security Exploitation Testing
 
 ---
@@ -135,7 +135,7 @@ Security tests discover vulnerabilities by executing attacks and observing resul
 DISCOVER = EXECUTE + OBSERVE + DECIDE
 
 1. EXECUTE: Launch actual attack payload
-2. OBSERVE: Analyze system response for compromise indicators  
+2. OBSERVE: Analyze system response for compromise indicators
 3. DECIDE: Determine vulnerability based on OWASP/CWE standards
 ```
 
@@ -147,11 +147,11 @@ DISCOVER = EXECUTE + OBSERVE + DECIDE
 def test_sql_injection_username_SEC_001(browser, sql_payload):
     # EXECUTE: Attempt signup with SQL payload
     perform_signup(browser, sql_payload, "TestPass123!")
-    
+
     # OBSERVE: Capture system response
     alert_text = wait_for_alert_and_get_text(browser)
     page_source = browser.page_source
-    
+
     # DECIDE: Based on OWASP ASVS 5.3.4
     if alert_text and "success" in alert_text.lower():
         # Vulnerability discovered - report with CVSS

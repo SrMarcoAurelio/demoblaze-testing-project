@@ -8,17 +8,19 @@ Contains all locators and actions related to order placement and payment.
 Universal and reusable across any web application with checkout features.
 """
 
+import datetime
+import re
+import time
+from typing import Any, Dict, List, Optional, Tuple
+
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.support.ui import WebDriverWait
+
 from pages.base_page import BasePage
-from typing import Tuple, Optional, Dict, List, Any
-import time
-import re
-import datetime
 
 
 class PurchasePage(BasePage):

@@ -10,10 +10,11 @@ Total Tests: 7
 Expected Pass Rate: 100%
 """
 
-import pytest
 import logging
-from pages.login_page import LoginPage
 
+import pytest
+
+from pages.login_page import LoginPage
 
 
 @pytest.mark.functional
@@ -43,11 +44,15 @@ def test_valid_login_success_FUNC_001(browser, base_url):
     if alert_text:
         logging.warning(f"Alert received: {alert_text}")
 
-    assert login_page.is_user_logged_in(), "User should be logged in after valid credentials"
+    assert (
+        login_page.is_user_logged_in()
+    ), "User should be logged in after valid credentials"
 
     welcome_msg = login_page.get_welcome_message()
     assert welcome_msg is not None, "Welcome message should be present"
-    assert "Apolo2025" in welcome_msg, f"Welcome message should contain username. Got: {welcome_msg}"
+    assert (
+        "Apolo2025" in welcome_msg
+    ), f"Welcome message should contain username. Got: {welcome_msg}"
 
     logging.info("✓ FUNC-001 PASSED: Valid login successful")
 
@@ -79,10 +84,16 @@ def test_invalid_username_rejected_FUNC_002(browser, base_url):
 
     alert_text = login_page.get_alert_text(timeout=5)
 
-    assert alert_text is not None, "Error alert should appear for invalid username"
-    assert not login_page.is_user_logged_in(), "User should NOT be logged in with invalid username"
+    assert (
+        alert_text is not None
+    ), "Error alert should appear for invalid username"
+    assert (
+        not login_page.is_user_logged_in()
+    ), "User should NOT be logged in with invalid username"
 
-    logging.info(f"✓ FUNC-002 PASSED: Invalid username rejected. Alert: '{alert_text}'")
+    logging.info(
+        f"✓ FUNC-002 PASSED: Invalid username rejected. Alert: '{alert_text}'"
+    )
 
 
 @pytest.mark.functional
@@ -110,10 +121,16 @@ def test_invalid_password_rejected_FUNC_003(browser, base_url):
 
     alert_text = login_page.get_alert_text(timeout=5)
 
-    assert alert_text is not None, "Error alert should appear for wrong password"
-    assert not login_page.is_user_logged_in(), "User should NOT be logged in with wrong password"
+    assert (
+        alert_text is not None
+    ), "Error alert should appear for wrong password"
+    assert (
+        not login_page.is_user_logged_in()
+    ), "User should NOT be logged in with wrong password"
 
-    logging.info(f"✓ FUNC-003 PASSED: Invalid password rejected. Alert: '{alert_text}'")
+    logging.info(
+        f"✓ FUNC-003 PASSED: Invalid password rejected. Alert: '{alert_text}'"
+    )
 
 
 @pytest.mark.functional
@@ -140,10 +157,16 @@ def test_empty_credentials_rejected_FUNC_004(browser, base_url):
 
     alert_text = login_page.get_alert_text(timeout=5)
 
-    assert alert_text is not None, "Validation alert should appear for empty credentials"
-    assert not login_page.is_user_logged_in(), "User should NOT be logged in with empty credentials"
+    assert (
+        alert_text is not None
+    ), "Validation alert should appear for empty credentials"
+    assert (
+        not login_page.is_user_logged_in()
+    ), "User should NOT be logged in with empty credentials"
 
-    logging.info(f"✓ FUNC-004 PASSED: Empty credentials rejected. Alert: '{alert_text}'")
+    logging.info(
+        f"✓ FUNC-004 PASSED: Empty credentials rejected. Alert: '{alert_text}'"
+    )
 
 
 @pytest.mark.functional
@@ -175,7 +198,9 @@ def test_complete_login_logout_flow_FUNC_005(browser, base_url):
     login_page.logout()
 
     assert not login_page.is_user_logged_in(), "User should be logged out"
-    assert login_page.is_element_visible(login_page.LOGIN_BUTTON_NAV, timeout=3), "Login button should be visible after logout"
+    assert login_page.is_element_visible(
+        login_page.LOGIN_BUTTON_NAV, timeout=3
+    ), "Login button should be visible after logout"
 
     logging.info("✓ FUNC-005 PASSED: Complete login-logout cycle successful")
 
@@ -205,7 +230,9 @@ def test_modal_close_button_FUNC_006(browser, base_url):
 
     login_page.close_login_modal()
 
-    assert not login_page.is_login_modal_visible(), "Login modal should be closed"
+    assert (
+        not login_page.is_login_modal_visible()
+    ), "Login modal should be closed"
 
     assert not login_page.is_user_logged_in(), "User should remain logged out"
 
@@ -235,13 +262,17 @@ def test_session_persistence_after_reload_FUNC_007(browser, base_url):
     login_page.login("Apolo2025", "apolo2025")
     login_page.get_alert_text(timeout=5)  # Handle potential alert
 
-    assert login_page.is_user_logged_in(), "User should be logged in before reload"
+    assert (
+        login_page.is_user_logged_in()
+    ), "User should be logged in before reload"
     logging.info("✓ Logged in successfully")
 
     login_page.refresh_page()
     login_page.wait(2)  # Wait for page to fully reload
 
-    assert login_page.is_user_logged_in(), "User should remain logged in after page reload (session persistence)"
+    assert (
+        login_page.is_user_logged_in()
+    ), "User should remain logged in after page reload (session persistence)"
 
     logging.info("✓ FUNC-007 PASSED: Session persisted after reload")
 

@@ -7,9 +7,9 @@ Helper functions for generating test data.
 Universal and reusable across any web application.
 """
 
-import time
 import random
 import string
+import time
 from typing import Optional
 
 

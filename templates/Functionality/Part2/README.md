@@ -26,10 +26,10 @@ Antes de empezar, déjame confirmar algunos detalles:
    - Módulo: Login/Authentication
    - Tipo: Banking application
    - ¿Ya tienen tests existentes de login? [YES/NO]
-   
+
 2. **Alcance de Testing:**
    Basándome en la Research Matrix, para Login debo crear:
-   
+
    **Functional Tests (6-8 tests):**
    - Valid credentials work
    - Invalid credentials rejected
@@ -37,7 +37,7 @@ Antes de empezar, déjame confirmar algunos detalles:
    - Login/logout flow
    - Remember me functionality
    - Password visibility toggle
-   
+
    **Business Rules Tests (10-12 tests):**
    - Password strength policy (NIST 800-63B)
    - Input length validation (ISO 25010)
@@ -49,7 +49,7 @@ Antes de empezar, déjame confirmar algunos detalles:
    - Session fixation prevention
    - Brute force protection
    - Account enumeration prevention
-   
+
    ¿Confirmas que quieres ambos tipos de tests?
 
 3. **Entorno de Testing:**
@@ -74,7 +74,7 @@ Perfecto, procediendo con la generación:
 PASO 1 - RESEARCH:
 Investigando estándares para Login/Authentication:
 - OWASP ASVS v5.0 Chapter 2 (Authentication)
-- NIST SP 800-63B Section 5.1.1 (Password Guidelines)  
+- NIST SP 800-63B Section 5.1.1 (Password Guidelines)
 - ISO 27001 A.9.4 (Access Control)
 - WCAG 2.1 Success Criterion 3.3.1 (Error Identification)
 
@@ -165,7 +165,7 @@ Información necesaria:
 Generando test_payment.py con 8 tests funcionales:
 
 TC-PAYMENT-FUNC-001: Valid card payment succeeds
-TC-PAYMENT-FUNC-002: Form submission works  
+TC-PAYMENT-FUNC-002: Form submission works
 TC-PAYMENT-FUNC-003: Order confirmation shown
 TC-PAYMENT-FUNC-004: Complete payment flow
 TC-PAYMENT-FUNC-005: Multiple items payment
@@ -286,7 +286,7 @@ Quick reference showing typical test patterns for different module types.
 def test_valid_credentials_work():
     """Discovers if login succeeds with valid credentials"""
     login("validuser", "ValidPass123!")
-    
+
     if is_logged_in():
         assert True  # DISCOVERED: Login works
     else:
@@ -296,7 +296,7 @@ def test_valid_credentials_work():
 def test_invalid_password_rejected():
     """Discovers if invalid password is rejected"""
     login("validuser", "WrongPass")
-    
+
     error = check_for_error()
     if error and "invalid" in error.lower():
         assert True  # DISCOVERED: Validates passwords
@@ -307,7 +307,7 @@ def test_invalid_password_rejected():
 def test_empty_fields_rejected():
     """Discovers if empty login is prevented"""
     login("", "")
-    
+
     error = check_for_error()
     if error and "required" in error.lower():
         assert True  # DISCOVERED: Validates required fields
@@ -321,11 +321,11 @@ def test_empty_fields_rejected():
 @pytest.mark.business_rules
 def test_password_strength_policy():
     """NIST 800-63B 5.1.1: Minimum 8 characters
-    
+
     Discovers if system enforces password strength policy.
     """
     signup("user", "123")  # Weak password
-    
+
     response = get_response()
     if "password" in response.lower() and "weak" in response.lower():
         assert True  # DISCOVERED: Enforces NIST policy
@@ -342,11 +342,11 @@ def test_password_strength_policy():
 @pytest.mark.parametrize("payload", ["' OR '1'='1", "admin'--"])
 def test_sql_injection_prevention(payload):
     """OWASP ASVS 1.2.5: SQL Injection Prevention
-    
+
     Discovers if SQL injection is possible in login form.
     """
     login(payload, "test")
-    
+
     if login_succeeded():
         log_violation(
             standard="OWASP ASVS v5.0-1.2.5",
@@ -361,14 +361,14 @@ def test_sql_injection_prevention(payload):
 @pytest.mark.business_rules
 def test_error_message_accessibility():
     """WCAG 2.1 SC 3.3.1: Error Identification
-    
+
     Discovers if error messages are accessible (inline, not alerts).
     """
     login("", "")
-    
+
     alert = check_for_alert()
     inline_error = check_for_inline_error()
-    
+
     if alert:
         log_violation(
             standard="WCAG 2.1 Success Criterion 3.3.1",
@@ -397,7 +397,7 @@ def test_valid_payment_succeeds():
         expiry="12/25"
     )
     submit_payment()
-    
+
     confirmation = check_for_confirmation()
     if confirmation:
         assert True  # DISCOVERED: Payment works
@@ -409,7 +409,7 @@ def test_payment_cancellation_works():
     """Discovers if payment can be cancelled"""
     fill_payment_form(card="4111111111111111")
     click_cancel()
-    
+
     if returned_to_cart():
         assert True  # DISCOVERED: Cancellation works
     else:
@@ -422,12 +422,12 @@ def test_payment_cancellation_works():
 @pytest.mark.business_rules
 def test_card_format_validation():
     """PCI-DSS 6.5.3: Card Number Validation
-    
+
     Discovers if system validates card number format.
     """
     fill_payment_form(card="abcd1234")  # Invalid format
     submit_payment()
-    
+
     error = check_for_error()
     if error and "invalid" in error.lower():
         assert True  # DISCOVERED: Validates format
@@ -443,7 +443,7 @@ def test_card_format_validation():
 @pytest.mark.business_rules
 def test_expired_card_rejected():
     """Payment Industry Standard: Reject expired cards
-    
+
     Discovers if system validates card expiration.
     """
     fill_payment_form(
@@ -451,7 +451,7 @@ def test_expired_card_rejected():
         expiry="01/2020"  # Expired
     )
     submit_payment()
-    
+
     error = check_for_error()
     if error and "expired" in error.lower():
         assert True  # DISCOVERED: Validates expiration
@@ -467,11 +467,11 @@ def test_expired_card_rejected():
 @pytest.mark.business_rules
 def test_required_fields_validation():
     """ISO 25010: Required Field Validation
-    
+
     Discovers if all required payment fields are validated.
     """
     submit_payment()  # Empty form
-    
+
     error = check_for_error()
     if error and "required" in error.lower():
         assert True  # DISCOVERED: Validates required fields
@@ -496,7 +496,7 @@ def test_required_fields_validation():
 def test_add_to_cart_works():
     """Discovers if add to cart functionality works"""
     add_to_cart(product_id=1)
-    
+
     if item_in_cart(product_id=1):
         assert True  # DISCOVERED: Add to cart works
     else:
@@ -507,7 +507,7 @@ def test_cart_total_calculates():
     """Discovers if cart total calculates correctly"""
     add_to_cart(product_id=1, price=100)
     add_to_cart(product_id=2, price=50)
-    
+
     total = get_cart_total()
     if total == 150:
         assert True  # DISCOVERED: Calculation correct
@@ -521,11 +521,11 @@ def test_cart_total_calculates():
 @pytest.mark.business_rules
 def test_negative_quantity_rejected():
     """ISO 25010: Input Validation - Negative Values
-    
+
     Discovers if system validates against negative quantities.
     """
     add_to_cart(product_id=1, quantity=-5)
-    
+
     if item_in_cart_with_negative_quantity():
         log_violation(
             standard="ISO 25010 - Functional Suitability",
@@ -540,11 +540,11 @@ def test_negative_quantity_rejected():
 @pytest.mark.business_rules
 def test_quantity_maximum_enforced():
     """ISO 25010: Input Validation - Maximum Values
-    
+
     Discovers if system enforces reasonable quantity limits.
     """
     add_to_cart(product_id=1, quantity=10000)
-    
+
     cart_quantity = get_cart_item_quantity(product_id=1)
     if cart_quantity == 10000:
         log_violation(
@@ -569,7 +569,7 @@ def test_quantity_maximum_enforced():
 def test_search_returns_results():
     """Discovers if search returns relevant results"""
     results = search("laptop")
-    
+
     if len(results) > 0:
         assert True  # DISCOVERED: Search works
     else:
@@ -579,7 +579,7 @@ def test_search_returns_results():
 def test_filter_applies_correctly():
     """Discovers if filters apply correctly"""
     results = search_with_filter(category="electronics", price_max=500)
-    
+
     if all(r.category == "electronics" and r.price <= 500 for r in results):
         assert True  # DISCOVERED: Filter works
     else:
@@ -593,11 +593,11 @@ def test_filter_applies_correctly():
 @pytest.mark.parametrize("payload", ["' OR '1'='1", "' UNION SELECT"])
 def test_sql_injection_in_search(payload):
     """OWASP ASVS 1.2.5: SQL Injection Prevention
-    
+
     Discovers if SQL injection is possible in search.
     """
     results = search(payload)
-    
+
     if "SQL" in str(results) or "error" in str(results).lower():
         log_violation(
             standard="OWASP ASVS v5.0-1.2.5",
@@ -613,11 +613,11 @@ def test_sql_injection_in_search(payload):
 @pytest.mark.parametrize("payload", ["<script>alert('XSS')</script>", "<img src=x onerror=alert(1)>"])
 def test_xss_in_search_results(payload):
     """OWASP ASVS 1.2.1: XSS Prevention
-    
+
     Discovers if XSS is possible in search results.
     """
     search(payload)
-    
+
     if alert_triggered():
         log_violation(
             standard="OWASP ASVS v5.0-1.2.1",
@@ -645,7 +645,7 @@ def test_valid_submission_succeeds():
         email="john@example.com",
         message="Test message"
     )
-    
+
     if confirmation_shown():
         assert True  # DISCOVERED: Submission works
     else:
@@ -658,7 +658,7 @@ def test_valid_submission_succeeds():
 @pytest.mark.business_rules
 def test_email_format_validation():
     """RFC 5322: Email Format Validation
-    
+
     Discovers if system validates email format.
     """
     submit_form(
@@ -666,7 +666,7 @@ def test_email_format_validation():
         email="not-an-email",  # Invalid format
         message="Test"
     )
-    
+
     error = check_for_error()
     if error and "email" in error.lower():
         assert True  # DISCOVERED: Validates email format
@@ -682,12 +682,12 @@ def test_email_format_validation():
 @pytest.mark.business_rules
 def test_message_length_limit():
     """ISO 25010: Input Length Validation
-    
+
     Discovers if system enforces message length limit.
     """
     long_message = "a" * 10000
     submit_form(name="John", email="john@test.com", message=long_message)
-    
+
     error = check_for_error()
     if error and "length" in error.lower():
         assert True  # DISCOVERED: Enforces limit
@@ -713,7 +713,7 @@ def test_profile_view_works():
     """Discovers if profile viewing works"""
     login("user", "pass")
     profile = view_profile()
-    
+
     if profile.contains_user_data():
         assert True  # DISCOVERED: Profile view works
     else:
@@ -724,7 +724,7 @@ def test_profile_update_succeeds():
     """Discovers if profile update works"""
     login("user", "pass")
     update_profile(name="New Name", bio="New bio")
-    
+
     updated_profile = view_profile()
     if updated_profile.name == "New Name":
         assert True  # DISCOVERED: Update works
@@ -739,12 +739,12 @@ def test_profile_update_succeeds():
 @pytest.mark.parametrize("payload", ["<script>alert('XSS')</script>", "<img src=x onerror=alert(1)>"])
 def test_xss_in_profile_fields(payload):
     """OWASP ASVS 1.2.1: XSS Prevention in Profile
-    
+
     Discovers if XSS is possible in profile fields.
     """
     update_profile(bio=payload)
     view_profile()
-    
+
     if alert_triggered():
         log_violation(
             standard="OWASP ASVS v5.0-1.2.1",
@@ -759,18 +759,18 @@ def test_xss_in_profile_fields(payload):
 @pytest.mark.business_rules
 def test_profile_access_control():
     """OWASP ASVS 4.1.1: Access Control
-    
+
     Discovers if users can access other users' profiles without authorization.
     """
     login("user1", "pass1")
     user1_id = get_current_user_id()
-    
+
     logout()
     login("user2", "pass2")
-    
+
     # Try to access user1's profile edit page
     can_access = try_access_profile_edit(user1_id)
-    
+
     if can_access:
         log_violation(
             standard="OWASP ASVS v5.0-4.1.1",
@@ -811,10 +811,10 @@ BUSINESS RULES TESTS (60-70% of tests):
 def test_feature():
     # EXECUTE: Perform action
     action()
-    
+
     # OBSERVE: Capture result
     result = observe()
-    
+
     # DECIDE: Compare to expected
     if result.is_correct():
         assert True
@@ -878,8 +878,8 @@ def test_feature():
 
 **Integration Note:** These sections (18-20) should be read in conjunction with TEMPLATE_functional_business_rules_v2.md (Sections 1-17).
 
-**Author:** Arévalo, Marc  
-**Version:** 2.0 (Universal Edition)  
+**Author:** Arévalo, Marc
+**Version:** 2.0 (Universal Edition)
 **Date:** November 2025
 
 **Remember:** Tests discover behavior through execution, never assume outcomes.

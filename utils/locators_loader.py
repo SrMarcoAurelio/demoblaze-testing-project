@@ -9,7 +9,8 @@ Makes framework adaptable to any web application by externalizing locators.
 
 import json
 import os
-from typing import Dict, Tuple, Optional
+from typing import Dict, Optional, Tuple
+
 from selenium.webdriver.common.by import By
 
 

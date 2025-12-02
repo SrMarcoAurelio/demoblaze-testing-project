@@ -1,8 +1,8 @@
 # Login Functional Testing Suite - README
 
-**Test File:** `test_login_functionality.py`  
-**Version:** 2.0 - Complete DISCOVER Philosophy Implementation  
-**Last Updated:** November 2025  
+**Test File:** `test_login_functionality.py`
+**Version:** 2.0 - Complete DISCOVER Philosophy Implementation
+**Last Updated:** November 2025
 **Author:** QA Testing Team
 
 ---
@@ -32,7 +32,7 @@
 
 This test suite validates the **Login & Authentication** functionality following the **DISCOVER methodology**. Tests execute actions, observe system responses, and make decisions based on objective industry standards.
 
-**Module Under Test:** Login & Authentication  
+**Module Under Test:** Login & Authentication
 **Application:** DemoBlaze (https://www.demoblaze.com/)
 
 ### Scope
@@ -68,7 +68,7 @@ This suite covers:
 
 ### Core Principle
 
-> **Tests DISCOVER behavior by EXECUTING actions and OBSERVING results.**  
+> **Tests DISCOVER behavior by EXECUTING actions and OBSERVING results.**
 > **Tests NEVER ASSUME how the application will behave.**
 
 ### The DISCOVER Formula
@@ -77,7 +77,7 @@ This suite covers:
 DISCOVER = EXECUTE + OBSERVE + DECIDE
 
 1. EXECUTE: Run the actual action (login, validate, submit)
-2. OBSERVE: Capture the real system response  
+2. OBSERVE: Capture the real system response
 3. DECIDE: Compare against objective standards (OWASP, NIST, ISO, WCAG)
 ```
 
@@ -95,15 +95,15 @@ def test_2fa():
 def test_2fa_mfa_enforcement_BR_018():
     """
     NIST 800-63B Section 5.2.3: MFA should be required
-    
+
     Discovers if system has multi-factor authentication.
     """
     # EXECUTE: Login with password
     perform_login(browser, username, password)
-    
+
     # OBSERVE: Check if 2FA prompt appears
     mfa_prompt_exists = check_for_mfa_elements(browser)
-    
+
     # DECIDE: According to NIST 800-63B, 2FA should exist
     if not mfa_prompt_exists:
         logging.critical("SECURITY VIOLATION: NO 2FA/MFA")

@@ -12,13 +12,13 @@ Expected Pass Rate: ~83% (some tests SHOULD fail to reveal missing features)
 Standards: OWASP ASVS v5.0, NIST SP 800-63B, ISO 27001, ISO 25010, WCAG 2.1
 """
 
-import pytest
-import time
 import logging
-from pages.login_page import LoginPage
+import time
+
+import pytest
 from selenium.webdriver.common.keys import Keys
 
-
+from pages.login_page import LoginPage
 
 
 @pytest.mark.business_rules
@@ -46,10 +46,16 @@ def test_username_max_length_BR_001(browser, base_url):
     logged_in = login_page.is_user_logged_in(timeout=2)
 
     if alert_text:
-        logging.info(f"✓ BR-001 PASSED: System handled long username. Alert: '{alert_text}'")
-        assert not logged_in, "Should not be logged in with invalid long username"
+        logging.info(
+            f"✓ BR-001 PASSED: System handled long username. Alert: '{alert_text}'"
+        )
+        assert (
+            not logged_in
+        ), "Should not be logged in with invalid long username"
     else:
-        logging.warning("No alert for extremely long username - may accept any length")
+        logging.warning(
+            "No alert for extremely long username - may accept any length"
+        )
 
     assert True
 
@@ -79,7 +85,9 @@ def test_password_max_length_BR_002(browser, base_url):
 
     if alert_text:
         if "wrong" in alert_text.lower() or "incorrect" in alert_text.lower():
-            logging.info(f"✓ BR-002 PASSED: System accepts long passwords. Alert: '{alert_text}'")
+            logging.info(
+                f"✓ BR-002 PASSED: System accepts long passwords. Alert: '{alert_text}'"
+            )
         else:
             logging.info(f"System response to long password: '{alert_text}'")
 
@@ -109,10 +117,14 @@ def test_whitespace_only_username_BR_003(browser, base_url):
     alert_text = login_page.get_alert_text(timeout=5)
     logged_in = login_page.is_user_logged_in(timeout=2)
 
-    assert alert_text is not None, "System should reject whitespace-only username"
+    assert (
+        alert_text is not None
+    ), "System should reject whitespace-only username"
     assert not logged_in, "Should not be logged in with whitespace username"
 
-    logging.info(f"✓ BR-003 PASSED: Whitespace-only username rejected. Alert: '{alert_text}'")
+    logging.info(
+        f"✓ BR-003 PASSED: Whitespace-only username rejected. Alert: '{alert_text}'"
+    )
 
 
 @pytest.mark.business_rules
@@ -138,10 +150,14 @@ def test_whitespace_only_password_BR_004(browser, base_url):
     alert_text = login_page.get_alert_text(timeout=5)
     logged_in = login_page.is_user_logged_in(timeout=2)
 
-    assert alert_text is not None, "System should reject whitespace-only password"
+    assert (
+        alert_text is not None
+    ), "System should reject whitespace-only password"
     assert not logged_in, "Should not be logged in with whitespace password"
 
-    logging.info(f"✓ BR-004 PASSED: Whitespace-only password rejected. Alert: '{alert_text}'")
+    logging.info(
+        f"✓ BR-004 PASSED: Whitespace-only password rejected. Alert: '{alert_text}'"
+    )
 
 
 @pytest.mark.business_rules
@@ -168,7 +184,9 @@ def test_special_characters_in_username_BR_006(browser, base_url):
     alert_text = login_page.get_alert_text(timeout=5)
 
     if alert_text:
-        logging.info(f"✓ BR-006 PASSED: System handled special chars. Alert: '{alert_text}'")
+        logging.info(
+            f"✓ BR-006 PASSED: System handled special chars. Alert: '{alert_text}'"
+        )
     else:
         logging.info("System processed special characters without alert")
 
@@ -199,21 +217,27 @@ def test_case_sensitivity_password_BR_008(browser, base_url):
     logged_in = login_page.is_user_logged_in(timeout=2)
 
     assert not logged_in, "Password MUST be case-sensitive per NIST 800-63B"
-    assert alert_text is not None, "Should receive error for wrong-case password"
+    assert (
+        alert_text is not None
+    ), "Should receive error for wrong-case password"
 
-    logging.info(f"✓ BR-008 PASSED: Password is case-sensitive. Alert: '{alert_text}'")
-
+    logging.info(
+        f"✓ BR-008 PASSED: Password is case-sensitive. Alert: '{alert_text}'"
+    )
 
 
 @pytest.mark.business_rules
 @pytest.mark.security
 @pytest.mark.critical
-@pytest.mark.parametrize("sql_payload", [
-    "' OR '1'='1",
-    "admin'--",
-    "' OR '1'='1'--",
-    "') OR ('1'='1",
-])
+@pytest.mark.parametrize(
+    "sql_payload",
+    [
+        "' OR '1'='1",
+        "admin'--",
+        "' OR '1'='1'--",
+        "') OR ('1'='1",
+    ],
+)
 def test_sql_injection_prevention_BR_013(browser, base_url, sql_payload):
     """
     TC-LOGIN-BR-013: SQL Injection Prevention
@@ -236,7 +260,9 @@ def test_sql_injection_prevention_BR_013(browser, base_url, sql_payload):
     login_page.get_alert_text(timeout=2)
 
     if logged_in:
-        logging.critical(f"CRITICAL VIOLATION: SQL Injection succeeded: {sql_payload}")
+        logging.critical(
+            f"CRITICAL VIOLATION: SQL Injection succeeded: {sql_payload}"
+        )
         logging.critical("Standard: OWASP ASVS v5.0 Section 1.2.5")
         logging.critical("CVSS Score: 9.8 CRITICAL")
         pytest.fail(f"DISCOVERED: SQL Injection vulnerability - {sql_payload}")
@@ -248,12 +274,15 @@ def test_sql_injection_prevention_BR_013(browser, base_url, sql_payload):
 @pytest.mark.business_rules
 @pytest.mark.security
 @pytest.mark.high
-@pytest.mark.parametrize("xss_payload", [
-    "<script>alert('XSS')</script>",
-    "<img src=x onerror=alert('XSS')>",
-    "javascript:alert('XSS')",
-    "<svg onload=alert('XSS')>",
-])
+@pytest.mark.parametrize(
+    "xss_payload",
+    [
+        "<script>alert('XSS')</script>",
+        "<img src=x onerror=alert('XSS')>",
+        "javascript:alert('XSS')",
+        "<svg onload=alert('XSS')>",
+    ],
+)
 def test_xss_prevention_BR_014(browser, base_url, xss_payload):
     """
     TC-LOGIN-BR-014: XSS (Cross-Site Scripting) Prevention
@@ -313,7 +342,11 @@ def test_account_lockout_enforcement_BR_017(browser, base_url):
 
         alert_text = login_page.get_alert_text(timeout=2)
 
-        if alert_text and ("rate" in alert_text.lower() or "locked" in alert_text.lower() or "wait" in alert_text.lower()):
+        if alert_text and (
+            "rate" in alert_text.lower()
+            or "locked" in alert_text.lower()
+            or "wait" in alert_text.lower()
+        ):
             rate_limited = True
             logging.info(f"✓ DISCOVERED: Rate limiting at attempt {i+1}")
             break
@@ -323,15 +356,23 @@ def test_account_lockout_enforcement_BR_017(browser, base_url):
 
     if not rate_limited:
         logging.critical("=" * 80)
-        logging.critical("SECURITY VIOLATION: NO ACCOUNT LOCKOUT / RATE LIMITING")
+        logging.critical(
+            "SECURITY VIOLATION: NO ACCOUNT LOCKOUT / RATE LIMITING"
+        )
         logging.critical("Standard: OWASP ASVS v5.0 Section 2.2.1")
         logging.critical("Standard: NIST SP 800-63B Section 5.2.2")
         logging.critical("CVSS Score: 7.5 (HIGH)")
-        logging.critical(f"Completed {attempts} attempts without rate limiting")
+        logging.critical(
+            f"Completed {attempts} attempts without rate limiting"
+        )
         logging.critical("Impact: Unlimited brute force attempts possible")
-        logging.critical("Recommendation: Implement progressive delays or account lockout")
+        logging.critical(
+            "Recommendation: Implement progressive delays or account lockout"
+        )
         logging.critical("=" * 80)
-        pytest.fail(f"DISCOVERED: NO RATE LIMITING - Violates OWASP ASVS 2.2.1")
+        pytest.fail(
+            f"DISCOVERED: NO RATE LIMITING - Violates OWASP ASVS 2.2.1"
+        )
     else:
         assert True
 
@@ -362,7 +403,15 @@ def test_2fa_mfa_enforcement_BR_018(browser, base_url):
     login_page.get_alert_text(timeout=2)
 
     page_source = browser.page_source.lower()
-    mfa_keywords = ['2fa', 'mfa', 'two-factor', 'multi-factor', 'authentication code', 'verify', 'otp']
+    mfa_keywords = [
+        "2fa",
+        "mfa",
+        "two-factor",
+        "multi-factor",
+        "authentication code",
+        "verify",
+        "otp",
+    ]
     mfa_detected = any(keyword in page_source for keyword in mfa_keywords)
 
     logged_in_immediately = login_page.is_user_logged_in(timeout=2)
@@ -374,8 +423,12 @@ def test_2fa_mfa_enforcement_BR_018(browser, base_url):
         logging.critical("Standard: NIST SP 800-63B Section 5.2.3")
         logging.critical("Standard: ISO 27001 A.9.4.2")
         logging.critical("CVSS Score: 7.5 (HIGH)")
-        logging.critical("Impact: Account vulnerable to password compromise alone")
-        logging.critical("Recommendation: Implement SMS, TOTP, or hardware token 2FA")
+        logging.critical(
+            "Impact: Account vulnerable to password compromise alone"
+        )
+        logging.critical(
+            "Recommendation: Implement SMS, TOTP, or hardware token 2FA"
+        )
         logging.critical("=" * 80)
         login_page.logout()
         pytest.fail("DISCOVERED: NO 2FA/MFA - Violates NIST 800-63B 5.2.3")
@@ -387,15 +440,20 @@ def test_2fa_mfa_enforcement_BR_018(browser, base_url):
 @pytest.mark.business_rules
 @pytest.mark.security
 @pytest.mark.medium
-@pytest.mark.parametrize("weak_password", [
-    "123456",
-    "password",
-    "abc",
-    "test",
-    "qwerty",
-    "12345678",
-])
-def test_password_complexity_enforcement_BR_019(browser, base_url, weak_password):
+@pytest.mark.parametrize(
+    "weak_password",
+    [
+        "123456",
+        "password",
+        "abc",
+        "test",
+        "qwerty",
+        "12345678",
+    ],
+)
+def test_password_complexity_enforcement_BR_019(
+    browser, base_url, weak_password
+):
     """
     TC-LOGIN-BR-019: Password Complexity Enforcement
 
@@ -425,14 +483,22 @@ def test_password_complexity_enforcement_BR_019(browser, base_url, weak_password
         alert_text = login_page.get_alert_text(timeout=5)
 
         if alert_text and "success" in alert_text.lower():
-            logging.error(f"SECURITY VIOLATION: Weak password accepted: '{weak_password}'")
+            logging.error(
+                f"SECURITY VIOLATION: Weak password accepted: '{weak_password}'"
+            )
             logging.error("Standard: NIST SP 800-63B Section 5.1.1.2")
             logging.error("CVSS Score: 6.5 (MEDIUM)")
             logging.error("Impact: Weak passwords allow easy brute force")
-            logging.error("Recommendation: Implement password complexity rules")
-            pytest.fail(f"DISCOVERED: Weak password '{weak_password}' was accepted")
+            logging.error(
+                "Recommendation: Implement password complexity rules"
+            )
+            pytest.fail(
+                f"DISCOVERED: Weak password '{weak_password}' was accepted"
+            )
         else:
-            logging.info(f"✓ DISCOVERED: Weak password rejected: '{weak_password}'")
+            logging.info(
+                f"✓ DISCOVERED: Weak password rejected: '{weak_password}'"
+            )
             assert True
 
     except Exception as e:
@@ -462,8 +528,16 @@ def test_captcha_bot_protection_BR_020(browser, base_url):
     login_page.open_login_modal()
 
     page_source = browser.page_source.lower()
-    captcha_keywords = ['captcha', 'recaptcha', 'hcaptcha', 'bot protection', 'g-recaptcha']
-    captcha_detected = any(keyword in page_source for keyword in captcha_keywords)
+    captcha_keywords = [
+        "captcha",
+        "recaptcha",
+        "hcaptcha",
+        "bot protection",
+        "g-recaptcha",
+    ]
+    captcha_detected = any(
+        keyword in page_source for keyword in captcha_keywords
+    )
 
     if not captcha_detected:
         logging.warning("=" * 80)
@@ -472,7 +546,9 @@ def test_captcha_bot_protection_BR_020(browser, base_url):
         logging.warning("Expected: CAPTCHA or bot challenge")
         logging.warning("Actual: No CAPTCHA detected")
         logging.warning("CVSS Score: 6.5 (MEDIUM)")
-        logging.warning("Impact: Automated attacks easier (bots, credential stuffing)")
+        logging.warning(
+            "Impact: Automated attacks easier (bots, credential stuffing)"
+        )
         logging.warning("Recommendation: Implement reCAPTCHA or hCaptcha")
         logging.warning("=" * 80)
         pytest.fail("DISCOVERED: NO CAPTCHA - Violates OWASP ASVS 2.2.3")
@@ -501,7 +577,12 @@ def test_password_reset_mechanism_BR_021(browser, base_url):
     browser.get(base_url)
 
     page_source = browser.page_source.lower()
-    reset_keywords = ['forgot password', 'reset password', 'recover password', 'forgot your password']
+    reset_keywords = [
+        "forgot password",
+        "reset password",
+        "recover password",
+        "forgot your password",
+    ]
     reset_found = any(keyword in page_source for keyword in reset_keywords)
 
     if not reset_found:
@@ -512,9 +593,13 @@ def test_password_reset_mechanism_BR_021(browser, base_url):
         logging.warning("Actual: No password reset functionality detected")
         logging.warning("CVSS Score: 5.0 (MEDIUM)")
         logging.warning("Impact: Users cannot recover forgotten passwords")
-        logging.warning("Recommendation: Implement email-based password reset with secure tokens")
+        logging.warning(
+            "Recommendation: Implement email-based password reset with secure tokens"
+        )
         logging.warning("=" * 80)
-        pytest.fail("DISCOVERED: NO PASSWORD RESET - Violates OWASP ASVS 2.5.6")
+        pytest.fail(
+            "DISCOVERED: NO PASSWORD RESET - Violates OWASP ASVS 2.5.6"
+        )
     else:
         logging.info("✓ DISCOVERED: Password reset mechanism exists")
         assert True
@@ -550,7 +635,9 @@ def test_session_timeout_enforcement_BR_022(browser, base_url):
     if not login_page.is_user_logged_in():
         pytest.skip("Login failed - cannot test session timeout")
 
-    logging.info("DISCOVERED: User logged in, waiting 60 seconds to test timeout...")
+    logging.info(
+        "DISCOVERED: User logged in, waiting 60 seconds to test timeout..."
+    )
 
     time.sleep(60)
 
@@ -560,21 +647,26 @@ def test_session_timeout_enforcement_BR_022(browser, base_url):
 
     if still_logged_in:
         logging.warning("=" * 80)
-        logging.warning("SECURITY CONCERN: NO SESSION TIMEOUT CLEARLY CONFIGURED")
+        logging.warning(
+            "SECURITY CONCERN: NO SESSION TIMEOUT CLEARLY CONFIGURED"
+        )
         logging.warning("Standard: OWASP ASVS v5.0 Section 3.3.2")
         logging.warning("Standard: ISO 27001 A.9.4.2")
-        logging.warning("Expected: Session expires after inactivity (15-30 min typical)")
+        logging.warning(
+            "Expected: Session expires after inactivity (15-30 min typical)"
+        )
         logging.warning("Actual: Session remained active after 60 seconds")
         logging.warning("CVSS Score: 5.3 (MEDIUM)")
         logging.warning("Impact: Unattended sessions remain accessible")
         logging.warning("Recommendation: Implement 15-30 minute idle timeout")
         logging.warning("=" * 80)
         login_page.logout()
-        pytest.fail("DISCOVERED: NO SESSION TIMEOUT - Violates OWASP ASVS 3.3.2")
+        pytest.fail(
+            "DISCOVERED: NO SESSION TIMEOUT - Violates OWASP ASVS 3.3.2"
+        )
     else:
         logging.info("✓ DISCOVERED: Session timeout is enforced")
         assert True
-
 
 
 @pytest.mark.business_rules
@@ -613,7 +705,9 @@ def test_keyboard_navigation_BR_015(browser, base_url):
 
     assert logged_in, "Login via keyboard navigation should work"
 
-    logging.info("✓ BR-015 PASSED: Keyboard navigation works (WCAG 2.1 SC 2.1.1)")
+    logging.info(
+        "✓ BR-015 PASSED: Keyboard navigation works (WCAG 2.1 SC 2.1.1)"
+    )
 
     login_page.logout()
 
@@ -653,7 +747,9 @@ def test_form_labels_for_screen_readers_BR_016(browser, base_url):
     if not password_has_label:
         logging.warning("Password field missing placeholder/aria-label")
 
-    assert username_placeholder or password_placeholder, "Form fields should have some accessibility labeling"
+    assert (
+        username_placeholder or password_placeholder
+    ), "Form fields should have some accessibility labeling"
 
     logging.info(f"✓ BR-016 PASSED: Form has accessibility labels")
     logging.info(f"  Username placeholder: '{username_placeholder}'")
@@ -691,10 +787,14 @@ def test_username_whitespace_normalization_BR_005(browser, base_url):
         login_page.logout()
         assert True
     else:
-        logging.warning("⚠ DISCOVERED: System does NOT trim whitespace from username")
+        logging.warning(
+            "⚠ DISCOVERED: System does NOT trim whitespace from username"
+        )
         logging.warning(f"Alert received: {alert_text}")
         logging.warning("Standard: ISO 25010 recommends user error protection")
-        logging.warning("Impact: Users may fail login due to accidental spaces")
+        logging.warning(
+            "Impact: Users may fail login due to accidental spaces"
+        )
         assert True
 
 
@@ -728,7 +828,9 @@ def test_case_sensitivity_username_BR_007(browser, base_url):
         login_page.logout()
     else:
         logging.info("✓ DISCOVERED: Usernames ARE case-sensitive")
-        logging.info(f"'APOLO2025' does not match 'Apolo2025'. Alert: {alert_text}")
+        logging.info(
+            f"'APOLO2025' does not match 'Apolo2025'. Alert: {alert_text}"
+        )
 
     logging.info("Note: Either behavior is acceptable if consistent")
     assert True
@@ -762,11 +864,15 @@ def test_empty_username_only_BR_009(browser, base_url):
     assert alert_text is not None, "Should show error for empty username"
 
     if "username" in alert_text.lower():
-        logging.info(f"✓ BR-009 PASSED: Field-specific error. Alert: '{alert_text}'")
+        logging.info(
+            f"✓ BR-009 PASSED: Field-specific error. Alert: '{alert_text}'"
+        )
         logging.info("Standard: WCAG 2.1 SC 3.3.1 - Error Identification")
     else:
         logging.info(f"✓ Empty username rejected. Alert: '{alert_text}'")
-        logging.info("Note: Generic error (WCAG recommends field-specific errors)")
+        logging.info(
+            "Note: Generic error (WCAG recommends field-specific errors)"
+        )
 
 
 @pytest.mark.business_rules
@@ -797,11 +903,15 @@ def test_empty_password_only_BR_010(browser, base_url):
     assert alert_text is not None, "Should show error for empty password"
 
     if "password" in alert_text.lower():
-        logging.info(f"✓ BR-010 PASSED: Field-specific error. Alert: '{alert_text}'")
+        logging.info(
+            f"✓ BR-010 PASSED: Field-specific error. Alert: '{alert_text}'"
+        )
         logging.info("Standard: WCAG 2.1 SC 3.3.1 - Error Identification")
     else:
         logging.info(f"✓ Empty password rejected. Alert: '{alert_text}'")
-        logging.info("Note: Generic error (WCAG recommends field-specific errors)")
+        logging.info(
+            "Note: Generic error (WCAG recommends field-specific errors)"
+        )
 
 
 @pytest.mark.business_rules
@@ -831,9 +941,13 @@ def test_numeric_only_username_BR_011(browser, base_url):
 
     if not logged_in:
         if alert_text:
-            logging.info(f"✓ DISCOVERED: System response to numeric username: '{alert_text}'")
+            logging.info(
+                f"✓ DISCOVERED: System response to numeric username: '{alert_text}'"
+            )
         else:
-            logging.info("✓ DISCOVERED: Numeric username not matched (expected if user doesn't exist)")
+            logging.info(
+                "✓ DISCOVERED: Numeric username not matched (expected if user doesn't exist)"
+            )
     else:
         logging.info("✓ DISCOVERED: System accepts numeric-only usernames")
 
@@ -875,10 +989,16 @@ def test_unicode_characters_BR_012(browser, base_url):
         logged_in = login_page.is_user_logged_in(timeout=2)
 
         if not logged_in:
-            logging.info(f"✓ DISCOVERED: {description} - System response: {alert_text if alert_text else 'No match (expected)'}")
+            logging.info(
+                f"✓ DISCOVERED: {description} - System response: {alert_text if alert_text else 'No match (expected)'}"
+            )
         else:
-            logging.info(f"✓ DISCOVERED: {description} - System supports Unicode login")
+            logging.info(
+                f"✓ DISCOVERED: {description} - System supports Unicode login"
+            )
 
-    logging.info("Standard: ISO 25010 recommends international character support")
+    logging.info(
+        "Standard: ISO 25010 recommends international character support"
+    )
     logging.info("Note: This test documents Unicode handling behavior")
     assert True

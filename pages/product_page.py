@@ -8,17 +8,19 @@ Follows the Page Object Model (POM) design pattern for maintainable test automat
 Universal and reusable across any web application.
 """
 
-import time
 import logging
 import re
-import requests  # type: ignore[import-untyped]
-from typing import Optional, Tuple, Dict, List, Any, Union, Generator
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from selenium.webdriver.common.keys import Keys
+import time
+from typing import Any, Dict, Generator, List, Optional, Tuple, Union
+
+import requests
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
-from pages.base_page import BasePage
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+
 from config import config
+from pages.base_page import BasePage
 
 logger = logging.getLogger(__name__)
 

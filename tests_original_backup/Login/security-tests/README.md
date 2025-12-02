@@ -2,10 +2,10 @@
 
 ##  **OVERVIEW**
 
-**Module:** `test_login_security.py`  
-**Version:** 2.0 - Complete DISCOVER Philosophy Implementation  
-**Target Application:** DemoBlaze (https://www.demoblaze.com/)  
-**Module Type:** Security & Exploitation Testing  
+**Module:** `test_login_security.py`
+**Version:** 2.0 - Complete DISCOVER Philosophy Implementation
+**Target Application:** DemoBlaze (https://www.demoblaze.com/)
+**Module Type:** Security & Exploitation Testing
 **Total Tests:** 20 functions (~40+ test executions with parametrization)
 
 This test suite focuses on **security vulnerabilities** and **exploitation attempts** for the Login/Authentication module of DemoBlaze. Tests follow a "**vulnerability discovery**" approach, attempting real-world attacks to identify security weaknesses.
@@ -27,7 +27,7 @@ Unlike functional testing (which verifies features work), security testing **att
 # EXECUTE: Try exploit
 perform_attack(browser, malicious_payload)
 
-# OBSERVE: Check if attack succeeded  
+# OBSERVE: Check if attack succeeded
 exploitation_successful = check_if_compromised(browser)
 
 # DECIDE & DOCUMENT
@@ -414,7 +414,7 @@ Recommendation: Implement parameterized queries
 for i in range(50):
     perform_login(browser, TEST_USERNAME, f"wrongpass{i}")
     alert_text = wait_for_alert(browser)
-    
+
     # OBSERVE: Check for rate limiting
     if "rate" in alert_text or "locked" in alert_text:
         rate_limited = True
@@ -542,7 +542,7 @@ Impact: Unattended sessions remain accessible
 page_source = browser.page_source.lower()
 
 # OBSERVE: Look for reset keywords
-reset_found = any(keyword in page_source 
+reset_found = any(keyword in page_source
                  for keyword in ['forgot password', 'reset password'])
 
 # DECIDE: Password reset should exist
@@ -677,21 +677,21 @@ If critical vulnerabilities found:
 def test_new_vulnerability_XXX_001(browser):
     """
     TC-SEC-LOGIN-XXX-001: [Vulnerability Name]
-    
+
     CVSS Score: X.X [SEVERITY]
     Standard: [OWASP/NIST/etc reference]
-    
+
     Discovers if [attack] is possible.
     Tests for [specific vulnerability].
     """
     browser.get(BASE_URL)
-    
+
     # EXECUTE: Try attack
     perform_attack(browser, malicious_payload)
-    
+
     # OBSERVE: Check if exploited
     exploited = check_if_compromised(browser)
-    
+
     # DECIDE & DOCUMENT
     if exploited:
         logging.critical(f"CRITICAL VULNERABILITY: [Attack] with: {payload}")
@@ -802,9 +802,9 @@ Test BOT-002 creates multiple browser instances:
 
 **END OF README - test_login_security.py**
 
-**Total Tests:** 20 functions (~40+ executions with parametrization)  
-**Coverage:** OWASP Top 10, ASVS v5.0, NIST 800-63B, CWE Top 25, PCI-DSS 4.0.1  
-**Severity:** CRITICAL, HIGH, MEDIUM, LOW vulnerabilities tested  
-**Philosophy:** DISCOVER - Tests discover vulnerabilities through actual exploitation attempts  
+**Total Tests:** 20 functions (~40+ executions with parametrization)
+**Coverage:** OWASP Top 10, ASVS v5.0, NIST 800-63B, CWE Top 25, PCI-DSS 4.0.1
+**Severity:** CRITICAL, HIGH, MEDIUM, LOW vulnerabilities tested
+**Philosophy:** DISCOVER - Tests discover vulnerabilities through actual exploitation attempts
 
 ** REMEMBER: AUTHORIZED TESTING ONLY **

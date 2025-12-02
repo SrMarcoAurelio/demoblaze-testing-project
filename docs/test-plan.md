@@ -4,10 +4,10 @@
 
 This document outlines the testing strategy for DemoBlaze (https://www.demoblaze.com), a demo e-commerce application. The purpose of this project is to demonstrate manual and automated testing skills through comprehensive functional testing of core e-commerce features.
 
-**Project Duration:** 2 weeks  
-**Tester:** Marc Arévalo  
-**Version:** 2.0 (Updated after Phase 2 completion)  
-**Date:** November 2025  
+**Project Duration:** 2 weeks
+**Tester:** Marc Arévalo
+**Version:** 2.0 (Updated after Phase 2 completion)
+**Date:** November 2025
 **Last Updated:** November 5, 2025
 
 ---
@@ -115,7 +115,7 @@ The following are NOT included in this testing cycle:
 
 ### 5.2 Test Infrastructure
 - **Operating System:** Windows 11
-- **Browsers:** 
+- **Browsers:**
   - Primary: Google Chrome (latest version)
   - Secondary: Mozilla Firefox (latest version)
 - **Automation Tools:**
@@ -278,7 +278,7 @@ Testing will be considered complete when:
 
 **Coverage Metrics:**
 - **Module Coverage:** 100% (all modules tested)
-- **Requirements Coverage:** 90%+ 
+- **Requirements Coverage:** 90%+
 - **Test Coverage Target:** 90%+  Achieved
 
 **Target Metrics Status:**
@@ -366,10 +366,10 @@ Testing will be considered complete when:
 
 This test plan is created for portfolio demonstration purposes.
 
-**Prepared by:** Arévalo, Marc  
-**Date:** November 2025  
-**Version:** 2.0  
-**Phase 2 Status:**  Complete  
+**Prepared by:** Arévalo, Marc
+**Date:** November 2025
+**Version:** 2.0
+**Phase 2 Status:**  Complete
 **Ready for Phase 3:**  Yes
 
 ---
@@ -380,4 +380,3 @@ This test plan is created for portfolio demonstration purposes.
 |---------|------|--------|---------|
 | 1.0 | Nov 2025 | Arévalo, Marc | Initial test plan creation |
 | 2.0 | Nov 5, 2025 | Arévalo, Marc | Updated with Phase 2 results: 36 test cases executed, 29 bugs found. Added metrics, findings, and recommendations. Ready for Phase 3. |
-

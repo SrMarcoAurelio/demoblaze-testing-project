@@ -1,9 +1,9 @@
 # Product Details Functionality Testing Suite
 
-**Module:** `test_product_functionality.py`  
-**Author:** Arévalo, Marc  
-**Application Under Test:** DemoBlaze (https://www.demoblaze.com/)  
-**Current Version:** 1.0  
+**Module:** `test_product_functionality.py`
+**Author:** Arévalo, Marc
+**Application Under Test:** DemoBlaze (https://www.demoblaze.com/)
+**Current Version:** 1.0
 **Test Type:** Functional and Business Rules Testing
 
 ---
@@ -782,7 +782,7 @@ While this is a functional test suite, OWASP ASVS principles inform our testing:
 ```
 TimeoutException: Message: Element not found: .hrefch
 ```
-**Cause:** Products not loading on homepage  
+**Cause:** Products not loading on homepage
 **Solution:**
 - Increase TIMEOUT value
 - Check internet connection
@@ -795,7 +795,7 @@ TimeoutException: Message: Element not found: .hrefch
 ```
 StaleElementReferenceException: stale element reference: element is not attached to page
 ```
-**Cause:** Page changed after element was found  
+**Cause:** Page changed after element was found
 **Solution:**
 - Re-locate element after page change
 - Use WebDriverWait for dynamic content
@@ -835,7 +835,7 @@ All tests pass on local machine but fail in GitHub Actions
 ```
 requests.exceptions.ConnectionError: Max retries exceeded
 ```
-**Cause:** Network issue checking image URLs  
+**Cause:** Network issue checking image URLs
 **Solution:**
 - Check firewall settings
 - Verify `requests` library installed
@@ -847,7 +847,7 @@ requests.exceptions.ConnectionError: Max retries exceeded
 ```
 Keyboard test fails - button not reachable via Tab
 ```
-**Cause:** Tab order may vary by browser  
+**Cause:** Tab order may vary by browser
 **Solution:**
 - Increase Tab press count (currently 10)
 - Verify button has proper `tabindex`
@@ -859,8 +859,8 @@ Keyboard test fails - button not reachable via Tab
 ```
 test_product_data_consistency_across_views_BR_010[2] SKIPPED
 ```
-**Cause:** Not enough products (product index 2 unavailable)  
-**Expected:** Normal behavior if catalog has < 3 products  
+**Cause:** Not enough products (product index 2 unavailable)
+**Expected:** Normal behavior if catalog has < 3 products
 **Action:** None required - test correctly skips when product unavailable
 
 ---
@@ -910,10 +910,10 @@ test_product_data_consistency_across_views_BR_010[2] SKIPPED
 def test_product_has_stock_info_BR_011(browser):
     """
     TC-PRODUCT-BR-011: Products Should Display Stock Information
-    
+
     Standard: ISO 25010 Section 5.3 (Completeness)
     CVSS Score: 3.7 (LOW) if violated
-    
+
     Discovers if products show stock availability.
     """
     # Test implementation
@@ -998,8 +998,8 @@ def test_product_has_stock_info_BR_011(browser):
 
 ---
 
-**Author:** Arévalo, Marc  
-**Version:** 1.0  
+**Author:** Arévalo, Marc
+**Version:** 1.0
 **Last Updated:** November 2025
 
 ---

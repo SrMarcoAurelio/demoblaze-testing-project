@@ -8,13 +8,15 @@ Contains all locators and actions related to cart operations.
 Universal and reusable across any web application with shopping cart features.
 """
 
+import re
+import time
+from typing import Optional, Tuple
+
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+
 from pages.base_page import BasePage
-from typing import Optional, Tuple
-import time
-import re
 
 
 class CartPage(BasePage):

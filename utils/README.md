@@ -1,6 +1,6 @@
 # Utils Package - Universal Test Automation Framework
 
-**Version:** 1.0  
+**Version:** 1.0
 **Author:** Marc Arévalo
 
 ---
@@ -15,10 +15,10 @@ This package contains utility modules that make the test automation framework **
 
 This framework follows a **universal design philosophy**:
 
-✅ **Application-Agnostic**: No hardcoded application-specific logic  
-✅ **Configurable**: All application-specific values externalized to config  
-✅ **Reusable**: Helpers can be used across different projects  
-✅ **Extensible**: Easy to add new helpers without modifying existing code  
+✅ **Application-Agnostic**: No hardcoded application-specific logic
+✅ **Configurable**: All application-specific values externalized to config
+✅ **Reusable**: Helpers can be used across different projects
+✅ **Extensible**: Easy to add new helpers without modifying existing code
 ✅ **Well-Documented**: Clear examples and type hints for easy adoption
 
 ---
