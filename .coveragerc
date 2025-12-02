@@ -1,0 +1,111 @@
+# Coverage.py Configuration - DemoBlaze Test Automation
+# Author: Marc Arévalo
+# Version: 1.0 - Phase 8
+#
+# Configuration for code coverage reporting
+
+[run]
+# Source directories to measure
+source =
+    pages
+    utils
+
+# Omit these files from coverage
+omit =
+    */tests/*
+    */test_*.py
+    */__pycache__/*
+    */venv/*
+    */env/*
+    */.venv/*
+    */site-packages/*
+    conftest.py
+    config.py
+    setup.py
+    */examples/*
+    tests_original_backup/*
+
+# Run coverage in parallel mode
+parallel = False
+
+# Branch coverage (measure if-else branches)
+branch = True
+
+# Data file location
+data_file = .coverage
+
+[report]
+# Precision for coverage percentage
+precision = 2
+
+# Show missing lines
+show_missing = True
+
+# Skip covered files
+skip_covered = False
+
+# Skip empty files
+skip_empty = True
+
+# Sort results
+sort = Cover
+
+# Exclude lines from coverage
+exclude_lines =
+    # Standard pragma
+    pragma: no cover
+
+    # Don't complain about missing debug code
+    def __repr__
+    def __str__
+
+    # Don't complain if tests don't hit defensive assertion code
+    raise AssertionError
+    raise NotImplementedError
+
+    # Don't complain if non-runnable code isn't run
+    if 0:
+    if False:
+    if __name__ == .__main__.:
+
+    # Don't complain about abstract methods
+    @(abc\.)?abstractmethod
+
+    # Type checking blocks
+    if TYPE_CHECKING:
+    if typing.TYPE_CHECKING:
+
+    # Logging statements
+    logger\.debug
+    logger\.info
+
+    # Pass statements
+    pass
+
+# Ignore errors
+ignore_errors = False
+
+# Minimum coverage thresholds (fail if below)
+fail_under = 70.0
+
+[html]
+# Directory for HTML report
+directory = results/coverage/html
+
+# Title for HTML report
+title = DemoBlaze Test Automation - Code Coverage Report
+
+[xml]
+# Output file for XML report (for CI/CD)
+output = results/coverage/coverage.xml
+
+[json]
+# Output file for JSON report
+output = results/coverage/coverage.json
+show_contexts = True
+
+[paths]
+# Map source paths (useful for CI/CD)
+source =
+    .
+    */demoblaze-testing-project
