@@ -181,7 +181,7 @@ class BasePage:
                 EC.invisibility_of_element_located(locator)
             )
             self.logger.debug(f"Element invisible: {locator}")
-            return result
+            return bool(result)
         except TimeoutException:
             self.logger.error(f"Element still visible: {locator}")
             raise

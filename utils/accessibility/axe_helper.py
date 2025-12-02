@@ -35,7 +35,7 @@ class AxeHelper:
     BEST_PRACTICE = ["best-practice"]
     EXPERIMENTAL = ["experimental"]
 
-    def __init__(self, driver):
+    def __init__(self, driver) -> None:
         """
         Initialize AxeHelper.
 

@@ -99,7 +99,7 @@ class PerformanceMetricsCollector:
         ),
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize metrics collector."""
         self.metrics: List[PerformanceMetric] = []
         self.thresholds: Dict[str, PerformanceThreshold] = (
