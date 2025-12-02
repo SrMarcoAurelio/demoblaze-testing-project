@@ -3,117 +3,117 @@
   "_info": "To adapt this framework to your application, update the locator values below",
   "_author": "Marc Arévalo",
   "_version": "1.0",
-  
+
   "login": {
     "login_button_nav": {"by": "id", "value": "login2"},
     "signup_button_nav": {"by": "id", "value": "signin2"},
     "logout_button_nav": {"by": "id", "value": "logout2"},
     "home_nav_link": {"by": "xpath", "value": "//a[contains(text(), 'Home')]"},
-    
+
     "login_modal": {"by": "id", "value": "logInModal"},
     "login_modal_title": {"by": "xpath", "value": "//div[@id='logInModal']//h5[@class='modal-title']"},
     "login_username_field": {"by": "id", "value": "loginusername"},
     "login_password_field": {"by": "id", "value": "loginpassword"},
     "login_submit_button": {"by": "xpath", "value": "//button[text()='Log in']"},
     "login_close_button": {"by": "xpath", "value": "//div[@id='logInModal']//button[@class='close']"},
-    
+
     "welcome_user_text": {"by": "id", "value": "nameofuser"}
   },
-  
+
   "signup": {
     "signup_button_nav": {"by": "id", "value": "signin2"},
     "login_button_nav": {"by": "id", "value": "login2"},
-    
+
     "signup_modal": {"by": "id", "value": "signInModal"},
     "signup_modal_title": {"by": "xpath", "value": "//div[@id='signInModal']//h5[@class='modal-title']"},
     "signup_username_field": {"by": "id", "value": "sign-username"},
     "signup_password_field": {"by": "id", "value": "sign-password"},
     "signup_submit_button": {"by": "xpath", "value": "//button[text()='Sign up']"},
     "signup_close_button": {"by": "xpath", "value": "//div[@id='signInModal']//button[@class='close']"},
-    
+
     "welcome_user_text": {"by": "id", "value": "nameofuser"}
   },
-  
+
   "cart": {
     "cart_nav_link": {"by": "id", "value": "cartur"},
     "home_nav_link": {"by": "xpath", "value": "//a[contains(text(), 'Home')]"},
-    
+
     "cart_items": {"by": "xpath", "value": "//tbody[@id='tbodyid']/tr"},
     "first_item_name": {"by": "xpath", "value": "//tbody[@id='tbodyid']/tr[1]/td[2]"},
     "first_item_price": {"by": "xpath", "value": "//tbody[@id='tbodyid']/tr[1]/td[3]"},
     "first_delete_link": {"by": "xpath", "value": "(//a[text()='Delete'])[1]"},
-    
+
     "cart_total_price": {"by": "id", "value": "totalp"},
     "place_order_button": {"by": "xpath", "value": "//button[text()='Place Order']"},
-    
+
     "add_to_cart_button": {"by": "xpath", "value": "//a[text()='Add to cart']"}
   },
-  
+
   "catalog": {
     "home_link": {"by": "id", "value": "nava"},
     "logo_link": {"by": "css", "value": ".navbar-brand"},
-    
+
     "categories_section": {"by": "id", "value": "cat"},
     "phones_category": {"by": "link_text", "value": "Phones"},
     "laptops_category": {"by": "link_text", "value": "Laptops"},
     "monitors_category": {"by": "link_text", "value": "Monitors"},
-    
+
     "product_cards": {"by": "css", "value": ".card"},
     "product_titles": {"by": "css", "value": ".card-title a"},
     "product_prices": {"by": "css", "value": ".card-block h5"},
     "product_images": {"by": "css", "value": ".card-img-top"},
     "product_links": {"by": "css", "value": ".hrefch"},
     "product_descriptions": {"by": "css", "value": ".card-block p"},
-    
+
     "next_button": {"by": "id", "value": "next2"},
     "prev_button": {"by": "id", "value": "prev2"},
-    
+
     "product_detail_name": {"by": "css", "value": "h2.name"}
   },
-  
+
   "product": {
     "product_links": {"by": "css", "value": ".hrefch"},
     "product_cards": {"by": "css", "value": ".card"},
     "first_product_link": {"by": "xpath", "value": "(//a[@class='hrefch'])[1]"},
     "second_product_link": {"by": "xpath", "value": "(//a[@class='hrefch'])[2]"},
-    
+
     "product_name": {"by": "css", "value": "h2.name"},
     "product_price": {"by": "css", "value": "h3.price-container"},
     "product_description": {"by": "css", "value": "#more"},
     "product_image": {"by": "css", "value": ".item.active img"},
     "add_to_cart_button": {"by": "css", "value": "a.btn.btn-success.btn-lg"},
-    
+
     "home_link": {"by": "css", "value": "a.nav-link[href='index.html']"},
     "cart_link": {"by": "id", "value": "cartur"},
-    
+
     "category_phones": {"by": "link_text", "value": "Phones"},
     "category_laptops": {"by": "link_text", "value": "Laptops"},
     "category_monitors": {"by": "link_text", "value": "Monitors"},
-    
+
     "next_button": {"by": "id", "value": "next2"},
     "prev_button": {"by": "id", "value": "prev2"}
   },
-  
+
   "purchase": {
     "order_modal": {"by": "id", "value": "orderModal"},
     "order_modal_title": {"by": "xpath", "value": "//div[@id='orderModal']//h5[@class='modal-title']"},
-    
+
     "order_name_field": {"by": "id", "value": "name"},
     "order_country_field": {"by": "id", "value": "country"},
     "order_city_field": {"by": "id", "value": "city"},
     "order_card_field": {"by": "id", "value": "card"},
     "order_month_field": {"by": "id", "value": "month"},
     "order_year_field": {"by": "id", "value": "year"},
-    
+
     "purchase_button": {"by": "xpath", "value": "//button[text()='Purchase']"},
     "close_order_modal_button": {"by": "xpath", "value": "//div[@id='orderModal']//button[@class='close']"},
     "close_order_modal_button_text": {"by": "xpath", "value": "//div[@id='orderModal']//button[text()='Close']"},
-    
+
     "purchase_confirm_modal": {"by": "class", "value": "sweet-alert"},
     "purchase_confirm_msg": {"by": "xpath", "value": "//h2[text()='Thank you for your purchase!']"},
     "purchase_confirm_text": {"by": "class", "value": "sweet-alert"},
     "confirm_ok_button": {"by": "xpath", "value": "//button[contains(@class, 'confirm')]"},
-    
+
     "cart_total_price": {"by": "id", "value": "totalp"}
   }
 }

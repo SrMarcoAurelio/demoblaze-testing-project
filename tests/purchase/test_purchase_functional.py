@@ -20,14 +20,17 @@ pytest tests_new/purchase/test_purchase_functional.py -m "critical" -v
 Total Tests: 20
 """
 
-import pytest
-import time
 import logging
+import time
+
+import pytest
+
 from pages.cart_page import CartPage
 from pages.purchase_page import PurchasePage
 
 # Logging is already configured in conftest.py
 # No need for duplicate logging.basicConfig() here
+
 
 @pytest.fixture
 def cart_page(browser, base_url):
@@ -40,6 +43,7 @@ def cart_page(browser, base_url):
     cart.open_cart()
 
     return cart
+
 
 @pytest.fixture
 def order_modal(cart_page):
@@ -55,7 +59,9 @@ def order_modal(cart_page):
 
 @pytest.mark.functional
 @pytest.mark.critical
-def test_successful_purchase_with_price_verification_FUNC_001(browser, base_url):
+def test_successful_purchase_with_price_verification_FUNC_001(
+    browser, base_url
+):
     """
     TC-PURCHASE-FUNC-001: Successful Purchase with Price Verification
 
@@ -69,7 +75,9 @@ def test_successful_purchase_with_price_verification_FUNC_001(browser, base_url)
     cart.open_cart()
 
     cart_total = cart.get_cart_total()
-    assert cart_total == price, f"Cart total {cart_total} should match product price {price}"
+    assert (
+        cart_total == price
+    ), f"Cart total {cart_total} should match product price {price}"
 
     cart.click_place_order()
 
@@ -82,12 +90,13 @@ def test_successful_purchase_with_price_verification_FUNC_001(browser, base_url)
         city="Barcelona",
         card="1234567890123456",
         month="12",
-        year="2028"
+        year="2028",
     )
 
     assert success, "Purchase should complete successfully"
-    assert details['amount'] == cart_total, \
-        f"Confirmed amount {details['amount']} should match cart total {cart_total}"
+    assert (
+        details["amount"] == cart_total
+    ), f"Confirmed amount {details['amount']} should match cart total {cart_total}"
 
     logging.info(f"✓ Purchase completed successfully: ${details['amount']}")
     assert True
@@ -101,7 +110,9 @@ def test_cart_empty_after_purchase_FUNC_002(order_modal):
 
     DISCOVER: Verify cart is cleared after purchase
     """
-    logging.info("TC-PURCHASE-FUNC-002: Testing cart clearing after purchase...")
+    logging.info(
+        "TC-PURCHASE-FUNC-002: Testing cart clearing after purchase..."
+    )
 
     purchase = order_modal
 
@@ -116,7 +127,9 @@ def test_cart_empty_after_purchase_FUNC_002(order_modal):
 
     item_count = cart.get_cart_item_count()
 
-    assert item_count == 0, f"Cart should be empty after purchase, found {item_count} items"
+    assert (
+        item_count == 0
+    ), f"Cart should be empty after purchase, found {item_count} items"
 
     logging.info("✓ Cart cleared after purchase")
     assert True
@@ -130,11 +143,14 @@ def test_purchase_as_logged_in_user_FUNC_003(browser, base_url):
 
     DISCOVER: Verify logged-in users can purchase
     """
-    logging.info("TC-PURCHASE-FUNC-003: Testing purchase with logged-in user...")
+    logging.info(
+        "TC-PURCHASE-FUNC-003: Testing purchase with logged-in user..."
+    )
 
     browser.get(base_url)
 
     from pages.login_page import LoginPage
+
     login = LoginPage(browser)
     login.login("Apolo2025", "apolo2025")
 
@@ -150,7 +166,9 @@ def test_purchase_as_logged_in_user_FUNC_003(browser, base_url):
 
     name_value = purchase.get_form_field_value(purchase.ORDER_NAME_FIELD)
 
-    logging.info(f"Name field value: '{name_value}' (auto-fill not implemented)")
+    logging.info(
+        f"Name field value: '{name_value}' (auto-fill not implemented)"
+    )
 
     success, _, details = purchase.complete_purchase()
 
@@ -159,7 +177,6 @@ def test_purchase_as_logged_in_user_FUNC_003(browser, base_url):
 
     login.logout()
     assert True
-
 
 
 @pytest.mark.functional
@@ -183,10 +200,13 @@ def test_multiple_items_total_calculation_FUNC_004(browser, base_url):
     cart_total = cart.get_cart_total()
     expected_total = price1 + price2
 
-    assert cart_total == expected_total, \
-        f"Cart total {cart_total} should equal {price1} + {price2} = {expected_total}"
+    assert (
+        cart_total == expected_total
+    ), f"Cart total {cart_total} should equal {price1} + {price2} = {expected_total}"
 
-    logging.info(f"✓ Cart total verified: ${cart_total} = ${price1} + ${price2}")
+    logging.info(
+        f"✓ Cart total verified: ${cart_total} = ${price1} + ${price2}"
+    )
     assert True
 
 
@@ -226,7 +246,9 @@ def test_delete_item_and_recalculate_total_FUNC_006(browser, base_url):
 
     DISCOVER: Verify total recalculates after deletion
     """
-    logging.info("TC-PURCHASE-FUNC-006: Testing total recalculation after deletion...")
+    logging.info(
+        "TC-PURCHASE-FUNC-006: Testing total recalculation after deletion..."
+    )
 
     browser.get(base_url)
     cart = CartPage(browser)
@@ -238,13 +260,17 @@ def test_delete_item_and_recalculate_total_FUNC_006(browser, base_url):
 
     initial_total = cart.get_cart_total()
     expected_initial = price1 + price2
-    assert initial_total == expected_initial, f"Initial total incorrect: {initial_total} != {expected_initial}"
+    assert (
+        initial_total == expected_initial
+    ), f"Initial total incorrect: {initial_total} != {expected_initial}"
 
     cart.delete_first_item()
 
     new_total = cart.get_cart_total()
 
-    assert new_total == price2, f"Total after deletion should be {price2}, got {new_total}"
+    assert (
+        new_total == price2
+    ), f"Total after deletion should be {price2}, got {new_total}"
 
     logging.info(f"✓ Total recalculated: ${initial_total} → ${new_total}")
     assert True
@@ -258,7 +284,9 @@ def test_add_same_product_multiple_times_FUNC_007(browser, base_url):
 
     DISCOVER: Verify duplicate product handling
     """
-    logging.info("TC-PURCHASE-FUNC-007: Testing same product multiple times...")
+    logging.info(
+        "TC-PURCHASE-FUNC-007: Testing same product multiple times..."
+    )
 
     browser.get(base_url)
     cart = CartPage(browser)
@@ -275,9 +303,13 @@ def test_add_same_product_multiple_times_FUNC_007(browser, base_url):
     total = cart.get_cart_total()
     expected_total = price1 * 2
 
-    assert total == expected_total, f"Total should be {expected_total}, got {total}"
+    assert (
+        total == expected_total
+    ), f"Total should be {expected_total}, got {total}"
 
-    logging.info(f"✓ Same product added twice: {item_count} items, total ${total}")
+    logging.info(
+        f"✓ Same product added twice: {item_count} items, total ${total}"
+    )
     assert True
 
 
@@ -310,7 +342,6 @@ def test_delete_all_items_from_cart_FUNC_008(browser, base_url):
 
     logging.info("✓ All items deleted successfully")
     assert True
-
 
 
 @pytest.mark.functional
@@ -353,11 +384,15 @@ def test_open_close_modal_multiple_times_FUNC_010(cart_page):
         cart.click_place_order()
         purchase.wait_for_order_modal()
 
-        assert purchase.is_order_modal_visible(), f"Modal should be visible (iteration {i+1})"
+        assert (
+            purchase.is_order_modal_visible()
+        ), f"Modal should be visible (iteration {i+1})"
         logging.info(f"Modal opened - iteration {i+1}")
 
         purchase.close_order_modal_with_close_button()
-        assert cart.is_place_order_visible(), f"Should be on cart page (iteration {i+1})"
+        assert (
+            cart.is_place_order_visible()
+        ), f"Should be on cart page (iteration {i+1})"
         logging.info(f"Modal closed - iteration {i+1}")
 
     logging.info("✓ Modal opened and closed 3 times successfully")
@@ -394,7 +429,6 @@ def test_order_modal_escape_key_FUNC_011(cart_page):
     assert True
 
 
-
 @pytest.mark.functional
 @pytest.mark.medium
 def test_access_empty_cart_FUNC_012(browser, base_url):
@@ -414,7 +448,9 @@ def test_access_empty_cart_FUNC_012(browser, base_url):
 
     assert item_count == 0, f"Cart should be empty, found {item_count} items"
 
-    assert cart.is_place_order_visible(), "Place Order button should be visible"
+    assert (
+        cart.is_place_order_visible()
+    ), "Place Order button should be visible"
 
     logging.info("✓ Empty cart accessible, Place Order visible")
     assert True
@@ -447,7 +483,9 @@ def test_cart_persistence_across_navigation_FUNC_013(browser, base_url):
     cart_total = cart.get_cart_total()
 
     assert item_count == 1, f"Cart should have 1 item, found {item_count}"
-    assert cart_total == price, f"Cart total should be {price}, got {cart_total}"
+    assert (
+        cart_total == price
+    ), f"Cart total should be {price}, got {cart_total}"
 
     logging.info("✓ Cart persisted correctly across navigation")
     assert True
@@ -473,7 +511,9 @@ def test_navigation_after_purchase_FUNC_014(order_modal):
 
     current_url = purchase.driver.current_url
 
-    assert "demoblaze.com" in current_url, f"Should remain on DemoBlaze, URL: {current_url}"
+    assert (
+        "demoblaze.com" in current_url
+    ), f"Should remain on DemoBlaze, URL: {current_url}"
 
     logging.info(f"✓ After purchase, URL: {current_url}")
     assert True
@@ -503,8 +543,9 @@ def test_rapid_add_to_cart_clicks_FUNC_015(browser, base_url):
 
     expected_min = price
     expected_max = price * 3
-    assert expected_min <= total <= expected_max, \
-        f"Total {total} should be between {expected_min} and {expected_max}"
+    assert (
+        expected_min <= total <= expected_max
+    ), f"Total {total} should be between {expected_min} and {expected_max}"
 
     logging.info(f"✓ Rapid clicks handled: {item_count} items, total ${total}")
     assert True
@@ -518,7 +559,9 @@ def test_cart_total_calculation_performance_FUNC_016(browser, base_url):
 
     DISCOVER: Verify cart total calculates quickly
     """
-    logging.info("TC-PURCHASE-FUNC-016: Testing cart calculation performance...")
+    logging.info(
+        "TC-PURCHASE-FUNC-016: Testing cart calculation performance..."
+    )
 
     browser.get(base_url)
     cart = CartPage(browser)
@@ -530,8 +573,9 @@ def test_cart_total_calculation_performance_FUNC_016(browser, base_url):
 
     calculation_time = cart.measure_cart_total_calculation_time()
 
-    assert calculation_time < 3.0, \
-        f"Cart calculation too slow: {calculation_time:.2f}s (should be < 3s)"
+    assert (
+        calculation_time < 3.0
+    ), f"Cart calculation too slow: {calculation_time:.2f}s (should be < 3s)"
 
     if calculation_time < 1.0:
         logging.info(f"✓ Excellent performance: {calculation_time:.2f}s")
@@ -557,15 +601,16 @@ def test_add_product_from_category_page_FUNC_017(browser, base_url):
     cart = CartPage(browser)
 
     name, price = cart.add_product_from_category(
-        cart.CATEGORY_LAPTOPS_LINK,
-        "Sony vaio i5"
+        cart.CATEGORY_LAPTOPS_LINK, "Sony vaio i5"
     )
 
     cart.open_cart()
 
     item_name = cart.get_first_item_name()
 
-    assert item_name == "Sony vaio i5", f"Expected 'Sony vaio i5', got '{item_name}'"
+    assert (
+        item_name == "Sony vaio i5"
+    ), f"Expected 'Sony vaio i5', got '{item_name}'"
 
     logging.info("✓ Product from category added successfully")
     assert True
@@ -590,14 +635,16 @@ def test_purchase_confirmation_details_FUNC_018(order_modal):
     expected_total = cart.get_cart_total()
 
     success, confirm_text, details = purchase.complete_purchase(
-        name=test_name,
-        card=test_card
+        name=test_name, card=test_card
     )
 
     assert success, "Purchase should succeed"
-    assert "Thank you for your purchase!" in confirm_text, "Should have thank you message"
-    assert details['amount'] == expected_total, \
-        f"Confirmed amount {details['amount']} should match expected {expected_total}"
+    assert (
+        "Thank you for your purchase!" in confirm_text
+    ), "Should have thank you message"
+    assert (
+        details["amount"] == expected_total
+    ), f"Confirmed amount {details['amount']} should match expected {expected_total}"
 
     logging.info(f"✓ Confirmation details verified: ${details['amount']}")
     assert True
@@ -619,7 +666,7 @@ def test_order_form_tab_navigation_FUNC_019(order_modal):
         fill_data=["Test1", "Test2", "Test3", "Test4", "Test5", "Test6"]
     )
 
-    assert filled_values['name'] == "Test1", "Name field should have Test1"
+    assert filled_values["name"] == "Test1", "Name field should have Test1"
 
     logging.info("✓ Tab navigation works correctly")
     assert True
@@ -641,13 +688,12 @@ def test_contact_modal_send_valid_message_FUNC_020(browser, base_url):
     alert_text = purchase.send_contact_message(
         email="test@example.com",
         name="Test User",
-        message="This is a test message."
+        message="This is a test message.",
     )
 
-    assert alert_text == "Thanks for the message!!", \
-        f"Expected 'Thanks for the message!!', got '{alert_text}'"
+    assert (
+        alert_text == "Thanks for the message!!"
+    ), f"Expected 'Thanks for the message!!', got '{alert_text}'"
 
     logging.info("✓ Contact form works correctly")
     assert True
-
-

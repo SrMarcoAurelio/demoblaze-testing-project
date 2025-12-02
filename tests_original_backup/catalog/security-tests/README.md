@@ -1,9 +1,9 @@
 # Catalog & Product Browsing Security Testing Suite
 
-**Module:** `test_catalog_security.py`  
-**Author:** QA Testing Team  
-**Application Under Test:** DemoBlaze (https://www.demoblaze.com/)  
-**Current Version:** 1.0  
+**Module:** `test_catalog_security.py`
+**Author:** QA Testing Team
+**Application Under Test:** DemoBlaze (https://www.demoblaze.com/)
+**Current Version:** 1.0
 **Test Type:** Security Exploitation Testing
 
 ---
@@ -160,7 +160,7 @@ Security tests discover vulnerabilities by executing attacks and observing resul
 DISCOVER = EXECUTE + OBSERVE + DECIDE
 
 1. EXECUTE: Launch actual attack payload
-2. OBSERVE: Analyze response for compromise indicators  
+2. OBSERVE: Analyze response for compromise indicators
 3. DECIDE: Determine vulnerability based on OWASP/CWE standards
 ```
 
@@ -178,10 +178,10 @@ def test_sql_injection():
 def test_sql_injection_product_id_INJ_002(browser, sql_payload):
     # EXECUTE: Attempt SQL injection
     browser.get(f"{BASE_URL}prod.html?idp_={sql_payload}")
-    
+
     # OBSERVE: Check for SQL errors
     has_error, indicator = check_for_sql_error_indicators(browser)
-    
+
     # DECIDE: Based on OWASP ASVS 5.3.4
     if has_error:
         logging.error("CRITICAL VULNERABILITY: SQL INJECTION")
@@ -1071,7 +1071,7 @@ Breakdown:
 # Refine detection logic
 def check_for_sql_error_indicators(browser):
     page_source = browser.page_source.lower()
-    
+
     # Be more specific
     specific_indicators = [
         "you have an error in your sql syntax",
@@ -1079,11 +1079,11 @@ def check_for_sql_error_indicators(browser):
         "unclosed quotation mark",
         "sqlstate"
     ]
-    
+
     for indicator in specific_indicators:
         if indicator in page_source:
             return True, indicator
-    
+
     return False, None
 ```
 
@@ -1147,7 +1147,7 @@ for attempt in range(3):
 for i in range(attempts):
     time.sleep(0.5)  # Consistent delay
     # ... test code
-    
+
 # Or increase attempts to get reliable average
 attempts = 30  # More attempts = more reliable
 ```
@@ -1167,7 +1167,7 @@ attempts = 30  # More attempts = more reliable
 for protocol in ["http://", "https://"]:
     browser.get(f"{protocol}www.demoblaze.com")
     cookies = browser.get_cookies()
-    
+
     # Check all cookies, not just session
     for cookie in cookies:
         check_security_flags(cookie)

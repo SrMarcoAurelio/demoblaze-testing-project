@@ -1,7 +1,7 @@
 # SECURITY TEMPLATE PACKAGE - COMPLETE GUIDE
 
-**Author:** Arévalo, Marc  
-**Date:** November 2025  
+**Author:** Arévalo, Marc
+**Date:** November 2025
 **Version:** 2.0 Universal Edition
 
 ---
@@ -11,7 +11,7 @@
 I've created a **comprehensive, universal security testing template** split into 2 files:
 
 ### File 1: TEMPLATE_security_exploitation.md (Main Template)
-**Size:** 2,350+ lines  
+**Size:** 2,350+ lines
 **Sections:** 1-17
 
 **Contains:**
@@ -34,7 +34,7 @@ I've created a **comprehensive, universal security testing template** split into
 17. ✅ **Exploitation Tools & Libraries** - Required imports
 
 ### File 2: TEMPLATE_security_PART2_critical_sections.md (Critical Additions)
-**Size:** 1,000+ lines  
+**Size:** 1,000+ lines
 **Sections:** 18-19
 
 **Contains:**
@@ -42,7 +42,7 @@ I've created a **comprehensive, universal security testing template** split into
     - Login module example
     - Payment module example
     - API endpoints example
-    
+
 19. ✅ **Common Vulnerabilities by Module** - Quick reference for 7 module types:
     - Authentication/Login (5 critical vulns + discovery patterns)
     - Payment/Checkout (5 critical vulns + discovery patterns)
@@ -58,7 +58,7 @@ I've created a **comprehensive, universal security testing template** split into
 
 ### The Golden Rule You MUST Understand
 
-> **Tests DISCOVER vulnerabilities by EXECUTING exploits and OBSERVING results.**  
+> **Tests DISCOVER vulnerabilities by EXECUTING exploits and OBSERVING results.**
 > **Tests NEVER ASSUME the application's behavior.**
 
 ### What This Means in Practice
@@ -77,7 +77,7 @@ def test_sql_injection():
     # "Let me discover if this site is vulnerable"
     inject_sql("' OR '1'='1")
     result = observe_response()
-    
+
     if result.shows_exploitation():
         pytest.fail("DISCOVERED: SQL Injection vulnerability")
     else:
@@ -90,7 +90,7 @@ def test_sql_injection():
 DISCOVER = EXECUTE + OBSERVE + DECIDE
 
 1. EXECUTE: Run the actual exploit attempt
-2. OBSERVE: Capture the real system response  
+2. OBSERVE: Capture the real system response
 3. DECIDE: Compare against secure behavior objectively
 ```
 
@@ -140,13 +140,13 @@ DISCOVER = EXECUTE + OBSERVE + DECIDE
 
 ### Works Across Any Domain:
 
-✅ **E-commerce** (DemoBlaze, Amazon, etc.)  
-✅ **Banking** (Online banking, fintech)  
-✅ **Healthcare** (Patient portals, medical records)  
-✅ **Social Networks** (Facebook, Twitter style apps)  
-✅ **SaaS** (B2B applications, dashboards)  
-✅ **Government** (Public services, portals)  
-✅ **Education** (LMS, student systems)  
+✅ **E-commerce** (DemoBlaze, Amazon, etc.)
+✅ **Banking** (Online banking, fintech)
+✅ **Healthcare** (Patient portals, medical records)
+✅ **Social Networks** (Facebook, Twitter style apps)
+✅ **SaaS** (B2B applications, dashboards)
+✅ **Government** (Public services, portals)
+✅ **Education** (LMS, student systems)
 ✅ **ANY web application**
 
 ### How It's Universal:
@@ -156,7 +156,7 @@ DISCOVER = EXECUTE + OBSERVE + DECIDE
    # Change these for different sites:
    BASE_URL = "..."
    LOCATORS = {...}
-   
+
    # Keep this logic (works everywhere):
    def test_vulnerability():
        execute_exploit()
@@ -425,8 +425,8 @@ Sections:
 
 ### Remember:
 
-> **This template is your REFERENCE for HOW I should generate security tests.**  
-> **You don't use it directly - you use it to TELL ME what you want.**  
+> **This template is your REFERENCE for HOW I should generate security tests.**
+> **You don't use it directly - you use it to TELL ME what you want.**
 > **I use it to ensure I generate code with the right PHILOSOPHY.**
 
 ---

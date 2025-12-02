@@ -8,18 +8,20 @@ Includes category navigation, product browsing, pagination, and accessibility fe
 Universal and reusable across any web application.
 """
 
-import time
 import logging
 import re
-import requests  # type: ignore[import-untyped]
-from typing import Optional, Tuple, List, Dict, Any, Callable
-from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webelement import WebElement
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from selenium.webdriver.common.keys import Keys
+import time
+from typing import Any, Callable, Dict, List, Optional, Tuple
+
+import requests
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
-from pages.base_page import BasePage
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.remote.webelement import WebElement
+
 from config import config
+from pages.base_page import BasePage
 
 logger = logging.getLogger(__name__)
 

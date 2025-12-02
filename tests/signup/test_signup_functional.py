@@ -10,10 +10,11 @@ Total Tests: 6
 Expected Pass Rate: ~83% (some tests may fail revealing missing features)
 """
 
-import pytest
 import logging
-from pages.signup_page import SignupPage
 
+import pytest
+
+from pages.signup_page import SignupPage
 
 
 @pytest.mark.functional
@@ -47,7 +48,9 @@ def test_valid_signup_with_unique_credentials_FUNC_001(browser, base_url):
     assert alert_text is not None, "Should receive feedback after signup"
 
     if "success" in alert_text.lower() or "registered" in alert_text.lower():
-        logging.info(f"✓ FUNC-001 PASSED: Signup successful. Alert: '{alert_text}'")
+        logging.info(
+            f"✓ FUNC-001 PASSED: Signup successful. Alert: '{alert_text}'"
+        )
 
         browser.get(base_url)
         signup_page.login_after_signup(unique_username, password)
@@ -55,7 +58,9 @@ def test_valid_signup_with_unique_credentials_FUNC_001(browser, base_url):
         login_alert = signup_page.get_alert_text(timeout=3)
         logged_in = signup_page.is_user_logged_in(timeout=3)
 
-        assert logged_in, f"New account should be able to login. Alert: {login_alert}"
+        assert (
+            logged_in
+        ), f"New account should be able to login. Alert: {login_alert}"
         logging.info("✓ Can login with newly created account")
 
         signup_page.logout()
@@ -95,11 +100,17 @@ def test_duplicate_username_rejected_FUNC_002(browser, base_url):
 
     duplicate_alert = signup_page.get_alert_text(timeout=5)
 
-    assert duplicate_alert is not None, "Should receive error for duplicate username"
-    assert "exist" in duplicate_alert.lower() or "already" in duplicate_alert.lower(), \
-        f"Should indicate username already exists. Got: '{duplicate_alert}'"
+    assert (
+        duplicate_alert is not None
+    ), "Should receive error for duplicate username"
+    assert (
+        "exist" in duplicate_alert.lower()
+        or "already" in duplicate_alert.lower()
+    ), f"Should indicate username already exists. Got: '{duplicate_alert}'"
 
-    logging.info(f"✓ FUNC-002 PASSED: Duplicate rejected. Alert: '{duplicate_alert}'")
+    logging.info(
+        f"✓ FUNC-002 PASSED: Duplicate rejected. Alert: '{duplicate_alert}'"
+    )
 
 
 @pytest.mark.functional
@@ -126,9 +137,13 @@ def test_empty_credentials_rejected_FUNC_003(browser, base_url):
 
     alert_text = signup_page.get_alert_text(timeout=5)
 
-    assert alert_text is not None, "Should show validation error for empty credentials"
+    assert (
+        alert_text is not None
+    ), "Should show validation error for empty credentials"
 
-    logging.info(f"✓ FUNC-003 PASSED: Empty credentials rejected. Alert: '{alert_text}'")
+    logging.info(
+        f"✓ FUNC-003 PASSED: Empty credentials rejected. Alert: '{alert_text}'"
+    )
 
 
 @pytest.mark.functional
@@ -157,7 +172,9 @@ def test_empty_username_only_FUNC_004(browser, base_url):
 
     assert alert_text is not None, "Should show error for empty username"
 
-    logging.info(f"✓ FUNC-004 PASSED: Empty username rejected. Alert: '{alert_text}'")
+    logging.info(
+        f"✓ FUNC-004 PASSED: Empty username rejected. Alert: '{alert_text}'"
+    )
 
 
 @pytest.mark.functional
@@ -187,7 +204,9 @@ def test_empty_password_only_FUNC_005(browser, base_url):
 
     assert alert_text is not None, "Should show error for empty password"
 
-    logging.info(f"✓ FUNC-005 PASSED: Empty password rejected. Alert: '{alert_text}'")
+    logging.info(
+        f"✓ FUNC-005 PASSED: Empty password rejected. Alert: '{alert_text}'"
+    )
 
 
 @pytest.mark.functional
@@ -211,10 +230,14 @@ def test_signup_modal_close_functionality_FUNC_006(browser, base_url):
     signup_page = SignupPage(browser)
 
     signup_page.open_signup_modal()
-    assert signup_page.is_signup_modal_visible(), "Signup modal should be visible"
+    assert (
+        signup_page.is_signup_modal_visible()
+    ), "Signup modal should be visible"
 
     signup_page.close_signup_modal()
 
-    assert not signup_page.is_signup_modal_visible(), "Signup modal should be closed"
+    assert (
+        not signup_page.is_signup_modal_visible()
+    ), "Signup modal should be closed"
 
     logging.info("✓ FUNC-006 PASSED: Signup modal close button works")

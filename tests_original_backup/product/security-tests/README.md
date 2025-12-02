@@ -1,9 +1,9 @@
 # Product Details Security Testing Suite (Exploitation)
 
-**Module:** `test_product_security.py`  
-**Author:** Arévalo, Marc  
-**Application Under Test:** DemoBlaze (https://www.demoblaze.com/)  
-**Current Version:** 1.0  
+**Module:** `test_product_security.py`
+**Author:** Arévalo, Marc
+**Application Under Test:** DemoBlaze (https://www.demoblaze.com/)
+**Current Version:** 1.0
 **Test Type:** Security Testing (Penetration Testing / Exploitation)
 
 ---
@@ -126,7 +126,7 @@ def test_sql_injection_INJ_001(browser, sql_payload):
     CVSS Score: 9.8 (CRITICAL)
     """
     url = navigate_to_product_by_id(browser, sql_payload)
-    
+
     if check_for_sql_error_indicators(browser.page_source):
         logging.error("CRITICAL VULNERABILITY: SQL INJECTION")
         logging.error(f"CVSS Score: 9.8 (CRITICAL)")
@@ -1218,7 +1218,7 @@ Brief description of the vulnerability and its impact.
 ```
 Test passes but you suspect SQL injection vulnerability exists
 ```
-**Cause:** Application may suppress error messages  
+**Cause:** Application may suppress error messages
 **Solution:**
 - Try blind SQL injection techniques
 - Use time-based payloads
@@ -1231,7 +1231,7 @@ Test passes but you suspect SQL injection vulnerability exists
 ```
 XSS payload appears in source but is HTML-encoded
 ```
-**Expected Behavior:** This is CORRECT - application is secure  
+**Expected Behavior:** This is CORRECT - application is secure
 **Confirmation:**
 - Check that `<` is encoded as `&lt;`
 - Check that `>` is encoded as `&gt;`
@@ -1243,7 +1243,7 @@ XSS payload appears in source but is HTML-encoded
 ```
 IDOR-001 reports many products enumerable
 ```
-**Expected:** For public e-commerce, this is normal  
+**Expected:** For public e-commerce, this is normal
 **When It's a Problem:**
 - Hidden/admin products accessible
 - User-specific products accessible without auth
@@ -1255,7 +1255,7 @@ IDOR-001 reports many products enumerable
 ```
 Cannot confirm if price tampering affects checkout
 ```
-**Limitation:** These tests only check display price  
+**Limitation:** These tests only check display price
 **Full Test Requires:**
 - Complete purchase flow
 - Backend request inspection
@@ -1269,7 +1269,7 @@ Cannot confirm if price tampering affects checkout
 ```
 CSRF test warns of potential vulnerability but cannot confirm
 ```
-**Reason:** Selenium cannot easily test CSRF  
+**Reason:** Selenium cannot easily test CSRF
 **Manual Testing Required:**
 1. Create separate HTML page with form
 2. Submit form to add-to-cart endpoint
@@ -1281,7 +1281,7 @@ CSRF test warns of potential vulnerability but cannot confirm
 ```
 Cannot detect all security headers via Selenium
 ```
-**Limitation:** Selenium has limited access to HTTP headers  
+**Limitation:** Selenium has limited access to HTTP headers
 **Solution:**
 - Use browser DevTools to inspect
 - Use curl/Burp Suite for header inspection
@@ -1345,12 +1345,12 @@ Cannot detect all security headers via Selenium
 def test_new_vulnerability_TYPE_XXX(browser):
     """
     TC-PRODUCT-SEC-TYPE-XXX: [Vulnerability Name]
-    
+
     Standard: OWASP ASVS v5.0 Section X.X.X
     CWE: CWE-XXX
     CVSS Score: X.X (SEVERITY)
     Vector: CVSS:3.1/...
-    
+
     Discovers if [description].
     """
     # Test implementation
@@ -1436,8 +1436,8 @@ def test_new_vulnerability_TYPE_XXX(browser):
 
 ---
 
-**Author:** Arévalo, Marc  
-**Version:** 1.0  
+**Author:** Arévalo, Marc
+**Version:** 1.0
 **Last Updated:** November 2025
 
 ---

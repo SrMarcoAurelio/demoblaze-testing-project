@@ -15,21 +15,22 @@ Philosophy: DISCOVER (EXECUTE → OBSERVE → DECIDE)
 All tests perform real exploitation attempts to discover actual vulnerabilities.
 """
 
-import pytest
+import datetime
 import logging
 import time
-import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from selenium.webdriver.common.keys import Keys
+
+import pytest
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
 from pages.cart_page import CartPage
-from pages.purchase_page import PurchasePage
 from pages.login_page import LoginPage
+from pages.purchase_page import PurchasePage
 
 logger = logging.getLogger(__name__)
-
 
 
 @pytest.mark.security
@@ -53,12 +54,14 @@ def test_price_manipulation_in_client_SEC_001(browser, base_url):
     logger.info(f"Original cart total: ${cart_total}")
 
     try:
-        browser.execute_script("""
+        browser.execute_script(
+            """
             var totalElement = document.getElementById('totalp');
             if (totalElement) {
                 totalElement.textContent = '1';
             }
-        """)
+        """
+        )
         time.sleep(1)
 
         cart.click_place_order()
@@ -68,17 +71,25 @@ def test_price_manipulation_in_client_SEC_001(browser, base_url):
         success, confirm_text, details = purchase.complete_purchase()
 
         if success:
-            confirmed_amount = details['amount']
+            confirmed_amount = details["amount"]
             logger.info(f"Confirmed amount: ${confirmed_amount}")
 
             if confirmed_amount != cart_total:
-                logger.critical(f"✗ CRITICAL: Price manipulation succeeded! Original: ${cart_total}, Confirmed: ${confirmed_amount}")
-                pytest.fail(f"DISCOVERED: Client-side price manipulation vulnerability")
+                logger.critical(
+                    f"✗ CRITICAL: Price manipulation succeeded! Original: ${cart_total}, Confirmed: ${confirmed_amount}"
+                )
+                pytest.fail(
+                    f"DISCOVERED: Client-side price manipulation vulnerability"
+                )
             else:
-                logger.info(f"✓ Price manipulation prevented - server-side validation enforced")
+                logger.info(
+                    f"✓ Price manipulation prevented - server-side validation enforced"
+                )
 
     except Exception as e:
-        logger.info(f"✓ Price manipulation blocked or not applicable: {str(e)}")
+        logger.info(
+            f"✓ Price manipulation blocked or not applicable: {str(e)}"
+        )
 
 
 @pytest.mark.security
@@ -102,7 +113,8 @@ def test_negative_quantity_exploit_SEC_002(browser, base_url):
     initial_total = cart.get_cart_total()
 
     try:
-        browser.execute_script("""
+        browser.execute_script(
+            """
             var rows = document.querySelectorAll('#tbodyid tr');
             if (rows.length > 0) {
                 // Try to modify the underlying data or total
@@ -112,7 +124,8 @@ def test_negative_quantity_exploit_SEC_002(browser, base_url):
                     totalElement.textContent = (currentTotal * -1).toString();
                 }
             }
-        """)
+        """
+        )
         time.sleep(1)
 
         cart.click_place_order()
@@ -121,7 +134,7 @@ def test_negative_quantity_exploit_SEC_002(browser, base_url):
 
         success, confirm_text, details = purchase.complete_purchase()
 
-        if success and details['amount'] < 0:
+        if success and details["amount"] < 0:
             logger.critical("✗ CRITICAL: Negative amount accepted!")
             pytest.fail("DISCOVERED: Negative quantity/amount vulnerability")
 
@@ -170,10 +183,14 @@ def test_race_condition_double_purchase_SEC_003(browser, base_url):
         pass
 
     if confirmations_count > 1:
-        logger.critical(f"✗ CRITICAL: Multiple purchases detected ({confirmations_count})")
+        logger.critical(
+            f"✗ CRITICAL: Multiple purchases detected ({confirmations_count})"
+        )
         pytest.fail(f"DISCOVERED: Race condition allows double purchase")
     else:
-        logger.info(f"✓ Race condition prevented - {confirmations_count} purchase(s)")
+        logger.info(
+            f"✓ Race condition prevented - {confirmations_count} purchase(s)"
+        )
 
 
 @pytest.mark.security
@@ -196,7 +213,9 @@ def test_cart_total_recalculation_exploit_SEC_004(browser, base_url):
     cart_total = cart.get_cart_total()
 
     expected_total = price1 + price2
-    logger.info(f"Expected total: ${expected_total}, Cart shows: ${cart_total}")
+    logger.info(
+        f"Expected total: ${expected_total}, Cart shows: ${cart_total}"
+    )
 
     cart.delete_first_item()
     time.sleep(1)
@@ -211,13 +230,14 @@ def test_cart_total_recalculation_exploit_SEC_004(browser, base_url):
     success, confirm_text, details = purchase.complete_purchase()
 
     if success:
-        confirmed_amount = details['amount']
+        confirmed_amount = details["amount"]
         if confirmed_amount != new_total:
-            logger.critical(f"✗ CRITICAL: Total mismatch! Cart: ${new_total}, Charged: ${confirmed_amount}")
+            logger.critical(
+                f"✗ CRITICAL: Total mismatch! Cart: ${new_total}, Charged: ${confirmed_amount}"
+            )
             pytest.fail("DISCOVERED: Cart total recalculation vulnerability")
         else:
             logger.info("✓ Cart total correctly recalculated server-side")
-
 
 
 @pytest.mark.security
@@ -259,17 +279,26 @@ def test_rapid_purchase_attempts_BOT_001(browser, base_url):
             purchase.close_purchase_confirmation()
         else:
             alert_text = purchase.get_alert_text(timeout=1)
-            if alert_text and any(word in alert_text.lower() for word in ["limit", "wait", "too many"]):
+            if alert_text and any(
+                word in alert_text.lower()
+                for word in ["limit", "wait", "too many"]
+            ):
                 rate_limited = True
                 logger.info(f"✓ Rate limiting detected after {i+1} attempts")
                 break
 
-        logger.info(f"Purchase attempt {i+1}/{purchase_attempts}: {'Success' if is_confirmed else 'Failed'}")
+        logger.info(
+            f"Purchase attempt {i+1}/{purchase_attempts}: {'Success' if is_confirmed else 'Failed'}"
+        )
 
     if successful_purchases >= purchase_attempts and not rate_limited:
-        logger.warning(f"⚠ DISCOVERED: No rate limiting after {purchase_attempts} rapid purchases")
+        logger.warning(
+            f"⚠ DISCOVERED: No rate limiting after {purchase_attempts} rapid purchases"
+        )
     else:
-        logger.info(f"✓ Bot protection: {successful_purchases} purchases allowed")
+        logger.info(
+            f"✓ Bot protection: {successful_purchases} purchases allowed"
+        )
 
 
 @pytest.mark.security
@@ -301,19 +330,25 @@ def test_automated_cart_manipulation_BOT_002(browser, base_url):
             time.sleep(0.1)  # Very rapid operations
 
             page_source = browser.page_source.lower()
-            if any(keyword in page_source for keyword in ["captcha", "robot", "automated", "blocked"]):
+            if any(
+                keyword in page_source
+                for keyword in ["captcha", "robot", "automated", "blocked"]
+            ):
                 blocked = True
-                logger.info(f"✓ Bot detection triggered after {i+1} operations")
+                logger.info(
+                    f"✓ Bot detection triggered after {i+1} operations"
+                )
                 break
 
         except Exception as e:
             logger.info(f"Operation {i+1} failed: {str(e)}")
 
     if not blocked:
-        logger.warning(f"⚠ DISCOVERED: No bot detection after {operations} rapid operations")
+        logger.warning(
+            f"⚠ DISCOVERED: No bot detection after {operations} rapid operations"
+        )
     else:
         logger.info("✓ Automated manipulation detected")
-
 
 
 @pytest.mark.security
@@ -344,16 +379,20 @@ def test_card_number_masking_PCI_001(browser, base_url):
         city="Barcelona",
         card=test_card,
         month="12",
-        year="2028"
+        year="2028",
     )
 
     if success and confirm_text:
         if test_card in confirm_text:
-            logger.critical("✗ CRITICAL: Full card number exposed in confirmation!")
-            pytest.fail("DISCOVERED: PCI-DSS violation - unmasked card number displayed")
+            logger.critical(
+                "✗ CRITICAL: Full card number exposed in confirmation!"
+            )
+            pytest.fail(
+                "DISCOVERED: PCI-DSS violation - unmasked card number displayed"
+            )
 
-        if details['card']:
-            displayed_card = details['card']
+        if details["card"]:
+            displayed_card = details["card"]
             logger.info(f"Card displayed as: {displayed_card}")
 
             if len(displayed_card) == 16 and displayed_card == test_card:
@@ -390,7 +429,7 @@ def test_card_data_in_url_PCI_002(browser, base_url):
         city="Barcelona",
         card=test_card,
         month="12",
-        year="2028"
+        year="2028",
     )
     purchase.click_purchase()
 
@@ -433,20 +472,26 @@ def test_card_data_in_browser_storage_PCI_003(browser, base_url):
         city="Barcelona",
         card=test_card,
         month="12",
-        year="2028"
+        year="2028",
     )
 
     time.sleep(1)
 
-    local_storage = browser.execute_script("return JSON.stringify(localStorage);")
-    session_storage = browser.execute_script("return JSON.stringify(sessionStorage);")
+    local_storage = browser.execute_script(
+        "return JSON.stringify(localStorage);"
+    )
+    session_storage = browser.execute_script(
+        "return JSON.stringify(sessionStorage);"
+    )
 
     logger.info(f"LocalStorage: {local_storage[:100]}...")
     logger.info(f"SessionStorage: {session_storage[:100]}...")
 
     if test_card in local_storage or test_card in session_storage:
         logger.critical("✗ CRITICAL: Card data stored in browser storage!")
-        pytest.fail("DISCOVERED: PCI-DSS critical violation - card in client storage")
+        pytest.fail(
+            "DISCOVERED: PCI-DSS critical violation - card in client storage"
+        )
 
     logger.info("✓ Card data not stored in browser storage")
 
@@ -474,21 +519,29 @@ def test_card_cvv_not_stored_PCI_004(browser, base_url):
     page_source = browser.page_source.lower()
 
     cvv_indicators = ["cvv", "cvc", "security code", "card verification"]
-    cvv_field_found = any(indicator in page_source for indicator in cvv_indicators)
+    cvv_field_found = any(
+        indicator in page_source for indicator in cvv_indicators
+    )
 
     if cvv_field_found:
         logger.info("CVV field detected - checking if it's stored...")
 
-        local_storage = browser.execute_script("return JSON.stringify(localStorage);")
-        session_storage = browser.execute_script("return JSON.stringify(sessionStorage);")
+        local_storage = browser.execute_script(
+            "return JSON.stringify(localStorage);"
+        )
+        session_storage = browser.execute_script(
+            "return JSON.stringify(sessionStorage);"
+        )
 
-        if any(indicator in local_storage.lower() or indicator in session_storage.lower()
-               for indicator in cvv_indicators):
+        if any(
+            indicator in local_storage.lower()
+            or indicator in session_storage.lower()
+            for indicator in cvv_indicators
+        ):
             logger.critical("✗ CRITICAL: CVV data found in browser storage!")
             pytest.fail("DISCOVERED: PCI-DSS critical violation - CVV stored")
 
     logger.info("✓ CVV storage test passed (no CVV field or not stored)")
-
 
 
 @pytest.mark.security
@@ -545,18 +598,24 @@ def test_session_fixation_SESSION_002(browser, base_url):
     """
     browser.get(base_url)
     cookies_before = browser.get_cookies()
-    session_cookie_before = next((c for c in cookies_before if 'session' in c['name'].lower()), None)
+    session_cookie_before = next(
+        (c for c in cookies_before if "session" in c["name"].lower()), None
+    )
 
     login_page = LoginPage(browser)
     login_page.login("testuser123", "testpass")
     time.sleep(2)
 
     cookies_after = browser.get_cookies()
-    session_cookie_after = next((c for c in cookies_after if 'session' in c['name'].lower()), None)
+    session_cookie_after = next(
+        (c for c in cookies_after if "session" in c["name"].lower()), None
+    )
 
     if session_cookie_before and session_cookie_after:
-        if session_cookie_before['value'] == session_cookie_after['value']:
-            logger.warning("⚠ DISCOVERED: Session ID not regenerated after login")
+        if session_cookie_before["value"] == session_cookie_after["value"]:
+            logger.warning(
+                "⚠ DISCOVERED: Session ID not regenerated after login"
+            )
         else:
             logger.info("✓ Session ID regenerated after login")
     else:
@@ -585,13 +644,15 @@ def test_cart_session_hijacking_SESSION_003(browser, base_url):
     logger.info(f"Initial cart: {initial_count} items, ${initial_total}")
 
     try:
-        browser.execute_script("""
+        browser.execute_script(
+            """
             var cartData = localStorage.getItem('cart') || sessionStorage.getItem('cart');
             if (cartData) {
                 // Try to modify cart data
                 console.log('Cart data found:', cartData);
             }
-        """)
+        """
+        )
 
         browser.refresh()
         time.sleep(1)
@@ -611,16 +672,18 @@ def test_cart_session_hijacking_SESSION_003(browser, base_url):
         logger.info(f"Session manipulation blocked: {str(e)}")
 
 
-
 @pytest.mark.security
 @pytest.mark.critical
 @pytest.mark.injection
-@pytest.mark.parametrize("sqli_payload", [
-    "' OR '1'='1' --",
-    "'; DROP TABLE orders--",
-    "1' UNION SELECT NULL,NULL,NULL--",
-    "admin' AND '1'='1",
-])
+@pytest.mark.parametrize(
+    "sqli_payload",
+    [
+        "' OR '1'='1' --",
+        "'; DROP TABLE orders--",
+        "1' UNION SELECT NULL,NULL,NULL--",
+        "admin' AND '1'='1",
+    ],
+)
 def test_advanced_sql_injection_INJ_001(browser, base_url, sqli_payload):
     """
     TC-PURCHASE-INJ-001: Advanced SQL Injection Attacks
@@ -645,7 +708,7 @@ def test_advanced_sql_injection_INJ_001(browser, base_url, sqli_payload):
         city="Barcelona",
         card="1234567890123456",
         month="12",
-        year="2028"
+        year="2028",
     )
     purchase.click_purchase()
 
@@ -654,13 +717,24 @@ def test_advanced_sql_injection_INJ_001(browser, base_url, sqli_payload):
     page_source = browser.page_source.lower()
 
     error_indicators = [
-        "sql syntax", "mysql", "postgresql", "sqlite", "database error",
-        "odbc", "jdbc", "oracle", "syntax error near"
+        "sql syntax",
+        "mysql",
+        "postgresql",
+        "sqlite",
+        "database error",
+        "odbc",
+        "jdbc",
+        "oracle",
+        "syntax error near",
     ]
 
     if is_confirmed:
-        logger.critical(f"✗ CRITICAL: SQL injection may have succeeded: {sqli_payload}")
-        pytest.fail(f"DISCOVERED: SQL injection vulnerability with '{sqli_payload}'")
+        logger.critical(
+            f"✗ CRITICAL: SQL injection may have succeeded: {sqli_payload}"
+        )
+        pytest.fail(
+            f"DISCOVERED: SQL injection vulnerability with '{sqli_payload}'"
+        )
 
     for indicator in error_indicators:
         if indicator in page_source:
@@ -673,12 +747,15 @@ def test_advanced_sql_injection_INJ_001(browser, base_url, sqli_payload):
 @pytest.mark.security
 @pytest.mark.critical
 @pytest.mark.injection
-@pytest.mark.parametrize("xss_vector", [
-    "<img src=x onerror=alert(document.cookie)>",
-    "<svg/onload=alert('XSS')>",
-    "javascript:alert(document.domain)",
-    "<iframe src='javascript:alert(1)'>",
-])
+@pytest.mark.parametrize(
+    "xss_vector",
+    [
+        "<img src=x onerror=alert(document.cookie)>",
+        "<svg/onload=alert('XSS')>",
+        "javascript:alert(document.domain)",
+        "<iframe src='javascript:alert(1)'>",
+    ],
+)
 def test_advanced_xss_vectors_INJ_002(browser, base_url, xss_vector):
     """
     TC-PURCHASE-INJ-002: Advanced XSS Attack Vectors
@@ -703,7 +780,7 @@ def test_advanced_xss_vectors_INJ_002(browser, base_url, xss_vector):
         city="Barcelona",
         card="1234567890123456",
         month="12",
-        year="2028"
+        year="2028",
     )
     purchase.click_purchase()
 
@@ -715,7 +792,9 @@ def test_advanced_xss_vectors_INJ_002(browser, base_url, xss_vector):
 
         if xss_vector in page_source:
             logger.critical(f"✗ CRITICAL: XSS payload reflected: {xss_vector}")
-            pytest.fail(f"DISCOVERED: XSS vulnerability - payload reflected unescaped")
+            pytest.fail(
+                f"DISCOVERED: XSS vulnerability - payload reflected unescaped"
+            )
 
         try:
             alert = browser.switch_to.alert
@@ -740,11 +819,7 @@ def test_ldap_injection_INJ_003(browser, base_url):
 
     DISCOVER: LDAP injection vulnerabilities in form fields
     """
-    ldap_payloads = [
-        "*)(uid=*))(|(uid=*",
-        "admin)(&(password=*))",
-        "*))%00"
-    ]
+    ldap_payloads = ["*)(uid=*))(|(uid=*", "admin)(&(password=*))", "*))%00"]
 
     browser.get(base_url)
     cart = CartPage(browser)
@@ -764,7 +839,7 @@ def test_ldap_injection_INJ_003(browser, base_url):
             city="Barcelona",
             card="1234567890123456",
             month="12",
-            year="2028"
+            year="2028",
         )
         purchase.click_purchase()
 
@@ -779,7 +854,9 @@ def test_ldap_injection_INJ_003(browser, base_url):
                 logger.critical(f"✗ LDAP error disclosure: {error}")
 
     if violations:
-        pytest.fail(f"DISCOVERED: LDAP injection vulnerabilities: {violations}")
+        pytest.fail(
+            f"DISCOVERED: LDAP injection vulnerabilities: {violations}"
+        )
 
     logger.info("✓ LDAP injection prevented")
 
@@ -795,12 +872,7 @@ def test_command_injection_INJ_004(browser, base_url):
 
     DISCOVER: Command injection in form processing
     """
-    command_payloads = [
-        "; ls -la",
-        "| whoami",
-        "`id`",
-        "$(cat /etc/passwd)"
-    ]
+    command_payloads = ["; ls -la", "| whoami", "`id`", "$(cat /etc/passwd)"]
 
     browser.get(base_url)
     cart = CartPage(browser)
@@ -820,7 +892,7 @@ def test_command_injection_INJ_004(browser, base_url):
             city="Barcelona",
             card="1234567890123456",
             month="12",
-            year="2028"
+            year="2028",
         )
         purchase.click_purchase()
 
@@ -835,10 +907,11 @@ def test_command_injection_INJ_004(browser, base_url):
                 logger.critical(f"✗ Command injection artifact: {indicator}")
 
     if violations:
-        pytest.fail(f"DISCOVERED: Command injection vulnerabilities: {violations}")
+        pytest.fail(
+            f"DISCOVERED: Command injection vulnerabilities: {violations}"
+        )
 
     logger.info("✓ Command injection prevented")
-
 
 
 @pytest.mark.security
@@ -863,7 +936,14 @@ def test_keyboard_navigation_WCAG_001(browser, base_url):
 
     try:
         filled_values = purchase.navigate_form_with_tab(
-            fill_data=["QA Tester", "Spain", "Barcelona", "1234567890123456", "12", "2028"]
+            fill_data=[
+                "QA Tester",
+                "Spain",
+                "Barcelona",
+                "1234567890123456",
+                "12",
+                "2028",
+            ]
         )
 
         logger.info(f"Keyboard navigation filled: {filled_values}")
@@ -872,7 +952,9 @@ def test_keyboard_navigation_WCAG_001(browser, base_url):
             logger.info("✓ Keyboard navigation fully functional")
         else:
             empty_fields = [k for k, v in filled_values.items() if not v]
-            logger.warning(f"⚠ ACCESSIBILITY ISSUE: Fields not keyboard-accessible: {empty_fields}")
+            logger.warning(
+                f"⚠ ACCESSIBILITY ISSUE: Fields not keyboard-accessible: {empty_fields}"
+            )
 
     except Exception as e:
         logger.warning(f"⚠ Keyboard navigation issue: {str(e)}")
@@ -898,14 +980,13 @@ def test_screen_reader_labels_WCAG_002(browser, base_url):
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
-    form_fields = [
-        "name", "country", "city", "card", "month", "year"
-    ]
+    form_fields = ["name", "country", "city", "card", "month", "year"]
 
     missing_labels = []
 
     for field_id in form_fields:
-        label_check = browser.execute_script(f"""
+        label_check = browser.execute_script(
+            f"""
             var field = document.getElementById('{field_id}');
             if (!field) return false;
 
@@ -915,13 +996,16 @@ def test_screen_reader_labels_WCAG_002(browser, base_url):
             var ariaLabelledBy = field.getAttribute('aria-labelledby');
 
             return !!(label || ariaLabel || ariaLabelledBy);
-        """)
+        """
+        )
 
         if not label_check:
             missing_labels.append(field_id)
 
     if missing_labels:
-        logger.warning(f"⚠ ACCESSIBILITY ISSUE: Missing labels for {missing_labels}")
+        logger.warning(
+            f"⚠ ACCESSIBILITY ISSUE: Missing labels for {missing_labels}"
+        )
     else:
         logger.info("✓ All form fields properly labeled for screen readers")
 
@@ -946,7 +1030,8 @@ def test_color_contrast_WCAG_003(browser, base_url):
     purchase = PurchasePage(browser)
     purchase.wait_for_order_modal()
 
-    purchase_button_styles = browser.execute_script("""
+    purchase_button_styles = browser.execute_script(
+        """
         var button = document.querySelector('button:contains("Purchase")') ||
                      document.evaluate("//button[text()='Purchase']", document, null,
                                       XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
@@ -958,11 +1043,14 @@ def test_color_contrast_WCAG_003(browser, base_url):
             backgroundColor: styles.backgroundColor,
             fontSize: styles.fontSize
         };
-    """)
+    """
+    )
 
     if purchase_button_styles:
         logger.info(f"Purchase button styles: {purchase_button_styles}")
-        logger.info("✓ Color contrast check completed (manual review recommended)")
+        logger.info(
+            "✓ Color contrast check completed (manual review recommended)"
+        )
     else:
         logger.warning("⚠ Could not retrieve button styles for contrast check")
 
@@ -996,7 +1084,8 @@ def test_focus_indicators_WCAG_004(browser, base_url):
     for i in range(6):  # 6 form fields
         time.sleep(0.3)
 
-        focus_check = browser.execute_script("""
+        focus_check = browser.execute_script(
+            """
             var activeEl = document.activeElement;
             var styles = window.getComputedStyle(activeEl);
 
@@ -1011,14 +1100,21 @@ def test_focus_indicators_WCAG_004(browser, base_url):
                 tagName: activeEl.tagName,
                 id: activeEl.id
             };
-        """)
+        """
+        )
 
-        if focus_check and (focus_check['hasOutline'] or focus_check['hasBorder']):
-            fields_with_visible_focus.append(focus_check['id'])
+        if focus_check and (
+            focus_check["hasOutline"] or focus_check["hasBorder"]
+        ):
+            fields_with_visible_focus.append(focus_check["id"])
 
         actions.send_keys(Keys.TAB).perform()
 
-    logger.info(f"✓ Visible focus detected on {len(fields_with_visible_focus)} fields")
+    logger.info(
+        f"✓ Visible focus detected on {len(fields_with_visible_focus)} fields"
+    )
 
     if len(fields_with_visible_focus) < 6:
-        logger.warning("⚠ ACCESSIBILITY ISSUE: Some fields lack visible focus indicators")
+        logger.warning(
+            "⚠ ACCESSIBILITY ISSUE: Some fields lack visible focus indicators"
+        )

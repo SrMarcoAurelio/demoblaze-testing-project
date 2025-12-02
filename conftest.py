@@ -6,11 +6,12 @@ Version: 6.0
 Centralized pytest configuration using config.py for all settings.
 """
 
-import pytest
-import os
 import datetime
 import logging
+import os
 import time
+
+import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager

@@ -23,27 +23,31 @@ Philosophy: DISCOVER (EXECUTE → OBSERVE → DECIDE)
 All tests perform real exploitation attempts to discover actual vulnerabilities.
 """
 
-import pytest
 import logging
-import time
 import re
+import time
+
+import pytest
+
 from pages.product_page import ProductPage
 
 logger = logging.getLogger(__name__)
 
 
-
 @pytest.mark.security
 @pytest.mark.critical
 @pytest.mark.injection
-@pytest.mark.parametrize("sql_payload", [
-    "1' OR '1'='1",
-    "1' OR '1'='1' --",
-    "1' OR '1'='1' /*",
-    "' OR 1=1--",
-    "admin'--",
-    "' UNION SELECT NULL--",
-])
+@pytest.mark.parametrize(
+    "sql_payload",
+    [
+        "1' OR '1'='1",
+        "1' OR '1'='1' --",
+        "1' OR '1'='1' /*",
+        "' OR 1=1--",
+        "admin'--",
+        "' UNION SELECT NULL--",
+    ],
+)
 def test_sql_injection_product_id_INJ_001(browser, base_url, sql_payload):
     """
     TC-PRODUCT-INJ-001: SQL Injection in Product ID Parameter
@@ -62,12 +66,20 @@ def test_sql_injection_product_id_INJ_001(browser, base_url, sql_payload):
     products_listed = page_source.count("hrefch")  # Product link class
 
     if has_error:
-        logger.critical(f"✗ CRITICAL: SQL error disclosure detected: {error_indicators}")
-        pytest.fail(f"DISCOVERED: SQL error disclosure with payload '{sql_payload}': {error_indicators}")
+        logger.critical(
+            f"✗ CRITICAL: SQL error disclosure detected: {error_indicators}"
+        )
+        pytest.fail(
+            f"DISCOVERED: SQL error disclosure with payload '{sql_payload}': {error_indicators}"
+        )
 
     if products_listed > 10:
-        logger.critical(f"✗ CRITICAL: Possible SQL injection - multiple products returned")
-        pytest.fail(f"DISCOVERED: SQL injection may have bypassed product ID filter")
+        logger.critical(
+            f"✗ CRITICAL: Possible SQL injection - multiple products returned"
+        )
+        pytest.fail(
+            f"DISCOVERED: SQL injection may have bypassed product ID filter"
+        )
 
     logger.info(f"✓ SQL injection prevented: {sql_payload}")
 
@@ -92,29 +104,37 @@ def test_sql_injection_error_disclosure_INJ_002(browser, base_url):
     for payload in error_payloads:
         product_page.navigate_to_product_by_url(payload)
 
-        has_error, error_indicators = product_page.check_for_sql_error_indicators()
+        has_error, error_indicators = (
+            product_page.check_for_sql_error_indicators()
+        )
 
         if has_error:
             violations.append((payload, error_indicators))
-            logger.critical(f"✗ SQL error disclosed with payload '{payload}': {error_indicators}")
+            logger.critical(
+                f"✗ SQL error disclosed with payload '{payload}': {error_indicators}"
+            )
 
     if violations:
-        pytest.fail(f"DISCOVERED: SQL error disclosure in {len(violations)} cases: {violations}")
+        pytest.fail(
+            f"DISCOVERED: SQL error disclosure in {len(violations)} cases: {violations}"
+        )
 
     logger.info("✓ No SQL error disclosure detected")
-
 
 
 @pytest.mark.security
 @pytest.mark.critical
 @pytest.mark.injection
-@pytest.mark.parametrize("xss_payload", [
-    "<script>alert('XSS')</script>",
-    "<img src=x onerror=alert('XSS')>",
-    "<svg/onload=alert('XSS')>",
-    "javascript:alert('XSS')",
-    "'><script>alert(String.fromCharCode(88,83,83))</script>",
-])
+@pytest.mark.parametrize(
+    "xss_payload",
+    [
+        "<script>alert('XSS')</script>",
+        "<img src=x onerror=alert('XSS')>",
+        "<svg/onload=alert('XSS')>",
+        "javascript:alert('XSS')",
+        "'><script>alert(String.fromCharCode(88,83,83))</script>",
+    ],
+)
 def test_xss_product_id_parameter_INJ_003(browser, base_url, xss_payload):
     """
     TC-PRODUCT-INJ-003: XSS in Product ID Parameter
@@ -131,7 +151,9 @@ def test_xss_product_id_parameter_INJ_003(browser, base_url, xss_payload):
 
     if is_vulnerable:
         logger.critical(f"✗ CRITICAL: XSS vulnerability detected!")
-        pytest.fail(f"DISCOVERED: XSS vulnerability with payload '{xss_payload}': {evidence}")
+        pytest.fail(
+            f"DISCOVERED: XSS vulnerability with payload '{xss_payload}': {evidence}"
+        )
 
     logger.info(f"✓ XSS prevented: {xss_payload}")
 
@@ -150,28 +172,33 @@ def test_xss_product_description_stored_INJ_004(browser, base_url):
     """
     product_page = ProductPage(browser)
     xss_patterns = [
-        r'<script>',
-        r'<img\s+.*onerror',
-        r'javascript:',
-        r'<svg.*onload'
+        r"<script>",
+        r"<img\s+.*onerror",
+        r"javascript:",
+        r"<svg.*onload",
     ]
 
     violations = []
 
-    for index, product_name, details in product_page.iterate_all_products(max_products=5):
-        description = details['description']
+    for index, product_name, details in product_page.iterate_all_products(
+        max_products=5
+    ):
+        description = details["description"]
 
         if description:
             for pattern in xss_patterns:
                 if re.search(pattern, description, re.IGNORECASE):
                     violations.append(f"Product {index}: {product_name}")
-                    logger.critical(f"✗ Potential stored XSS in product {index}: {pattern}")
+                    logger.critical(
+                        f"✗ Potential stored XSS in product {index}: {pattern}"
+                    )
 
     if violations:
-        pytest.fail(f"DISCOVERED: Potential stored XSS in {len(violations)} products")
+        pytest.fail(
+            f"DISCOVERED: Potential stored XSS in {len(violations)} products"
+        )
 
     logger.info("✓ No stored XSS detected in product descriptions")
-
 
 
 @pytest.mark.security
@@ -197,7 +224,9 @@ def test_idor_product_enumeration_IDOR_001(browser, base_url):
         if product_name:
             accessible_products.append((product_id, product_name))
 
-    logger.info(f"✓ Product enumeration check: {len(accessible_products)} products accessible")
+    logger.info(
+        f"✓ Product enumeration check: {len(accessible_products)} products accessible"
+    )
     logger.info(f"  Note: Product enumeration is expected for public catalogs")
 
 
@@ -221,15 +250,19 @@ def test_idor_invalid_product_id_IDOR_002(browser, base_url):
         product_page.navigate_to_product_by_url(invalid_id)
 
         page_source = browser.page_source.lower()
-        error_indicators = ['error', 'exception', 'stack trace', 'warning']
+        error_indicators = ["error", "exception", "stack trace", "warning"]
 
         for indicator in error_indicators:
             if indicator in page_source:
                 violations.append(f"ID {invalid_id}: {indicator}")
-                logger.warning(f"⚠ Error disclosure for invalid ID {invalid_id}: {indicator}")
+                logger.warning(
+                    f"⚠ Error disclosure for invalid ID {invalid_id}: {indicator}"
+                )
 
     if violations:
-        logger.warning(f"⚠ DISCOVERED: Error disclosure in {len(violations)} cases")
+        logger.warning(
+            f"⚠ DISCOVERED: Error disclosure in {len(violations)} cases"
+        )
 
     logger.info("✓ Invalid product ID handling checked")
 
@@ -257,13 +290,16 @@ def test_idor_negative_product_id_IDOR_003(browser, base_url):
 
         if product_name:
             unexpected_access.append(f"ID {negative_id}: {product_name}")
-            logger.warning(f"⚠ Negative ID accessible: {negative_id} -> {product_name}")
+            logger.warning(
+                f"⚠ Negative ID accessible: {negative_id} -> {product_name}"
+            )
 
     if unexpected_access:
-        logger.warning(f"⚠ DISCOVERED: Negative IDs accessible: {unexpected_access}")
+        logger.warning(
+            f"⚠ DISCOVERED: Negative IDs accessible: {unexpected_access}"
+        )
 
     logger.info("✓ Negative product ID handling checked")
-
 
 
 @pytest.mark.security
@@ -284,7 +320,9 @@ def test_price_tampering_url_parameter_PRICE_001(browser, base_url):
     legitimate_price = product_page.get_product_price_value()
     product_id = product_page.get_current_product_id_from_url()
 
-    logger.info(f"Legitimate price: ${legitimate_price}, Product ID: {product_id}")
+    logger.info(
+        f"Legitimate price: ${legitimate_price}, Product ID: {product_id}"
+    )
 
     manipulated_url = f"{base_url}prod.html?idp_={product_id}&price=1"
     browser.get(manipulated_url)
@@ -294,7 +332,9 @@ def test_price_tampering_url_parameter_PRICE_001(browser, base_url):
 
     if manipulated_price and manipulated_price != legitimate_price:
         logger.critical(f"✗ CRITICAL: Price manipulation succeeded!")
-        pytest.fail(f"DISCOVERED: Price changed from ${legitimate_price} to ${manipulated_price}")
+        pytest.fail(
+            f"DISCOVERED: Price changed from ${legitimate_price} to ${manipulated_price}"
+        )
 
     logger.info("✓ Price tampering via URL prevented")
 
@@ -317,21 +357,29 @@ def test_price_consistency_across_views_PRICE_002(browser, base_url):
     success, product_name = product_page.navigate_to_first_product()
     detail_price = product_page.get_product_price_value()
 
-    logger.info(f"✓ Price consistency check: Product detail price: ${detail_price}")
-    logger.info("  Note: Catalog view prices would require additional comparison logic")
-
+    logger.info(
+        f"✓ Price consistency check: Product detail price: ${detail_price}"
+    )
+    logger.info(
+        "  Note: Catalog view prices would require additional comparison logic"
+    )
 
 
 @pytest.mark.security
 @pytest.mark.high
 @pytest.mark.injection
-@pytest.mark.parametrize("traversal_payload", [
-    "../",
-    "../../",
-    "../../../etc/passwd",
-    "..\\..\\windows\\system32",
-])
-def test_path_traversal_product_id_TRAV_001(browser, base_url, traversal_payload):
+@pytest.mark.parametrize(
+    "traversal_payload",
+    [
+        "../",
+        "../../",
+        "../../../etc/passwd",
+        "..\\..\\windows\\system32",
+    ],
+)
+def test_path_traversal_product_id_TRAV_001(
+    browser, base_url, traversal_payload
+):
     """
     TC-PRODUCT-TRAV-001: Path Traversal in Product ID
     CWE: CWE-22 (Path Traversal)
@@ -346,11 +394,11 @@ def test_path_traversal_product_id_TRAV_001(browser, base_url, traversal_payload
     page_source = browser.page_source.lower()
 
     disclosure_indicators = [
-        'root:',  # Unix passwd file
-        '[boot loader]',  # Windows ini files
-        'file not found',
-        'directory',
-        'access denied'
+        "root:",  # Unix passwd file
+        "[boot loader]",  # Windows ini files
+        "file not found",
+        "directory",
+        "access denied",
     ]
 
     violations = []
@@ -364,7 +412,6 @@ def test_path_traversal_product_id_TRAV_001(browser, base_url, traversal_payload
         pytest.fail(f"DISCOVERED: Path traversal vulnerability - {violations}")
 
     logger.info(f"✓ Path traversal prevented: {traversal_payload}")
-
 
 
 @pytest.mark.security
@@ -390,8 +437,9 @@ def test_session_fixation_product_access_SESS_001(browser, base_url):
     logger.info(f"Cookies after: {len(cookies_after)}")
 
     logger.info("✓ Session fixation check completed")
-    logger.info("  Note: Full session security testing requires authentication flow")
-
+    logger.info(
+        "  Note: Full session security testing requires authentication flow"
+    )
 
 
 @pytest.mark.security
@@ -411,12 +459,7 @@ def test_csrf_add_to_cart_CSRF_001(browser, base_url):
 
     page_source = browser.page_source
 
-    csrf_indicators = [
-        'csrf',
-        'token',
-        '_token',
-        'authenticity_token'
-    ]
+    csrf_indicators = ["csrf", "token", "_token", "authenticity_token"]
 
     csrf_tokens_found = []
 
@@ -431,7 +474,6 @@ def test_csrf_add_to_cart_CSRF_001(browser, base_url):
         logger.info("  Note: CSRF tokens may be in headers or cookies")
 
     logger.info("✓ CSRF check completed")
-
 
 
 @pytest.mark.security
@@ -455,7 +497,6 @@ def test_security_headers_product_page_HEAD_001(browser, base_url):
     logger.info("    - X-Content-Type-Options: nosniff")
     logger.info("    - Content-Security-Policy")
     logger.info("    - Strict-Transport-Security")
-
 
 
 @pytest.mark.security

@@ -12,12 +12,15 @@ Test Coverage:
 Philosophy: DISCOVER (EXECUTE → OBSERVE → DECIDE)
 """
 
-import pytest
 import logging
 import time
+
+import pytest
+
 from pages.product_page import ProductPage
 
 logger = logging.getLogger(__name__)
+
 
 @pytest.mark.functional
 @pytest.mark.critical
@@ -31,6 +34,7 @@ def test_navigate_to_product_from_catalog_FUNC_001(browser, base_url):
     assert product_name, "Product name not captured"
     logger.info(f"✓ Successfully navigated to product: {product_name}")
 
+
 @pytest.mark.functional
 @pytest.mark.critical
 def test_product_name_displays_FUNC_002(browser, base_url):
@@ -42,6 +46,7 @@ def test_product_name_displays_FUNC_002(browser, base_url):
     assert product_name, "Product name not displayed"
     assert len(product_name) > 0, "Product name is empty"
     logger.info(f"✓ Product name displayed: {product_name}")
+
 
 @pytest.mark.functional
 @pytest.mark.critical
@@ -59,6 +64,7 @@ def test_product_price_displays_FUNC_003(browser, base_url):
     assert price_value > 0, f"Price should be positive: {price_value}"
     logger.info(f"✓ Product price displayed: {product_price}")
 
+
 @pytest.mark.functional
 @pytest.mark.high
 def test_product_description_displays_FUNC_004(browser, base_url):
@@ -71,6 +77,7 @@ def test_product_description_displays_FUNC_004(browser, base_url):
     assert len(description) > 10, f"Description too short"
     logger.info(f"✓ Product description displayed: {len(description)} chars")
 
+
 @pytest.mark.functional
 @pytest.mark.high
 def test_product_image_displays_FUNC_005(browser, base_url):
@@ -80,8 +87,9 @@ def test_product_image_displays_FUNC_005(browser, base_url):
 
     image_src = product_page.get_product_image_src()
     assert image_src, "Product image not found"
-    assert image_src.startswith('http'), f"Invalid image URL"
+    assert image_src.startswith("http"), f"Invalid image URL"
     logger.info(f"✓ Product image displayed")
+
 
 @pytest.mark.functional
 @pytest.mark.critical
@@ -93,6 +101,7 @@ def test_add_to_cart_button_present_FUNC_006(browser, base_url):
     is_visible = product_page.is_add_to_cart_visible()
     assert is_visible, "Add to Cart button not visible"
     logger.info("✓ Add to Cart button is present")
+
 
 @pytest.mark.functional
 @pytest.mark.critical
@@ -106,6 +115,7 @@ def test_add_to_cart_from_product_page_FUNC_007(browser, base_url):
     assert alert_text, "No alert received"
     logger.info(f"✓ Product added to cart: {product_name}")
 
+
 @pytest.mark.functional
 @pytest.mark.high
 def test_back_to_catalog_navigation_FUNC_008(browser, base_url):
@@ -118,10 +128,11 @@ def test_back_to_catalog_navigation_FUNC_008(browser, base_url):
 
     product_page.go_home()
     time.sleep(1)
-    
+
     current_url = browser.current_url
     assert current_url == base_url or "index.html" in current_url
     logger.info("✓ Successfully navigated back to catalog")
+
 
 @pytest.mark.functional
 @pytest.mark.medium
@@ -136,9 +147,10 @@ def test_browser_back_button_FUNC_009(browser, base_url):
 
     product_page.go_back_browser()
     current_url = browser.current_url
-    
+
     assert current_url != product_url
     logger.info("✓ Browser back button works correctly")
+
 
 @pytest.mark.functional
 @pytest.mark.medium

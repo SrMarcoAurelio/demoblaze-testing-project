@@ -9,8 +9,10 @@ Universal and reusable across any web application with modal-based registration.
 """
 
 from typing import Optional
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+
 from pages.base_page import BasePage
 
 

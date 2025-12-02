@@ -8,3 +8,6 @@ allure-pytest==2.13.2
 flake8==7.0.0
 mypy==1.18.2
 types-requests==2.32.4.20250913
+black==25.11.0
+isort==5.13.2
+pre-commit==4.5.0

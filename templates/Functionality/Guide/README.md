@@ -1,7 +1,7 @@
 # FUNCTIONAL TEMPLATE PACKAGE - COMPLETE GUIDE
 
-**Author:** Arévalo, Marc  
-**Date:** November 2025  
+**Author:** Arévalo, Marc
+**Date:** November 2025
 **Version:** 2.0 Universal Edition
 
 ---
@@ -11,7 +11,7 @@
 I've created a **comprehensive, universal functional testing template** split into 2 files + guide:
 
 ### File 1: TEMPLATE_functional_business_rules_v2.md (Main Template)
-**Size:** 2,500+ lines  
+**Size:** 2,500+ lines
 **Sections:** 1-17
 
 **Contains:**
@@ -34,7 +34,7 @@ I've created a **comprehensive, universal functional testing template** split in
 17. ✅ **Testing Tools & Libraries** - Required tools
 
 ### File 2: TEMPLATE_functional_PART2.md (Critical Additions)
-**Size:** 1,200+ lines  
+**Size:** 1,200+ lines
 **Sections:** 18-20
 
 **Contains:**
@@ -42,7 +42,7 @@ I've created a **comprehensive, universal functional testing template** split in
     - Login module (functional + business rules)
     - Payment module (functional only)
     - Cart module (complete suite)
-    
+
 19. ✅ **Common Patterns by Module** - 6 module types with code:
     - Login/Authentication (6 functional + 12 business rules examples)
     - Payment/Checkout (8 functional + 15 business rules examples)
@@ -62,7 +62,7 @@ I've created a **comprehensive, universal functional testing template** split in
 
 ### The Golden Rule
 
-> **Tests DISCOVER behavior by EXECUTING actions and OBSERVING results.**  
+> **Tests DISCOVER behavior by EXECUTING actions and OBSERVING results.**
 > **Tests NEVER ASSUME how the application will behave.**
 
 ### Two Types of Tests
@@ -73,10 +73,10 @@ def test_valid_operation():
     """Discovers if feature works with valid inputs"""
     # EXECUTE
     submit_form(valid_data)
-    
+
     # OBSERVE
     result = check_success()
-    
+
     # DECIDE
     if result.success:
         assert True  # DISCOVERED: Works
@@ -88,15 +88,15 @@ def test_valid_operation():
 ```python
 def test_password_policy():
     """NIST 800-63B: Minimum 8 characters
-    
+
     Discovers if system enforces password policy.
     """
     # EXECUTE
     signup("user", "123")
-    
+
     # OBSERVE
     response = get_response()
-    
+
     # DECIDE (based on NIST standard)
     if password_rejected():
         assert True  # DISCOVERED: Complies
@@ -151,13 +151,13 @@ def test_password_policy():
 
 ### Works Across Any Domain:
 
-✅ **E-commerce** (DemoBlaze, Amazon, Shopify)  
-✅ **Banking** (Online banking, fintech apps)  
-✅ **Healthcare** (Patient portals, EHR systems)  
-✅ **Social Networks** (Twitter/LinkedIn style)  
-✅ **SaaS** (CRM, ERP, dashboards)  
-✅ **Government** (Public services, portals)  
-✅ **Education** (LMS, student systems)  
+✅ **E-commerce** (DemoBlaze, Amazon, Shopify)
+✅ **Banking** (Online banking, fintech apps)
+✅ **Healthcare** (Patient portals, EHR systems)
+✅ **Social Networks** (Twitter/LinkedIn style)
+✅ **SaaS** (CRM, ERP, dashboards)
+✅ **Government** (Public services, portals)
+✅ **Education** (LMS, student systems)
 ✅ **ANY web application**
 
 ### How It's Universal:
@@ -167,7 +167,7 @@ def test_password_policy():
    # Change these for different sites:
    BASE_URL = "..."
    LOCATORS = {...}
-   
+
    # Keep this logic (works everywhere):
    def test_feature():
        execute_action()
@@ -323,7 +323,7 @@ When I generate code using this template:
    ```python
    # Functional: "Does it work?"
    @pytest.mark.functional
-   
+
    # Business Rules: "Does it meet standards?"
    @pytest.mark.business_rules
    ```
@@ -361,7 +361,7 @@ Distribution:
   - Happy path validation
   - Core feature verification
   - Integration flows
-  
+
 - Business Rules Tests: 60-70% (10-15 tests)
   - Input validation standards
   - Security requirements

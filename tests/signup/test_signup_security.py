@@ -34,27 +34,33 @@ pytest tests_new/signup/test_signup_security.py -k "sql_injection" -v
 Total Tests: 13 functions (~25+ executions with parametrization)
 """
 
-import pytest
-import time
 import logging
-import requests
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
+import pytest
+import requests
+
 from pages.signup_page import SignupPage
 
 # Logging is already configured in conftest.py
 # No need for duplicate logging.basicConfig() here
 
+
 @pytest.mark.security
 @pytest.mark.critical
 @pytest.mark.injection
-@pytest.mark.parametrize("sql_payload", [
-    "' OR '1'='1",
-    "admin'--",
-    "' OR '1'='1' --",
-    "') OR ('1'='1",
-    "' OR 1=1--",
-    "admin' OR '1'='1' /*"
-])
+@pytest.mark.parametrize(
+    "sql_payload",
+    [
+        "' OR '1'='1",
+        "admin'--",
+        "' OR '1'='1' --",
+        "') OR ('1'='1",
+        "' OR 1=1--",
+        "admin' OR '1'='1' /*",
+    ],
+)
 def test_sql_injection_username_field_SEC_001(browser, base_url, sql_payload):
     """
     TC-SIGNUP-SEC-001: SQL Injection in Username Field
@@ -67,7 +73,9 @@ def test_sql_injection_username_field_SEC_001(browser, base_url, sql_payload):
     DISCOVER: Tests if signup username field is vulnerable to SQL injection.
     """
     logging.info("=" * 80)
-    logging.info(f"TC-SIGNUP-SEC-001: Testing SQL injection with payload: {sql_payload}")
+    logging.info(
+        f"TC-SIGNUP-SEC-001: Testing SQL injection with payload: {sql_payload}"
+    )
 
     browser.get(base_url)
     signup_page = SignupPage(browser)
@@ -85,14 +93,27 @@ def test_sql_injection_username_field_SEC_001(browser, base_url, sql_payload):
         logging.critical("CWE-89: SQL Injection")
         logging.critical("CVSS Score: 9.8 (CRITICAL)")
         logging.critical("Impact: Complete database compromise possible")
-        logging.critical("Evidence: Account creation succeeded with SQL payload")
+        logging.critical(
+            "Evidence: Account creation succeeded with SQL payload"
+        )
         logging.critical("=" * 80)
 
-        pytest.fail(f"DISCOVERED: SQL Injection vulnerability with payload '{sql_payload}'")
+        pytest.fail(
+            f"DISCOVERED: SQL Injection vulnerability with payload '{sql_payload}'"
+        )
 
     page_source = browser.page_source.lower()
-    error_indicators = ["sql syntax", "mysql", "postgresql", "oracle", "sqlite",
-                       "syntax error", "odbc", "jdbc", "error in your sql"]
+    error_indicators = [
+        "sql syntax",
+        "mysql",
+        "postgresql",
+        "oracle",
+        "sqlite",
+        "syntax error",
+        "odbc",
+        "jdbc",
+        "error in your sql",
+    ]
 
     for indicator in error_indicators:
         if indicator in page_source:
@@ -104,7 +125,9 @@ def test_sql_injection_username_field_SEC_001(browser, base_url, sql_payload):
             logging.error("Impact: Database structure disclosure")
             logging.error("=" * 80)
 
-            pytest.fail(f"DISCOVERED: SQL error disclosure with indicator '{indicator}'")
+            pytest.fail(
+                f"DISCOVERED: SQL error disclosure with indicator '{indicator}'"
+            )
 
     logging.info(f"✓ SQL payload '{sql_payload}' handled safely")
     assert True
@@ -113,11 +136,9 @@ def test_sql_injection_username_field_SEC_001(browser, base_url, sql_payload):
 @pytest.mark.security
 @pytest.mark.critical
 @pytest.mark.injection
-@pytest.mark.parametrize("sql_payload", [
-    "' OR '1'='1",
-    "' OR 1=1--",
-    "') OR ('1'='1"
-])
+@pytest.mark.parametrize(
+    "sql_payload", ["' OR '1'='1", "' OR 1=1--", "') OR ('1'='1"]
+)
 def test_sql_injection_password_field_SEC_002(browser, base_url, sql_payload):
     """
     TC-SIGNUP-SEC-002: SQL Injection in Password Field
@@ -129,7 +150,9 @@ def test_sql_injection_password_field_SEC_002(browser, base_url, sql_payload):
     DISCOVER: Tests if signup password field is vulnerable to SQL injection.
     """
     logging.info("=" * 80)
-    logging.info(f"TC-SIGNUP-SEC-002: Testing SQL injection in password: {sql_payload}")
+    logging.info(
+        f"TC-SIGNUP-SEC-002: Testing SQL injection in password: {sql_payload}"
+    )
 
     browser.get(base_url)
     signup_page = SignupPage(browser)
@@ -153,7 +176,9 @@ def test_sql_injection_password_field_SEC_002(browser, base_url, sql_payload):
             logging.critical("SQL INJECTION IN PASSWORD FIELD")
             logging.critical(f"Payload stored: {sql_payload}")
             logging.critical("CVSS Score: 9.8 (CRITICAL)")
-            logging.critical("Impact: SQL injection possible through password field")
+            logging.critical(
+                "Impact: SQL injection possible through password field"
+            )
             logging.critical("=" * 80)
 
             signup_page.logout()
@@ -163,17 +188,19 @@ def test_sql_injection_password_field_SEC_002(browser, base_url, sql_payload):
     assert True
 
 
-
 @pytest.mark.security
 @pytest.mark.critical
 @pytest.mark.xss
-@pytest.mark.parametrize("xss_payload", [
-    "<script>alert('XSS')</script>",
-    "javascript:alert('XSS')",
-    "<img src=x onerror=alert('XSS')>",
-    "<svg/onload=alert('XSS')>",
-    "'-alert('XSS')-'"
-])
+@pytest.mark.parametrize(
+    "xss_payload",
+    [
+        "<script>alert('XSS')</script>",
+        "javascript:alert('XSS')",
+        "<img src=x onerror=alert('XSS')>",
+        "<svg/onload=alert('XSS')>",
+        "'-alert('XSS')-'",
+    ],
+)
 def test_xss_username_field_SEC_003(browser, base_url, xss_payload):
     """
     TC-SIGNUP-SEC-003: Cross-Site Scripting (XSS) in Username
@@ -209,11 +236,15 @@ def test_xss_username_field_SEC_003(browser, base_url, xss_payload):
             logging.error("Standard: OWASP ASVS v5.0 Section 5.3.3")
             logging.error("CWE-79: Cross-site Scripting")
             logging.error("CVSS Score: 7.1 (HIGH)")
-            logging.error("Impact: Session hijacking, cookie theft, defacement")
+            logging.error(
+                "Impact: Session hijacking, cookie theft, defacement"
+            )
             logging.error("Evidence: XSS payload reflected unescaped in page")
             logging.error("=" * 80)
 
-            pytest.fail(f"DISCOVERED: XSS vulnerability with payload '{xss_payload}'")
+            pytest.fail(
+                f"DISCOVERED: XSS vulnerability with payload '{xss_payload}'"
+            )
 
     logging.info(f"✓ XSS payload '{xss_payload}' handled safely")
     assert True
@@ -252,9 +283,9 @@ def test_stored_xss_via_username_SEC_004(browser, base_url):
         time.sleep(2)
 
         try:
-            from selenium.webdriver.support.ui import WebDriverWait
-            from selenium.webdriver.support import expected_conditions as EC
             from selenium.common.exceptions import TimeoutException
+            from selenium.webdriver.support import expected_conditions as EC
+            from selenium.webdriver.support.ui import WebDriverWait
 
             WebDriverWait(browser, 3).until(EC.alert_is_present())
             alert = browser.switch_to.alert
@@ -266,7 +297,9 @@ def test_stored_xss_via_username_SEC_004(browser, base_url):
                 logging.critical("STORED XSS VULNERABILITY DISCOVERED")
                 logging.critical("Payload executed on subsequent page load")
                 logging.critical("CVSS Score: 8.7 (HIGH)")
-                logging.critical("Impact: Persistent XSS affects all users viewing profile")
+                logging.critical(
+                    "Impact: Persistent XSS affects all users viewing profile"
+                )
                 logging.critical("=" * 80)
 
                 pytest.fail("DISCOVERED: Stored XSS vulnerability")
@@ -275,7 +308,6 @@ def test_stored_xss_via_username_SEC_004(browser, base_url):
 
     logging.info("✓ Stored XSS test: No vulnerability detected")
     assert True
-
 
 
 @pytest.mark.security
@@ -307,7 +339,10 @@ def test_brute_force_protection_SEC_005(browser, base_url):
 
         alert_text = signup_page.get_alert_text(timeout=3)
 
-        if alert_text and any(keyword in alert_text.lower() for keyword in ["limit", "wait", "too many"]):
+        if alert_text and any(
+            keyword in alert_text.lower()
+            for keyword in ["limit", "wait", "too many"]
+        ):
             logging.info(f"✓ Rate limiting detected after {i + 1} attempts")
             rate_limited = True
             break
@@ -316,14 +351,22 @@ def test_brute_force_protection_SEC_005(browser, base_url):
         logging.error("=" * 80)
         logging.error("NO BRUTE FORCE PROTECTION DETECTED")
         logging.error("Standard: OWASP ASVS v5.0 Section 2.2.1")
-        logging.error("CWE-307: Improper Restriction of Excessive Authentication Attempts")
+        logging.error(
+            "CWE-307: Improper Restriction of Excessive Authentication Attempts"
+        )
         logging.error("CVSS Score: 7.5 (HIGH)")
-        logging.error(f"Completed {attempts} rapid signup attempts without restriction")
+        logging.error(
+            f"Completed {attempts} rapid signup attempts without restriction"
+        )
         logging.error("Impact: Automated account creation possible")
-        logging.error("Recommendation: Implement rate limiting (e.g., 5 attempts per IP per hour)")
+        logging.error(
+            "Recommendation: Implement rate limiting (e.g., 5 attempts per IP per hour)"
+        )
         logging.error("=" * 80)
 
-        pytest.fail(f"DISCOVERED: No rate limiting after {attempts} signup attempts")
+        pytest.fail(
+            f"DISCOVERED: No rate limiting after {attempts} signup attempts"
+        )
 
     assert True
 
@@ -375,16 +418,24 @@ def test_account_enumeration_timing_SEC_006(browser, base_url):
     if time_diff > 0.5:
         logging.error("=" * 80)
         logging.error("TIMING DISCREPANCY DETECTED")
-        logging.error(f"Existing account response time: {existing_duration:.2f}s")
-        logging.error(f"Nonexistent account response time: {nonexistent_duration:.2f}s")
+        logging.error(
+            f"Existing account response time: {existing_duration:.2f}s"
+        )
+        logging.error(
+            f"Nonexistent account response time: {nonexistent_duration:.2f}s"
+        )
         logging.error(f"Difference: {time_diff:.2f}s")
         logging.error("CVSS Score: 5.3 (MEDIUM)")
         logging.error("Impact: Account enumeration via timing attack")
         logging.error("=" * 80)
 
-        pytest.fail(f"DISCOVERED: Timing discrepancy of {time_diff:.2f}s enables enumeration")
+        pytest.fail(
+            f"DISCOVERED: Timing discrepancy of {time_diff:.2f}s enables enumeration"
+        )
 
-    logging.info(f"✓ No significant timing discrepancy detected (diff: {time_diff:.2f}s)")
+    logging.info(
+        f"✓ No significant timing discrepancy detected (diff: {time_diff:.2f}s)"
+    )
     assert True
 
 
@@ -428,21 +479,27 @@ def test_username_enumeration_SEC_007(browser, base_url):
 
     if duplicate_alert and empty_alert:
         if duplicate_alert.lower() != empty_alert.lower():
-            if any(keyword in duplicate_alert.lower() for keyword in ["exist", "taken", "already"]):
+            if any(
+                keyword in duplicate_alert.lower()
+                for keyword in ["exist", "taken", "already"]
+            ):
                 logging.error("=" * 80)
                 logging.error("USERNAME ENUMERATION VULNERABILITY")
                 logging.error(f"Duplicate user message: {duplicate_alert}")
                 logging.error(f"Empty field message: {empty_alert}")
                 logging.error("CVSS Score: 5.3 (MEDIUM)")
-                logging.error("Impact: Attackers can enumerate valid usernames")
+                logging.error(
+                    "Impact: Attackers can enumerate valid usernames"
+                )
                 logging.error("Recommendation: Use generic error messages")
                 logging.error("=" * 80)
 
-                pytest.fail("DISCOVERED: Username enumeration via different error messages")
+                pytest.fail(
+                    "DISCOVERED: Username enumeration via different error messages"
+                )
 
     logging.info("✓ Generic error messages used - no enumeration possible")
     assert True
-
 
 
 @pytest.mark.security
@@ -466,7 +523,9 @@ def test_session_fixation_SEC_008(browser, base_url):
     browser.get(base_url)
     time.sleep(1)
 
-    pre_signup_cookies = {cookie['name']: cookie['value'] for cookie in browser.get_cookies()}
+    pre_signup_cookies = {
+        cookie["name"]: cookie["value"] for cookie in browser.get_cookies()
+    }
     logging.info(f"Pre-signup cookies: {list(pre_signup_cookies.keys())}")
 
     test_user = signup_page.generate_unique_username()
@@ -483,15 +542,25 @@ def test_session_fixation_SEC_008(browser, base_url):
         signup_page.get_alert_text(timeout=3)
 
         if signup_page.is_user_logged_in(timeout=3):
-            post_login_cookies = {cookie['name']: cookie['value'] for cookie in browser.get_cookies()}
-            logging.info(f"Post-login cookies: {list(post_login_cookies.keys())}")
+            post_login_cookies = {
+                cookie["name"]: cookie["value"]
+                for cookie in browser.get_cookies()
+            }
+            logging.info(
+                f"Post-login cookies: {list(post_login_cookies.keys())}"
+            )
 
             session_changed = False
             for cookie_name in pre_signup_cookies:
                 if cookie_name in post_login_cookies:
-                    if pre_signup_cookies[cookie_name] != post_login_cookies[cookie_name]:
+                    if (
+                        pre_signup_cookies[cookie_name]
+                        != post_login_cookies[cookie_name]
+                    ):
                         session_changed = True
-                        logging.info(f"✓ Session cookie '{cookie_name}' changed after authentication")
+                        logging.info(
+                            f"✓ Session cookie '{cookie_name}' changed after authentication"
+                        )
 
             if not session_changed and pre_signup_cookies:
                 logging.error("=" * 80)
@@ -551,16 +620,18 @@ def test_cookie_security_flags_SEC_009(browser, base_url):
 
             insecure_cookies = []
             for cookie in cookies:
-                cookie_name = cookie.get('name', 'unknown')
-                is_secure = cookie.get('secure', False)
-                is_httponly = cookie.get('httpOnly', False)
+                cookie_name = cookie.get("name", "unknown")
+                is_secure = cookie.get("secure", False)
+                is_httponly = cookie.get("httpOnly", False)
 
                 if not is_secure or not is_httponly:
-                    insecure_cookies.append({
-                        'name': cookie_name,
-                        'secure': is_secure,
-                        'httponly': is_httponly
-                    })
+                    insecure_cookies.append(
+                        {
+                            "name": cookie_name,
+                            "secure": is_secure,
+                            "httponly": is_httponly,
+                        }
+                    )
 
             if insecure_cookies:
                 logging.error("=" * 80)
@@ -570,17 +641,20 @@ def test_cookie_security_flags_SEC_009(browser, base_url):
                     logging.error(f"  Secure flag: {cookie['secure']}")
                     logging.error(f"  HttpOnly flag: {cookie['httponly']}")
                 logging.error("CVSS Score: 6.5 (MEDIUM)")
-                logging.error("Impact: Session hijacking via XSS or MITM attacks")
+                logging.error(
+                    "Impact: Session hijacking via XSS or MITM attacks"
+                )
                 logging.error("=" * 80)
 
                 signup_page.logout()
-                pytest.fail(f"DISCOVERED: {len(insecure_cookies)} cookies lack security flags")
+                pytest.fail(
+                    f"DISCOVERED: {len(insecure_cookies)} cookies lack security flags"
+                )
 
             signup_page.logout()
 
     logging.info("✓ Cookie security flags properly configured")
     assert True
-
 
 
 @pytest.mark.security
@@ -610,11 +684,11 @@ def test_csrf_token_validation_SEC_010(browser, base_url):
     page_source = browser.page_source.lower()
 
     csrf_indicators = [
-        'csrf',
-        'xsrf',
-        '_token',
-        'authenticity_token',
-        'anti-forgery'
+        "csrf",
+        "xsrf",
+        "_token",
+        "authenticity_token",
+        "anti-forgery",
     ]
 
     csrf_found = False
@@ -639,7 +713,6 @@ def test_csrf_token_validation_SEC_010(browser, base_url):
     assert True
 
 
-
 @pytest.mark.security
 @pytest.mark.medium
 @pytest.mark.headers
@@ -661,11 +734,11 @@ def test_security_headers_SEC_011(browser, base_url):
         headers = response.headers
 
         required_headers = {
-            'X-Content-Type-Options': 'nosniff',
-            'X-Frame-Options': ['DENY', 'SAMEORIGIN'],
-            'Strict-Transport-Security': 'max-age',
-            'Content-Security-Policy': None,
-            'X-XSS-Protection': '1'
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": ["DENY", "SAMEORIGIN"],
+            "Strict-Transport-Security": "max-age",
+            "Content-Security-Policy": None,
+            "X-XSS-Protection": "1",
         }
 
         missing_headers = []
@@ -678,7 +751,9 @@ def test_security_headers_SEC_011(browser, base_url):
                 actual_value = headers[header]
                 if isinstance(expected_value, list):
                     if not any(val in actual_value for val in expected_value):
-                        misconfigured_headers.append(f"{header}: {actual_value}")
+                        misconfigured_headers.append(
+                            f"{header}: {actual_value}"
+                        )
                 elif expected_value not in actual_value:
                     misconfigured_headers.append(f"{header}: {actual_value}")
 
@@ -688,12 +763,16 @@ def test_security_headers_SEC_011(browser, base_url):
             if missing_headers:
                 logging.error(f"Missing headers: {', '.join(missing_headers)}")
             if misconfigured_headers:
-                logging.error(f"Misconfigured: {', '.join(misconfigured_headers)}")
+                logging.error(
+                    f"Misconfigured: {', '.join(misconfigured_headers)}"
+                )
             logging.error("CVSS Score: 7.5 (HIGH)")
             logging.error("Impact: Increased attack surface")
             logging.error("=" * 80)
 
-            pytest.fail(f"DISCOVERED: {len(missing_headers)} headers missing, {len(misconfigured_headers)} misconfigured")
+            pytest.fail(
+                f"DISCOVERED: {len(missing_headers)} headers missing, {len(misconfigured_headers)} misconfigured"
+            )
 
         logging.info("✓ All critical security headers present")
         assert True
@@ -701,7 +780,6 @@ def test_security_headers_SEC_011(browser, base_url):
     except requests.RequestException as e:
         logging.warning(f"Could not fetch headers: {e}")
         pytest.skip("Network request failed")
-
 
 
 @pytest.mark.security
@@ -729,7 +807,9 @@ def test_password_transmitted_plaintext_SEC_012(browser, base_url):
         logging.error("INSECURE PASSWORD TRANSMISSION")
         logging.error(f"Current URL: {current_url}")
         logging.error("Protocol: HTTP (unencrypted)")
-        logging.error("CWE-319: Cleartext Transmission of Sensitive Information")
+        logging.error(
+            "CWE-319: Cleartext Transmission of Sensitive Information"
+        )
         logging.error("CVSS Score: 7.4 (HIGH)")
         logging.error("Impact: Passwords transmitted in plaintext")
         logging.error("Recommendation: Enforce HTTPS for all pages")
@@ -774,7 +854,7 @@ def test_verbose_error_messages_SEC_013(browser, base_url):
             "query",
             "file path",
             "server",
-            "version"
+            "version",
         ]
 
         for term in sensitive_terms:
@@ -791,5 +871,3 @@ def test_verbose_error_messages_SEC_013(browser, base_url):
 
     logging.info("✓ Error messages appear appropriately generic")
     assert True
-
-

@@ -1,7 +1,7 @@
 # [MODULE_NAME] Security Tests - README Template
 
-> **Template Version:** 1.0  
-> **Last Updated:** November 2025  
+> **Template Version:** 1.0
+> **Last Updated:** November 2025
 > **Purpose:** Standard structure for documenting security/exploitation test suites
 
 ---
@@ -104,7 +104,7 @@ This suite covers:
 
 ### Core Principle
 
-> **Security tests DISCOVER vulnerabilities by EXECUTING attacks and OBSERVING results.**  
+> **Security tests DISCOVER vulnerabilities by EXECUTING attacks and OBSERVING results.**
 > **Tests NEVER ASSUME whether vulnerabilities exist.**
 
 ### The DISCOVER Formula for Security Testing
@@ -113,7 +113,7 @@ This suite covers:
 DISCOVER = EXECUTE + OBSERVE + DECIDE
 
 1. EXECUTE: Launch actual attack payload
-2. OBSERVE: Analyze system response for indicators of compromise  
+2. OBSERVE: Analyze system response for indicators of compromise
 3. DECIDE: Determine if vulnerability exists based on OWASP standards and CVSS scoring
 ```
 
@@ -136,12 +136,12 @@ def test_sql_injection():
 def test_sql_injection_SEC_001(payload):
     """
     OWASP ASVS 5.3.4: SQL Injection Prevention
-    
+
     Discovers SQL injection vulnerabilities by executing attack payloads.
     """
     # EXECUTE: Submit SQL injection payload
     perform_[action](browser, username=payload, password="test")
-    
+
     # OBSERVE: Check for vulnerability indicators
     response_text = get_page_text(browser)
     sql_indicators = [
@@ -151,17 +151,17 @@ def test_sql_injection_SEC_001(payload):
         "database error",
         "warning: mysql"
     ]
-    
+
     vulnerability_found = False
     for indicator in sql_indicators:
         if indicator in response_text.lower():
             vulnerability_found = True
             break
-    
+
     # Alternative: Check if attack succeeded
     if check_unauthorized_access(browser):
         vulnerability_found = True
-    
+
     # DECIDE: Based on OWASP ASVS 5.3.4
     if vulnerability_found:
         logging.critical("=" * 80)
@@ -175,7 +175,7 @@ def test_sql_injection_SEC_001(payload):
         logging.critical("Impact: Complete database compromise")
         logging.critical("Recommendation: Use parameterized queries")
         logging.critical("=" * 80)
-        
+
         pytest.fail(f"DISCOVERED: SQL Injection vulnerability with payload: {payload}")
     else:
         logging.info("✓ SECURE: SQL Injection blocked - %s", payload)
@@ -430,7 +430,7 @@ XSS_PAYLOADS = [
 - **Discovery:** Checks for SQL error messages and unauthorized access
 
 #### SEC-002: `test_ldap_injection_SEC_002(payload)`
-- **Type:** LDAP Injection  
+- **Type:** LDAP Injection
 - **Payloads:** [NUMBER] parametrized variants
 - **Standard:** OWASP ASVS 5.3.3
 - **CVSS:** 8.5 (HIGH)
@@ -575,7 +575,7 @@ output = f"<div>{escape(user_input)}</div>"
 # EXECUTE: Attempt multiple failed logins
 for attempt in range(100):
     perform_login(browser, username, "WRONG_PASSWORD")
-    
+
     # OBSERVE: Check for lockout
     if account_locked_detected():
         lockout_implemented = True

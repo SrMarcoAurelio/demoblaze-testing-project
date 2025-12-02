@@ -1,9 +1,9 @@
 # TEMPLATE: Functional + Business Rules Tests
 
-**Purpose:** Universal template for functional testing and business rules compliance validation  
-**Use Case:** ANY web application module across ANY domain (Login, Payment, Cart, Search, Profile, Admin, API, etc.)  
-**Core Philosophy:** Tests DISCOVER behavior through execution - NEVER assume functionality  
-**Author:** Arévalo, Marc  
+**Purpose:** Universal template for functional testing and business rules compliance validation
+**Use Case:** ANY web application module across ANY domain (Login, Payment, Cart, Search, Profile, Admin, API, etc.)
+**Core Philosophy:** Tests DISCOVER behavior through execution - NEVER assume functionality
+**Author:** Arévalo, Marc
 **Version:** 2.0 (Universal Edition)
 
 ---
@@ -42,14 +42,14 @@
 
 Functional testing validates TWO critical aspects:
 
-**1. Functional Tests:** "Does the happy path work?"  
+**1. Functional Tests:** "Does the happy path work?"
 **2. Business Rules Tests:** "Does it comply with industry standards and prevent violations?"
 
 ### Core Philosophy: DISCOVERY, Not Assumption
 
 **The Golden Rule:**
 
-> **Tests must DISCOVER behavior by EXECUTING actions and OBSERVING results.**  
+> **Tests must DISCOVER behavior by EXECUTING actions and OBSERVING results.**
 > **NEVER write tests that ASSUME how the application will behave.**
 
 **Why This Matters:**
@@ -72,10 +72,10 @@ def test_valid_login():
     """Discovers if login works with valid credentials"""
     # EXECUTE
     login("validuser", "validpass")
-    
+
     # OBSERVE
     result = check_if_logged_in()
-    
+
     # DECIDE
     if result.logged_in:
         assert True  # DISCOVERED: Login works
@@ -87,15 +87,15 @@ def test_valid_login():
 ```python
 def test_password_strength():
     """NIST 800-63B: Minimum 8 characters required
-    
+
     Discovers if system enforces password strength policy.
     """
     # EXECUTE
     signup("user", "123")  # Weak password
-    
+
     # OBSERVE
     response = get_alert_or_error()
-    
+
     # DECIDE based on NIST standard
     if response and "password" in response.lower() and \
        ("weak" in response.lower() or "minimum" in response.lower()):
@@ -125,7 +125,7 @@ This template works for:
 
 **How?**
 - Change BASE_URL
-- Change LOCATORS  
+- Change LOCATORS
 - Keep testing logic generic
 - Tests discover behavior objectively
 
@@ -145,7 +145,7 @@ This is THE MOST CRITICAL concept. Master this and your tests will be profession
 fill_form(username="testuser", password="testpass")
 click_submit()
 
-# Step 2: OBSERVE what happened  
+# Step 2: OBSERVE what happened
 result = check_if_succeeded()
 
 # Step 3: DECIDE based on observation
@@ -181,10 +181,10 @@ def test_validation():
 ```python
 def test_empty_form_WRONG():
     """Tests empty form submission (assuming it fails)"""
-    
+
     # Hardcoded assumption about site behavior
     submit_form(name="", email="")
-    
+
     # Assumes validation error will appear
     assert False, "Site doesn't validate"  # WRONG!
 ```
@@ -199,31 +199,31 @@ def test_empty_form_WRONG():
 ```python
 def test_empty_form_CORRECT():
     """ISO 25010: Required Fields Validation
-    
+
     Discovers if system validates required fields by submitting
     empty form and observing system response.
     """
-    
+
     # Step 1: EXECUTE action
     fill_form(name="", email="")
     click_submit()
-    
+
     # Step 2: OBSERVE response
     alert_text = wait_for_alert(browser, timeout=5)
     error_on_page = check_for_error_message(browser)
-    
+
     # Step 3: DECIDE based on observation
     # If validation works, we'll see an error
     if alert_text and ("required" in alert_text.lower() or "fill" in alert_text.lower()):
         # DISCOVERED: System validates correctly
         logging.info("Empty field validation works (ISO 25010 compliant)")
         assert True
-        
+
     elif error_on_page:
         # DISCOVERED: System validates with inline message
         logging.info("Empty field validation works (inline error)")
         assert True
-        
+
     else:
         # DISCOVERED: No validation - business rule violation
         log_business_rule_violation(
@@ -252,10 +252,10 @@ def test_empty_form_CORRECT():
 ```python
 def test_password_strength_WRONG():
     """Tests password strength (assuming weak passwords accepted)"""
-    
+
     # I know this site accepts weak passwords
     signup("user", "123")
-    
+
     # Assumes registration will succeed
     assert registration_failed()  # Assumes behavior
 ```
@@ -270,29 +270,29 @@ def test_password_strength_WRONG():
 ```python
 def test_password_strength_CORRECT(browser):
     """NIST SP 800-63B Section 5.1.1: Password Strength
-    
+
     Requirement: Minimum 8 characters for user-chosen passwords
-    
+
     Discovers if system enforces password strength policy by
     attempting registration with weak password.
     """
-    
+
     logging.info("TC-MOD-BR-002: Testing NIST 800-63B password policy")
-    
+
     # Step 1: EXECUTE registration with weak password
     weak_password = "123"
-    
+
     navigate_to_signup(browser)
     fill_signup_form(browser, username="testuser123", password=weak_password)
     click_signup_button(browser)
-    
+
     # Step 2: OBSERVE system response
     time.sleep(2)
-    
+
     alert_text = wait_for_alert(browser, timeout=3)
     error_message = check_for_error_message(browser)
     success_indicator = check_for_success(browser)
-    
+
     # Step 3: DECIDE based on NIST standard
     # If weak password rejected, system complies with NIST
     if alert_text:
@@ -319,12 +319,12 @@ def test_password_strength_CORRECT(browser):
                 # Some other error
                 logging.info(f"Other error occurred: {alert_text}")
                 assert True
-                
+
     elif error_message:
         # DISCOVERED: Inline error message (good)
         logging.info("Password policy enforced via inline message")
         assert True
-        
+
     elif success_indicator:
         # DISCOVERED: Weak password accepted (bad)
         log_business_rule_violation(
@@ -336,7 +336,7 @@ def test_password_strength_CORRECT(browser):
             severity="HIGH"
         )
         pytest.fail("DISCOVERED: Weak password accepted (NIST violation)")
-        
+
     else:
         # Unclear state - conservative pass
         logging.warning("Could not determine password policy enforcement")
@@ -358,10 +358,10 @@ def test_password_strength_CORRECT(browser):
 ```python
 def test_input_length_WRONG():
     """Tests input length (assuming no validation)"""
-    
+
     # I know this accepts any length
     submit_form(name="a" * 10000)
-    
+
     # Assumes it will accept without validation
     assert form_submitted_successfully()  # Assumes
 ```
@@ -370,50 +370,50 @@ def test_input_length_WRONG():
 ```python
 def test_input_length_CORRECT(browser):
     """ISO 25010: Input Length Validation
-    
+
     Requirement: Inputs should have reasonable maximum length (50-100 chars)
     to prevent database issues and DoS attacks.
-    
+
     Discovers if system validates input length.
     """
-    
+
     logging.info("TC-MOD-BR-003: Testing input length validation")
-    
+
     # Step 1: EXECUTE with excessive input
     excessive_input = "a" * 1000
-    
+
     navigate_to_form(browser)
     fill_field(browser, FIELD_NAME, excessive_input)
     click_submit(browser)
-    
+
     # Step 2: OBSERVE response
     time.sleep(2)
-    
+
     alert_text = wait_for_alert(browser, timeout=3)
     error_on_page = check_for_error_message(browser)
-    
+
     # Check if input was actually truncated by examining field value
     field_value = browser.find_element(*FIELD_NAME).get_attribute('value')
-    
+
     # Step 3: DECIDE based on observation
     # Check for validation error
-    if alert_text and ("length" in alert_text.lower() or 
+    if alert_text and ("length" in alert_text.lower() or
                        "long" in alert_text.lower() or
                        "maximum" in alert_text.lower()):
         # DISCOVERED: Length validation works (alert)
         logging.info(f"Input length validated: '{alert_text}'")
         assert True
-        
+
     elif error_on_page:
         # DISCOVERED: Length validation works (inline error)
         logging.info("Input length validated with inline message")
         assert True
-        
+
     elif len(field_value) < len(excessive_input):
         # DISCOVERED: HTML maxlength attribute works
         logging.info(f"Input truncated by maxlength: {len(field_value)} chars")
         assert True
-        
+
     else:
         # DISCOVERED: No length validation
         # Check if form submitted successfully
@@ -448,10 +448,10 @@ def test_input_length_CORRECT(browser):
 ```python
 def test_form_submission_WRONG():
     """Tests form submission (assuming success)"""
-    
+
     # I know valid data will work
     submit_form(name="Test", email="test@test.com")
-    
+
     # Assumes it will succeed
     assert True  # Not actually checking
 ```
@@ -466,13 +466,13 @@ def test_form_submission_WRONG():
 ```python
 def test_form_submission_CORRECT(browser):
     """TC-MOD-FUNC-001: Valid Form Submission
-    
+
     Functional test verifying form submission works with valid inputs.
     Discovers if happy path functions correctly.
     """
-    
+
     logging.info("TC-MOD-FUNC-001: Testing valid form submission")
-    
+
     # Step 1: EXECUTE form submission with valid data
     valid_data = {
         "name": "John Doe",
@@ -480,44 +480,44 @@ def test_form_submission_CORRECT(browser):
         "phone": "555-0123",
         "message": "Test message"
     }
-    
+
     navigate_to_form(browser)
-    
+
     for field, value in valid_data.items():
         fill_field(browser, get_field_locator(field), value)
-    
+
     click_submit(browser)
-    
+
     # Step 2: OBSERVE multiple success indicators
     time.sleep(2)
-    
+
     # Check for success alert
     alert_text = wait_for_alert(browser, timeout=5)
-    
+
     # Check for success message on page
     success_message = check_for_success_message(browser)
-    
+
     # Check if redirected to confirmation page
     current_url = browser.current_url
-    
+
     # Check if form cleared (indicates successful submission)
     form_cleared = check_if_form_cleared(browser)
-    
+
     # Step 3: DECIDE based on observations
     success_indicators_found = []
-    
+
     if alert_text and "success" in alert_text.lower():
         success_indicators_found.append(f"Success alert: '{alert_text}'")
-    
+
     if success_message:
         success_indicators_found.append(f"Success message: '{success_message}'")
-    
+
     if "success" in current_url or "confirmation" in current_url:
         success_indicators_found.append(f"Redirected to: {current_url}")
-    
+
     if form_cleared:
         success_indicators_found.append("Form fields cleared")
-    
+
     # Decide based on what we discovered
     if success_indicators_found:
         # DISCOVERED: Submission succeeded
@@ -527,7 +527,7 @@ def test_form_submission_CORRECT(browser):
         # DISCOVERED: Submission failed or unclear
         # Check for error indicators
         error_text = check_for_error_message(browser)
-        
+
         if error_text:
             pytest.fail(f"DISCOVERED: Form submission failed with error: {error_text}")
         else:
@@ -605,7 +605,7 @@ def test_feature():
     """Discovers if input validation exists"""
     submit_invalid_data()
     result = observe_response()
-    
+
     if result.shows_validation_error():
         assert True  # DISCOVERED: Validates
     else:
@@ -630,7 +630,7 @@ def test_validation():
 def test_validation():
     # Works on ANY site
     result = check_validation()
-    
+
     if result.validated:
         assert True
     else:
@@ -651,10 +651,10 @@ def test_error_handling():
 def test_error_handling():
     # Cause an error
     submit_invalid_data()
-    
+
     # Observe if error handling works
     error_shown = wait_for_error_message(timeout=5)
-    
+
     if error_shown:
         assert True  # Error handling works
     else:
@@ -675,7 +675,7 @@ def test_input_validation():
 # ✅ CORRECT - Clear standard reference
 def test_input_validation():
     """TC-MOD-BR-001: Input Validation
-    
+
     Standard: ISO 25010 - Functional Suitability
     Reference: OWASP ASVS v5.0-1.2.5
     Requirement: All inputs must be validated
@@ -696,9 +696,9 @@ def test_feature():
 # ✅ CORRECT - Clear context
 def test_feature():
     """Verifies form submission works with valid data"""
-    
+
     result = submit_form_with_valid_data()
-    
+
     if result.success:
         assert True
     else:
@@ -746,12 +746,12 @@ def test_feature():
 def test_feature():
     try:
         result = do_something()
-        
+
         if result.indicates_success():
             assert True
         else:
             pytest.fail("Feature broken")
-            
+
     except ExpectedException:
         # Expected error
         assert True
@@ -908,20 +908,20 @@ Complete this before writing test code:
 ```
 ☐ 1. I understand what functionality I'm testing
      Specific feature: _________________________
-     
+
 ☐ 2. I know if this is functional or business rule test
      Type: [ ] Functional (happy path)
            [ ] Business Rule (standard compliance)
-     
+
 ☐ 3. I know which standard applies (for business rules)
      Standard: _________________________
      Requirement: _________________________
-     
+
 ☐ 4. I understand what "DISCOVERY" means for this test
      How will I discover behavior: _________________________
      What indicates success: _________________________
      What indicates failure: _________________________
-     
+
 ☐ 5. I have identified all locators needed
      Elements: _________________________
 ```
@@ -932,11 +932,11 @@ Complete this before writing test code:
 ☐ 6. My test will DISCOVER, not ASSUME
      Test will: [ ] Execute action [ ] Observe result [ ] Decide objectively
      Test will NOT: [ ] Hardcode results [ ] Assume site behavior
-     
+
 ☐ 7. My test is reusable on different sites
      Only need to change: [ ] BASE_URL [ ] LOCATORS
      Logic is generic: [ ] YES
-     
+
 ☐ 8. For business rules: I have standard reference
      Standard cited: _________________________
      Version included: [ ] YES
@@ -949,14 +949,14 @@ Complete this before writing test code:
 ☐ 9. Test has clear purpose
      Functional: "Verifies [feature] works with valid inputs"
      Business Rule: "Validates compliance with [standard]"
-     
+
 ☐ 10. Test has proper markers
       [ ] @pytest.mark.functional OR @pytest.mark.business_rules
       [ ] Additional markers if needed
-      
+
 ☐ 11. Code follows template structure
       Sections: [ ] Config [ ] Locators [ ] Helpers [ ] Tests
-      
+
 ☐ 12. No emojis in code or comments
       Verified: [ ] YES
 ```
@@ -966,11 +966,11 @@ Complete this before writing test code:
 ```
 ☐ 13. I can explain this test to a QA manager
       Can explain: [ ] What it tests [ ] Why it matters [ ] How it discovers
-      
+
 ☐ 14. This test works on sites I haven't seen
       Generic enough: [ ] YES
       Not site-specific: [ ] YES
-      
+
 ☐ 15. Ready to write code
       All checkboxes above completed: [ ] YES
 ```
@@ -990,7 +990,7 @@ Test Suite: [Module Name] - Functional & Business Rules
 Module: test_[module].py
 Author: Arévalo, Marc
 
-Description: 
+Description:
 Comprehensive automated tests for [module description].
 Includes both functional tests (happy path) and business rules compliance tests.
 
@@ -1064,7 +1064,7 @@ def browser(request):
     """Cross-browser fixture - supports Chrome, Firefox, Edge"""
     browser_name = request.config.getoption("--browser", default="chrome").lower()
     driver = None
-    
+
     if browser_name == "chrome":
         service = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()
@@ -1079,12 +1079,12 @@ def browser(request):
         driver = webdriver.Edge(service=service, options=options)
     else:
         pytest.fail(f"Unsupported browser: {browser_name}")
-    
+
     driver.maximize_window()
     driver.implicitly_wait(TIMEOUT)
-    
+
     yield driver
-    
+
     driver.quit()
 
 
@@ -1157,7 +1157,7 @@ def check_for_error_message(browser, timeout=5):
         return None
 
 
-def log_business_rule_violation(test_id, standard, expected_behavior, 
+def log_business_rule_violation(test_id, standard, expected_behavior,
                                  actual_behavior, impact, severity):
     """Standard logging format for business rule violations"""
     logging.error("=" * 80)
@@ -1178,14 +1178,14 @@ def log_business_rule_violation(test_id, standard, expected_behavior,
 @pytest.mark.functional
 def test_valid_operation_001(browser):
     """TC-[MOD]-FUNC-001: Valid Operation - Happy Path
-    
+
     Functional test verifying core feature works with valid inputs.
     Discovers if basic operation succeeds as expected.
     """
     logging.info("TC-[MOD]-FUNC-001: Testing valid operation")
-    
+
     navigate_to_module(browser)
-    
+
     # Execute with valid data
     valid_data = {
         FIELD_1: "valid_input_1",
@@ -1193,11 +1193,11 @@ def test_valid_operation_001(browser):
     }
     fill_form(browser, valid_data)
     click_element(browser, SUBMIT_BUTTON)
-    
+
     # Observe result
     time.sleep(2)
     success_message = check_for_success_message(browser)
-    
+
     # Decide based on observation
     if success_message:
         logging.info(f"Operation successful: {success_message}")
@@ -1209,14 +1209,14 @@ def test_valid_operation_001(browser):
 @pytest.mark.functional
 def test_invalid_input_rejected_002(browser):
     """TC-[MOD]-FUNC-002: Invalid Input Rejection
-    
+
     Functional test verifying system properly rejects invalid inputs.
     Discovers if error handling works for bad data.
     """
     logging.info("TC-[MOD]-FUNC-002: Testing invalid input rejection")
-    
+
     navigate_to_module(browser)
-    
+
     # Execute with invalid data
     invalid_data = {
         FIELD_1: "!@#$%^&*()",  # Invalid characters
@@ -1224,12 +1224,12 @@ def test_invalid_input_rejected_002(browser):
     }
     fill_form(browser, invalid_data)
     click_element(browser, SUBMIT_BUTTON)
-    
+
     # Observe result
     time.sleep(2)
     error_message = check_for_error_message(browser)
     alert_text = wait_for_alert(browser, timeout=3)
-    
+
     # Decide based on observation
     if error_message:
         logging.info(f"Invalid input rejected with message: {error_message}")
@@ -1244,22 +1244,22 @@ def test_invalid_input_rejected_002(browser):
 @pytest.mark.functional
 def test_empty_fields_rejected_003(browser):
     """TC-[MOD]-FUNC-003: Empty Fields Validation
-    
+
     Functional test verifying required field validation works.
     Discovers if system prevents empty form submission.
     """
     logging.info("TC-[MOD]-FUNC-003: Testing empty fields validation")
-    
+
     navigate_to_module(browser)
-    
+
     # Execute with empty fields
     click_element(browser, SUBMIT_BUTTON)
-    
+
     # Observe result
     time.sleep(2)
     error_message = check_for_error_message(browser)
     alert_text = wait_for_alert(browser, timeout=3)
-    
+
     # Decide based on observation
     if error_message:
         logging.info(f"Empty fields rejected: {error_message}")
@@ -1285,19 +1285,19 @@ def test_empty_fields_rejected_003(browser):
 @pytest.mark.business_rules
 def test_input_length_validation_BR_001(browser):
     """TC-[MOD]-BR-001: Input Length Validation
-    
+
     Standard: ISO 25010 - Functional Suitability, Input Validation
     Requirement: Inputs should have reasonable maximum length (50-100 chars)
-    
+
     Discovers if system validates input length to prevent:
     - Database bloat
     - Buffer overflow vulnerabilities
     - DoS attack vectors
     """
     logging.info("TC-[MOD]-BR-001: Testing input length validation")
-    
+
     navigate_to_module(browser)
-    
+
     # Execute with excessive input
     excessive_input = "a" * 1000
     excessive_data = {
@@ -1306,15 +1306,15 @@ def test_input_length_validation_BR_001(browser):
     }
     fill_form(browser, excessive_data)
     click_element(browser, SUBMIT_BUTTON)
-    
+
     # Observe response
     time.sleep(2)
     error_message = check_for_error_message(browser)
     alert_text = wait_for_alert(browser, timeout=3)
-    
+
     # Decide based on observation
     validation_keywords = ["length", "long", "maximum", "limit", "exceeded"]
-    
+
     if error_message and any(keyword in error_message.lower() for keyword in validation_keywords):
         logging.info(f"Input length validated: {error_message}")
         assert True
@@ -1348,17 +1348,17 @@ def test_input_length_validation_BR_001(browser):
 ])
 def test_sql_injection_prevention_BR_002(browser, payload):
     """TC-[MOD]-BR-002: SQL Injection Prevention
-    
+
     Standard: OWASP ASVS v5.0-1.2.5 (Injection Prevention)
     Requirement: Use parameterized queries, input sanitization
-    
+
     Discovers if SQL injection is possible by attempting various
     SQL injection payloads and observing system response.
     """
     logging.info(f"TC-[MOD]-BR-002: Testing SQL injection prevention - Payload: {payload}")
-    
+
     navigate_to_module(browser)
-    
+
     # Execute with SQL injection payload
     payload_data = {
         FIELD_1: payload,
@@ -1366,13 +1366,13 @@ def test_sql_injection_prevention_BR_002(browser, payload):
     }
     fill_form(browser, payload_data)
     click_element(browser, SUBMIT_BUTTON)
-    
+
     # Observe response
     time.sleep(2)
     success_message = check_for_success_message(browser)
     alert_text = wait_for_alert(browser, timeout=3)
     page_source = browser.page_source
-    
+
     # Decide based on observation
     # If operation succeeds with SQL payload, vulnerability exists
     if success_message and "success" in success_message.lower():
@@ -1385,7 +1385,7 @@ def test_sql_injection_prevention_BR_002(browser, payload):
             severity="CRITICAL"
         )
         pytest.fail(f"DISCOVERED: SQL injection vulnerability with payload: {payload}")
-    
+
     # Check for database errors (also indicates vulnerability)
     sql_error_keywords = ["sql", "syntax", "mysql", "postgresql", "database", "query"]
     if any(keyword in page_source.lower() for keyword in sql_error_keywords):
@@ -1398,7 +1398,7 @@ def test_sql_injection_prevention_BR_002(browser, payload):
             severity="CRITICAL"
         )
         pytest.fail(f"DISCOVERED: SQL error exposed with payload: {payload}")
-    
+
     logging.info(f"SQL injection blocked: {payload}")
     assert True
 
@@ -1412,17 +1412,17 @@ def test_sql_injection_prevention_BR_002(browser, payload):
 ])
 def test_xss_prevention_BR_003(browser, payload):
     """TC-[MOD]-BR-003: XSS Prevention
-    
+
     Standard: OWASP ASVS v5.0-1.2.1 (Output Encoding)
     Requirement: All output encoded, Content Security Policy enforced
-    
+
     Discovers if XSS is possible by injecting XSS payloads and
     observing if scripts execute.
     """
     logging.info(f"TC-[MOD]-BR-003: Testing XSS prevention - Payload: {payload}")
-    
+
     navigate_to_module(browser)
-    
+
     # Execute with XSS payload
     xss_data = {
         FIELD_1: payload,
@@ -1430,11 +1430,11 @@ def test_xss_prevention_BR_003(browser, payload):
     }
     fill_form(browser, xss_data)
     click_element(browser, SUBMIT_BUTTON)
-    
+
     # Observe if XSS executes
     time.sleep(2)
     alert_text = wait_for_alert(browser, timeout=3)
-    
+
     # Decide based on observation
     # If alert with 'XSS' appears, vulnerability exists
     if alert_text and 'XSS' in alert_text:
@@ -1447,7 +1447,7 @@ def test_xss_prevention_BR_003(browser, payload):
             severity="CRITICAL"
         )
         pytest.fail(f"DISCOVERED: XSS vulnerability with payload: {payload}")
-    
+
     logging.info(f"XSS prevention working: {payload}")
     assert True
 
@@ -1455,25 +1455,25 @@ def test_xss_prevention_BR_003(browser, payload):
 @pytest.mark.business_rules
 def test_error_message_accessibility_BR_004(browser):
     """TC-[MOD]-BR-004: Error Message Accessibility
-    
+
     Standard: WCAG 2.1 Level AA - Success Criterion 3.3.1
     Requirement: Inline error messages, not JavaScript alerts
-    
+
     Discovers if system uses accessible error messages or
     inaccessible JavaScript alerts.
     """
     logging.info("TC-[MOD]-BR-004: Testing error message accessibility")
-    
+
     navigate_to_module(browser)
-    
+
     # Trigger error with empty form
     click_element(browser, SUBMIT_BUTTON)
-    
+
     # Observe error presentation
     time.sleep(2)
     alert_text = wait_for_alert(browser, timeout=3)
     inline_error = check_for_error_message(browser)
-    
+
     # Decide based on WCAG standard
     if alert_text:
         # JavaScript alert used (bad for accessibility)
@@ -1497,17 +1497,17 @@ def test_error_message_accessibility_BR_004(browser):
 @pytest.mark.business_rules
 def test_whitespace_normalization_BR_005(browser):
     """TC-[MOD]-BR-005: Input Whitespace Handling
-    
+
     Standard: ISO 25010 - Data Quality, Usability
     Requirement: Trim leading/trailing whitespace from inputs
-    
+
     Discovers if system normalizes whitespace in user inputs
     to improve data quality and user experience.
     """
     logging.info("TC-[MOD]-BR-005: Testing whitespace normalization")
-    
+
     navigate_to_module(browser)
-    
+
     # Execute with padded input
     input_with_spaces = "   test   "
     padded_data = {
@@ -1516,13 +1516,13 @@ def test_whitespace_normalization_BR_005(browser):
     }
     fill_form(browser, padded_data)
     click_element(browser, SUBMIT_BUTTON)
-    
+
     # Observe result
     time.sleep(2)
     success = check_for_success_message(browser)
     error = check_for_error_message(browser)
     alert_text = wait_for_alert(browser, timeout=3)
-    
+
     # Decide based on observation
     # If system treats padded input same as trimmed, it's normalizing
     if success:
@@ -1563,7 +1563,7 @@ if __name__ == "__main__":
 
 ### Functional Tests (Happy Path)
 
-**Purpose:** Verify core functionality works as designed  
+**Purpose:** Verify core functionality works as designed
 **Expected Outcome:** Should PASS on well-designed systems
 
 **Typical Tests:**
@@ -1578,7 +1578,7 @@ if __name__ == "__main__":
 def test_valid_login():
     """Discovers if login works with valid credentials"""
     login("validuser", "ValidPass123!")
-    
+
     if is_logged_in():
         assert True  # DISCOVERED: Login works
     else:
@@ -1587,7 +1587,7 @@ def test_valid_login():
 
 ### Business Rules Tests (Standards Compliance)
 
-**Purpose:** Verify compliance with industry standards  
+**Purpose:** Verify compliance with industry standards
 **Expected Outcome:** May PASS or FAIL - discovers compliance
 
 **Typical Tests:**
@@ -1603,7 +1603,7 @@ def test_valid_login():
 def test_password_policy():
     """NIST 800-63B: Minimum 8 characters required"""
     signup("user", "123")
-    
+
     if password_rejected():
         assert True  # DISCOVERED: Complies with NIST
     else:
@@ -1663,19 +1663,19 @@ Examples:
 @pytest.mark.functional
 def test_valid_operation_001(browser):
     """TC-[MOD]-FUNC-001: Feature Name - Happy Path
-    
+
     Functional test verifying [feature] works with valid inputs.
     Discovers if [specific behavior] functions correctly.
     """
-    
+
 @pytest.mark.business_rules
 def test_validation_BR_001(browser):
     """TC-[MOD]-BR-001: Input Validation
-    
+
     Standard: ISO 25010 - Functional Suitability
     Reference: OWASP ASVS v5.0-1.2.5
     Requirement: [Specific requirement from standard]
-    
+
     Discovers if system [what is being validated].
     """
 ```
@@ -2110,8 +2110,8 @@ Managed automatically by webdriver-manager:
 - TEMPLATE_security_exploitation.md (Security testing companion)
 - README_template.md (Documentation template)
 
-**Author:** Arévalo, Marc  
-**Version:** 2.0 (Universal Edition)  
+**Author:** Arévalo, Marc
+**Version:** 2.0 (Universal Edition)
 **Date:** November 2025
 
 **Quick Start:**

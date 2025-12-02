@@ -1,9 +1,9 @@
 # TEMPLATE: Security & Exploitation Tests
 
-**Purpose:** Universal template for active security testing and vulnerability exploitation  
-**Use Case:** ANY web application module across ANY domain (Login, Payment, Cart, Search, Profile, Admin, API, etc.)  
-**Core Philosophy:** Tests DISCOVER vulnerabilities through active exploitation - NEVER assume behavior  
-**Author:** Arévalo, Marc  
+**Purpose:** Universal template for active security testing and vulnerability exploitation
+**Use Case:** ANY web application module across ANY domain (Login, Payment, Cart, Search, Profile, Admin, API, etc.)
+**Core Philosophy:** Tests DISCOVER vulnerabilities through active exploitation - NEVER assume behavior
+**Author:** Arévalo, Marc
 **Version:** 2.0 (Universal Edition)
 
 ---
@@ -40,14 +40,14 @@
 
 Security testing is fundamentally different from functional testing:
 
-**Functional Testing:** "Does it work as designed?"  
+**Functional Testing:** "Does it work as designed?"
 **Security Testing:** "Can I break it? Can I exploit it? Can I bypass it?"
 
 ### Core Philosophy: DISCOVERY, Not Assumption
 
 **The Golden Rule:**
 
-> **Tests must DISCOVER vulnerabilities by EXECUTING exploits and OBSERVING results.**  
+> **Tests must DISCOVER vulnerabilities by EXECUTING exploits and OBSERVING results.**
 > **NEVER write tests that ASSUME the application's behavior.**
 
 **Why This Matters:**
@@ -149,10 +149,10 @@ def test_negative_quantity():
 ```python
 def test_sql_injection_WRONG():
     """I know DemoBlaze is vulnerable to SQL injection"""
-    
+
     # Hardcoded assumption about site behavior
     inject_payload("' OR '1'='1")
-    
+
     # Assumes injection will work
     assert False, "Site is vulnerable"  # WRONG!
 ```
@@ -167,25 +167,25 @@ def test_sql_injection_WRONG():
 ```python
 def test_sql_injection_CORRECT():
     """OWASP ASVS v5.0-1.2.5: SQL Injection Prevention
-    
+
     Discovers if SQL injection is possible by attempting exploitation
     and observing system response.
     """
-    
+
     # Step 1: EXECUTE exploit
     payload = "' OR '1'='1"
     inject_payload(browser, payload)
     browser.find_element(*SUBMIT_BUTTON).click()
-    
+
     # Step 2: OBSERVE response
     response = wait_for_alert(browser)
     page_source = browser.page_source
-    
+
     # Step 3: DECIDE based on objective criteria
     # If exploit succeeds, system is vulnerable
     if (response and "success" in response.lower()) or \
        ("welcome" in page_source.lower() and "dashboard" in page_source.lower()):
-        
+
         # DISCOVERED: Vulnerability exists
         log_exploitation_attempt(
             vulnerability="SQL Injection",
@@ -194,7 +194,7 @@ def test_sql_injection_CORRECT():
             standard="OWASP ASVS v5.0-1.2.5"
         )
         pytest.fail(f"VULNERABILITY: SQL injection with payload: {payload}")
-    
+
     # If exploit fails, system is secure
     else:
         # DISCOVERED: System is secure
@@ -217,10 +217,10 @@ def test_sql_injection_CORRECT():
 ```python
 def test_negative_quantity_WRONG():
     """Tests negative quantity (assuming it fails)"""
-    
+
     # I know this site accepts negative quantities
     add_item(quantity=-5)
-    
+
     # Assumes cart will have negative total
     cart_total = get_cart_total()
     assert cart_total < 0  # Assumes specific behavior
@@ -235,31 +235,31 @@ def test_negative_quantity_WRONG():
 ```python
 def test_negative_quantity_CORRECT(browser):
     """OWASP WSTG-BUSL-10: Business Logic - Negative Quantity
-    
+
     Discovers if application accepts negative quantities by
     attempting the exploit and observing cart behavior.
     """
-    
+
     # Step 1: EXECUTE exploit attempt
     browser.get(BASE_URL + "/product/1")
-    
+
     # Try to inject negative quantity via JavaScript
     browser.execute_script("""
         document.querySelector('#quantity').value = '-5';
     """)
-    
+
     browser.find_element(*ADD_TO_CART_BUTTON).click()
     time.sleep(2)
-    
+
     # Navigate to cart
     browser.find_element(*CART_LINK).click()
     time.sleep(2)
-    
+
     # Step 2: OBSERVE what happened
     cart_items = browser.find_elements(By.CSS_SELECTOR, ".cart-item")
     cart_total_element = browser.find_element(*CART_TOTAL)
     cart_total = parse_price(cart_total_element.text)
-    
+
     # Step 3: DECIDE based on observation
     # Check if negative quantity was accepted
     negative_found = False
@@ -268,7 +268,7 @@ def test_negative_quantity_CORRECT(browser):
         if "-" in quantity_text:
             negative_found = True
             break
-    
+
     # If negative quantity accepted = vulnerable
     if negative_found or cart_total < 0:
         # DISCOVERED: Business logic flaw exists
@@ -279,7 +279,7 @@ def test_negative_quantity_CORRECT(browser):
             standard="OWASP WSTG-BUSL-10"
         )
         pytest.fail(f"VULNERABILITY: Negative quantities accepted")
-    
+
     # If rejected = secure
     else:
         # DISCOVERED: System validates correctly
@@ -301,11 +301,11 @@ def test_negative_quantity_CORRECT(browser):
 ```python
 def test_rate_limiting_WRONG():
     """Tests rate limiting (assuming no protection)"""
-    
+
     # I know this site has no rate limiting
     for i in range(1000):
         submit_form()
-    
+
     # Assumes all requests succeed
     assert True  # Assumes no protection
 ```
@@ -319,58 +319,58 @@ def test_rate_limiting_WRONG():
 ```python
 def test_rate_limiting_CORRECT(browser):
     """OWASP API Security - API6: Unrestricted Access
-    
+
     Discovers if rate limiting is implemented by sending
     rapid requests and observing when blocking occurs.
     """
-    
+
     browser.get(BASE_URL)
-    
+
     # Counters to track discoveries
     successful_requests = 0
     blocked_requests = 0
     rate_limit_triggered = False
-    
+
     # Step 1: EXECUTE rapid requests
     for i in range(100):  # Try 100 rapid requests
         try:
             browser.find_element(*SUBMIT_BUTTON).click()
             time.sleep(0.01)  # Very fast
-            
+
             # Step 2: OBSERVE response
             page_source = browser.page_source.lower()
-            
+
             # Check for rate limit indicators
-            if ("rate limit" in page_source or 
+            if ("rate limit" in page_source or
                 "too many requests" in page_source or
                 "429" in page_source or
                 "slow down" in page_source):
-                
+
                 # DISCOVERED: Rate limiting exists!
                 rate_limit_triggered = True
                 blocked_requests += 1
                 logging.info(f"Rate limit discovered after {successful_requests} requests")
                 break
-            
+
             # Check if request succeeded
             if "success" in page_source or check_success_indicator(browser):
                 successful_requests += 1
             else:
                 blocked_requests += 1
-                
+
         except Exception as e:
             # Exception might indicate rate limiting
             if "429" in str(e) or "timeout" in str(e).lower():
                 rate_limit_triggered = True
                 logging.info("Rate limit discovered via exception")
                 break
-    
+
     # Step 3: DECIDE based on discovery
     if rate_limit_triggered:
         # DISCOVERED: Rate limiting works
         logging.info(f"Rate limiting OK - Triggered after {successful_requests} requests")
         assert True
-    
+
     elif successful_requests >= 50:
         # DISCOVERED: No rate limiting (50+ requests succeeded)
         log_exploitation_attempt(
@@ -380,7 +380,7 @@ def test_rate_limiting_CORRECT(browser):
             standard="OWASP API Security - API6"
         )
         pytest.fail(f"VULNERABILITY: No rate limiting - {successful_requests} requests succeeded")
-    
+
     else:
         # Unclear - maybe rate limiting, maybe other protection
         logging.info(f"Rate limiting status unclear - {successful_requests} succeeded, {blocked_requests} blocked")
@@ -402,10 +402,10 @@ def test_rate_limiting_CORRECT(browser):
 ```python
 def test_price_manipulation_WRONG():
     """Tests price manipulation (assuming it works)"""
-    
+
     # I know prices are client-side
     change_price_to_zero()
-    
+
     # Assumes checkout will accept $0
     assert final_price == 0  # Assumes vulnerability
 ```
@@ -414,57 +414,57 @@ def test_price_manipulation_WRONG():
 ```python
 def test_price_manipulation_CORRECT(browser):
     """OWASP Top 10 - A04: Insecure Design - Price Manipulation
-    
+
     Discovers if client-side price manipulation is possible by
     attempting to modify price and observing if change persists.
     """
-    
+
     browser.get(BASE_URL + "/product/1")
-    
+
     # Step 1: CAPTURE original price
     original_price_element = browser.find_element(*PRICE_ELEMENT)
     original_price = parse_price(original_price_element.text)
     logging.info(f"Original price: ${original_price}")
-    
+
     # Step 2: EXECUTE manipulation attempt
     manipulated_price = "0.01"
     browser.execute_script(f"""
         document.querySelector('#price').innerText = '${manipulated_price}';
         document.querySelector('#price').setAttribute('data-price', '{manipulated_price}');
     """)
-    
+
     time.sleep(1)
-    
+
     # Add to cart
     browser.find_element(*ADD_TO_CART_BUTTON).click()
     time.sleep(2)
-    
+
     # Go to cart
     browser.find_element(*CART_LINK).click()
     time.sleep(2)
-    
+
     # Step 3: OBSERVE cart price
     cart_price_element = browser.find_element(*CART_ITEM_PRICE)
     cart_price = parse_price(cart_price_element.text)
     logging.info(f"Cart price: ${cart_price}")
-    
+
     # Proceed to checkout
     browser.find_element(*CHECKOUT_BUTTON).click()
     time.sleep(2)
-    
+
     # Fill checkout form
     fill_checkout_form(browser)
-    
+
     # Get final price at checkout
     final_price_element = browser.find_element(*FINAL_TOTAL)
     final_price = parse_price(final_price_element.text)
     logging.info(f"Final checkout price: ${final_price}")
-    
+
     # Step 4: DECIDE based on observation
     # If ANY stage shows manipulated price, vulnerability exists
-    if (cart_price == float(manipulated_price) or 
+    if (cart_price == float(manipulated_price) or
         final_price == float(manipulated_price)):
-        
+
         # DISCOVERED: Price manipulation works
         log_exploitation_attempt(
             vulnerability="Client-side price manipulation",
@@ -473,13 +473,13 @@ def test_price_manipulation_CORRECT(browser):
             standard="OWASP Top 10 - A04"
         )
         pytest.fail(f"VULNERABILITY: Price manipulation - Final: ${final_price}, Original: ${original_price}")
-    
+
     # If all stages show original price, server-side validation works
     elif (cart_price == original_price and final_price == original_price):
         # DISCOVERED: Server-side validation works
         logging.info(f"Price manipulation blocked - All stages show original ${original_price}")
         assert True
-    
+
     else:
         # Unclear state
         logging.warning(f"Price state unclear - Cart: ${cart_price}, Final: ${final_price}")
@@ -595,16 +595,16 @@ def test_captcha():
 # ✅ CORRECT - Attempts to bypass
 def test_captcha():
     captcha_present = check_for_captcha_element()
-    
+
     if not captcha_present:
         pytest.fail("No CAPTCHA found")
-    
+
     # Additionally: try to bypass it
     for i in range(100):
         result = attempt_automated_submission()
         if blocked:
             break
-    
+
     if i >= 99:
         pytest.fail("CAPTCHA can be bypassed")
     else:
@@ -626,12 +626,12 @@ def test_sql_injection():
 def test_sql_injection():
     """Attempts SQL injection exploitation"""
     payloads = ["' OR '1'='1", "' UNION SELECT"]
-    
+
     for payload in payloads:
         result = inject_and_observe(payload)
         if result.exploited:
             pytest.fail(f"DISCOVERED: SQL injection with {payload}")
-    
+
     assert True  # All payloads blocked
 ```
 
@@ -649,7 +649,7 @@ def test_security():
 def test_security():
     payload = "' OR '1'='1"
     result = inject_payload(payload)
-    
+
     if result.indicates_sql_injection():
         log_exploitation_attempt(
             vulnerability="SQL Injection",
@@ -675,7 +675,7 @@ def test_problem():
 # ✅ CORRECT - Clear standards and severity
 def test_problem():
     """TC-SEC-MOD-INJ-001: SQL Injection Vulnerability
-    
+
     Severity: CRITICAL
     CVSS: 9.8
     Standard: OWASP Top 10 2021 - A03 (Injection)
@@ -726,12 +726,12 @@ def test_security():
 def test_security():
     try:
         result = attempt_exploit()
-        
+
         if result.exploited:
             pytest.fail("VULNERABILITY FOUND")
         else:
             assert True
-            
+
     except SecurityException as e:
         # Expected security block
         assert True
@@ -935,20 +935,20 @@ Stop! Before writing exploitation code, complete this checklist:
 ```
 ☐ 1. I understand what vulnerability I'm testing for
      Specific vulnerability: _________________________
-     
+
 ☐ 2. I know which standard/requirement it violates
      Standard: _________________________
      Requirement number: _________________________
-     
+
 ☐ 3. I know how an attacker would exploit this
      Attack technique: _________________________
      Payload example: _________________________
-     
+
 ☐ 4. I understand what "DISCOVERY" means for this test
      How will I discover if vulnerable: _________________________
      What response indicates vulnerability: _________________________
      What response indicates security: _________________________
-     
+
 ☐ 5. I have researched the exploitation technique
      Reviewed: [ ] OWASP [ ] CWE [ ] Real-world examples
 ```
@@ -959,15 +959,15 @@ Stop! Before writing exploitation code, complete this checklist:
 ☐ 6. My test will DISCOVER, not ASSUME
      Test will: [ ] Execute exploit [ ] Observe response [ ] Decide objectively
      Test will NOT: [ ] Hardcode assumptions [ ] Assume site behavior
-     
+
 ☐ 7. My test is reusable on different sites
      Only need to change: [ ] BASE_URL [ ] LOCATORS
      Logic is generic: [ ] YES
-     
+
 ☐ 8. My test has proper severity classification
      CVSS score determined: [ ] YES
      Severity level: [ ] CRITICAL [ ] HIGH [ ] MEDIUM [ ] LOW
-     
+
 ☐ 9. My test references specific standards
      Standards cited: _________________________
      Version numbers included: [ ] YES
@@ -979,10 +979,10 @@ Stop! Before writing exploitation code, complete this checklist:
 ☐ 10. Testing authorized environment only
       Environment: [ ] Demo [ ] Staging [ ] Authorized test
       NOT testing: [ ] Production [ ] Live systems
-      
+
 ☐ 11. Exploitation will not cause harm
       Won't: [ ] Delete data [ ] Disrupt service [ ] Expose real users
-      
+
 ☐ 12. Logging is properly configured
       Sensitive data excluded: [ ] YES
       Exploit attempts logged: [ ] YES
@@ -993,13 +993,13 @@ Stop! Before writing exploitation code, complete this checklist:
 ```
 ☐ 13. Code follows template structure
       Sections: [ ] Config [ ] Locators [ ] Helpers [ ] Tests
-      
+
 ☐ 14. No emojis in code or comments
       Verified: [ ] YES
-      
+
 ☐ 15. Professional docstrings with standards
       Format: Test ID, Severity, CVSS, Standard, Description
-      
+
 ☐ 16. Parametrized tests where applicable
       Multiple payloads tested: [ ] YES (if applicable)
 ```
@@ -1009,11 +1009,11 @@ Stop! Before writing exploitation code, complete this checklist:
 ```
 ☐ 17. I can explain this test to a security auditor
       Can explain: [ ] What it tests [ ] Why it matters [ ] How it discovers
-      
+
 ☐ 18. This test will work on sites I haven't seen yet
       Generic enough: [ ] YES
       Not site-specific: [ ] YES
-      
+
 ☐ 19. Ready to write code
       All above checkboxes completed: [ ] YES
 ```
@@ -1108,7 +1108,7 @@ Security & Exploitation Test Suite
 Module: test_[module]_security.py
 Author: Arévalo, Marc
 
-Description: 
+Description:
 Active security testing suite that attempts to exploit vulnerabilities in [module].
 Tests discover security issues through real exploitation attempts.
 
@@ -1186,7 +1186,7 @@ def browser(request):
     """Cross-browser fixture for security testing"""
     browser_name = request.config.getoption("--browser", default="chrome").lower()
     driver = None
-    
+
     if browser_name == "chrome":
         service = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()
@@ -1196,12 +1196,12 @@ def browser(request):
         driver = webdriver.Chrome(service=service, options=options)
     else:
         pytest.fail(f"Unsupported browser: {browser_name}")
-    
+
     driver.maximize_window()
     driver.implicitly_wait(TIMEOUT)
-    
+
     yield driver
-    
+
     driver.quit()
 
 
@@ -1209,10 +1209,10 @@ def browser(request):
 def authenticated_session(browser):
     """Setup authenticated session for authorization tests"""
     browser.get(BASE_URL)
-    
+
     # Perform authentication if needed
     # login(browser, TEST_USERNAME, TEST_PASSWORD)
-    
+
     return browser
 
 
@@ -1260,7 +1260,7 @@ def check_client_side_storage(browser):
         local_storage = browser.execute_script("return JSON.stringify(localStorage);")
         session_storage = browser.execute_script("return JSON.stringify(sessionStorage);")
         cookies = browser.get_cookies()
-        
+
         return {
             "localStorage": local_storage,
             "sessionStorage": session_storage,
@@ -1300,31 +1300,31 @@ def log_exploitation_attempt(test_id, vulnerability, payload, result, cvss_score
 @pytest.mark.critical
 def test_negative_quantity_exploit_BL_001(browser):
     """TC-SEC-[MOD]-BL-001: Negative Quantity Price Manipulation
-    
+
     Severity: CRITICAL
     CVSS: 9.1 (AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H)
     Standard: OWASP WSTG-BUSL-10 (Business Logic Testing)
-    
+
     Exploitation Attempt:
     Add items with negative quantities to manipulate cart total
     and obtain discounts through business logic flaw.
     """
     logging.info("TC-SEC-[MOD]-BL-001: Attempting negative quantity exploit")
-    
+
     browser.get(BASE_URL)
-    
+
     # Attempt to add item with negative quantity
     # Adapt this to your module's specific functionality
     try:
         browser.find_element(*QUANTITY_FIELD).send_keys("-5")
         browser.find_element(*SUBMIT_BUTTON).click()
-        
+
         # Check if exploit succeeded
         time.sleep(2)
-        
+
         # Get price/total (adapt to your module)
         final_price = browser.find_element(*PRICE_ELEMENT).text
-        
+
         # If negative quantity accepted, exploitation succeeded
         if "-" in final_price or "discount" in final_price.lower():
             log_exploitation_attempt(
@@ -1336,10 +1336,10 @@ def test_negative_quantity_exploit_BL_001(browser):
                 standard="OWASP WSTG-BUSL-10"
             )
             pytest.fail(f"VULNERABILITY: Negative quantities accepted - Price: {final_price}")
-        
+
         logging.info("Negative quantity exploit failed (system secure)")
         assert True
-        
+
     except Exception as e:
         logging.info(f"Exploit blocked: {e}")
         assert True
@@ -1350,36 +1350,36 @@ def test_negative_quantity_exploit_BL_001(browser):
 @pytest.mark.critical
 def test_price_manipulation_BL_002(browser):
     """TC-SEC-[MOD]-BL-002: Client-Side Price Manipulation
-    
+
     Severity: CRITICAL
     CVSS: 9.1
     Standard: OWASP Top 10 2021 - A04 (Insecure Design)
-    
+
     Exploitation Attempt:
     Modify price using JavaScript before submission.
     """
     logging.info("TC-SEC-[MOD]-BL-002: Attempting price manipulation")
-    
+
     browser.get(BASE_URL)
-    
+
     # Capture original price
     original_price = browser.find_element(*PRICE_ELEMENT).text
-    
+
     # Attempt to modify price via JavaScript
     execute_javascript_exploit(browser, """
         document.querySelector('#price').innerText = '$0.01';
         // Adapt selector to your module
     """)
-    
+
     time.sleep(1)
-    
+
     # Submit and check if manipulation worked
     browser.find_element(*SUBMIT_BUTTON).click()
     time.sleep(2)
-    
+
     # Verify if exploit succeeded (adapt verification to your module)
     confirmation = browser.page_source
-    
+
     if "$0.01" in confirmation or "0.01" in confirmation:
         log_exploitation_attempt(
             test_id="TC-SEC-[MOD]-BL-002",
@@ -1390,7 +1390,7 @@ def test_price_manipulation_BL_002(browser):
             standard="OWASP Top 10 2021 - A04"
         )
         pytest.fail("VULNERABILITY: Client-side price manipulation successful")
-    
+
     logging.info("Price manipulation blocked (system secure)")
     assert True
 
@@ -1400,29 +1400,29 @@ def test_price_manipulation_BL_002(browser):
 @pytest.mark.high
 def test_integer_overflow_BL_003(browser):
     """TC-SEC-[MOD]-BL-003: Integer Overflow Attack
-    
+
     Severity: HIGH
     CVSS: 7.5
     Standard: CWE-190 (Integer Overflow)
-    
+
     Exploitation Attempt:
     Send extremely large numbers to trigger integer overflow.
     """
     logging.info("TC-SEC-[MOD]-BL-003: Attempting integer overflow")
-    
+
     browser.get(BASE_URL)
-    
+
     # Attempt maximum 32-bit integer
     overflow_value = "2147483647"  # Max int32
-    
+
     inject_payload(browser, QUANTITY_FIELD, overflow_value)
     browser.find_element(*SUBMIT_BUTTON).click()
-    
+
     time.sleep(2)
-    
+
     # Check if system handled overflow
     page_source = browser.page_source
-    
+
     if "error" not in page_source.lower() and check_exploitation_success(browser, "success"):
         log_exploitation_attempt(
             test_id="TC-SEC-[MOD]-BL-003",
@@ -1433,7 +1433,7 @@ def test_integer_overflow_BL_003(browser):
             standard="CWE-190"
         )
         pytest.fail(f"VULNERABILITY: Integer overflow - Accepted {overflow_value}")
-    
+
     logging.info("Integer overflow handled correctly")
     assert True
 
@@ -1443,16 +1443,16 @@ def test_integer_overflow_BL_003(browser):
 @pytest.mark.critical
 def test_race_condition_BL_004(browser):
     """TC-SEC-[MOD]-BL-004: Race Condition Exploit
-    
+
     Severity: CRITICAL
     CVSS: 8.1
     Standard: CWE-362 (Race Condition)
-    
+
     Exploitation Attempt:
     Submit concurrent requests to exploit race conditions.
     """
     logging.info("TC-SEC-[MOD]-BL-004: Attempting race condition exploit")
-    
+
     def submit_action(driver):
         try:
             driver.find_element(*SUBMIT_BUTTON).click()
@@ -1460,14 +1460,14 @@ def test_race_condition_BL_004(browser):
             return True
         except:
             return False
-    
+
     browser.get(BASE_URL)
-    
+
     # Simulate concurrent submissions
     results = simulate_concurrent_requests(browser, submit_action, CONCURRENT_REQUESTS)
-    
+
     successful_exploits = sum(results)
-    
+
     # If multiple submissions succeeded, race condition exists
     if successful_exploits > 1:
         log_exploitation_attempt(
@@ -1479,7 +1479,7 @@ def test_race_condition_BL_004(browser):
             standard="CWE-362"
         )
         pytest.fail(f"VULNERABILITY: Race condition - {successful_exploits} concurrent operations")
-    
+
     logging.info("Race condition protected")
     assert True
 
@@ -1500,26 +1500,26 @@ def test_race_condition_BL_004(browser):
 ])
 def test_sql_injection_INJ_001(browser, sql_payload):
     """TC-SEC-[MOD]-INJ-001: SQL Injection Vulnerability
-    
+
     Severity: CRITICAL
     CVSS: 9.8
     Standard: OWASP Top 10 2021 - A03 (Injection)
     Reference: OWASP ASVS v5.0-1.2.5
-    
+
     Exploitation Attempt:
     Inject SQL payloads to bypass authentication or access database.
     """
     logging.info(f"TC-SEC-[MOD]-INJ-001: Testing SQL injection - Payload: {sql_payload}")
-    
+
     browser.get(BASE_URL)
-    
+
     # Inject payload into vulnerable field
     inject_payload(browser, VULNERABLE_FIELD_1, sql_payload)
     inject_payload(browser, VULNERABLE_FIELD_2, "test")
-    
+
     browser.find_element(*SUBMIT_BUTTON).click()
     time.sleep(2)
-    
+
     # Check if SQL injection succeeded
     if check_exploitation_success(browser, "success"):
         log_exploitation_attempt(
@@ -1531,7 +1531,7 @@ def test_sql_injection_INJ_001(browser, sql_payload):
             standard="OWASP ASVS v5.0-1.2.5"
         )
         pytest.fail(f"VULNERABILITY: SQL Injection successful with payload: {sql_payload}")
-    
+
     logging.info(f"SQL injection blocked: {sql_payload}")
     assert True
 
@@ -1548,31 +1548,31 @@ def test_sql_injection_INJ_001(browser, sql_payload):
 ])
 def test_xss_attack_INJ_002(browser, xss_payload):
     """TC-SEC-[MOD]-INJ-002: Cross-Site Scripting (XSS)
-    
+
     Severity: CRITICAL
     CVSS: 8.8
     Standard: OWASP Top 10 2021 - A03 (Injection)
     Reference: OWASP ASVS v5.0-1.2.1
-    
+
     Exploitation Attempt:
     Inject XSS payloads to execute JavaScript in victim's browser.
     """
     logging.info(f"TC-SEC-[MOD]-INJ-002: Testing XSS - Payload: {xss_payload}")
-    
+
     browser.get(BASE_URL)
-    
+
     # Inject XSS payload
     inject_payload(browser, VULNERABLE_FIELD_1, xss_payload)
     browser.find_element(*SUBMIT_BUTTON).click()
-    
+
     time.sleep(2)
-    
+
     # Check if XSS executed (alert would appear)
     try:
         alert = browser.switch_to.alert
         alert_text = alert.text
         alert.accept()
-        
+
         if 'XSS' in alert_text:
             log_exploitation_attempt(
                 test_id="TC-SEC-[MOD]-INJ-002",
@@ -1585,7 +1585,7 @@ def test_xss_attack_INJ_002(browser, xss_payload):
             pytest.fail(f"VULNERABILITY: XSS successful with payload: {xss_payload}")
     except:
         pass  # No alert = XSS blocked
-    
+
     logging.info(f"XSS blocked: {xss_payload}")
     assert True
 
@@ -1599,43 +1599,43 @@ def test_xss_attack_INJ_002(browser, xss_payload):
 @pytest.mark.critical
 def test_rate_limiting_BOT_001(browser):
     """TC-SEC-[MOD]-BOT-001: Rate Limiting Protection
-    
+
     Severity: CRITICAL
     CVSS: 9.1
     Standard: OWASP API Security Top 10 - API6 (Unrestricted Access)
-    
+
     Exploitation Attempt:
     Send rapid automated requests to verify rate limiting.
     """
     logging.info("TC-SEC-[MOD]-BOT-001: Testing rate limiting")
-    
+
     browser.get(BASE_URL)
-    
+
     successful_requests = 0
     blocked_requests = 0
-    
+
     for i in range(RATE_LIMIT_REQUESTS):
         try:
             browser.find_element(*SUBMIT_BUTTON).click()
             time.sleep(0.001)  # Very fast requests
-            
+
             if check_exploitation_success(browser, "success", timeout=1):
                 successful_requests += 1
             else:
                 blocked_requests += 1
-                
+
             # If blocked, rate limiting works
             if blocked_requests > 0:
                 logging.info(f"Rate limit triggered after {successful_requests} requests")
                 assert True
                 return
-                
+
         except Exception as e:
             # Exception might indicate rate limiting
             logging.info(f"Rate limit triggered: {e}")
             assert True
             return
-    
+
     # If ALL requests succeeded, no rate limiting
     if successful_requests >= RATE_LIMIT_REQUESTS:
         log_exploitation_attempt(
@@ -1654,18 +1654,18 @@ def test_rate_limiting_BOT_001(browser):
 @pytest.mark.high
 def test_captcha_presence_BOT_002(browser):
     """TC-SEC-[MOD]-BOT-002: CAPTCHA Protection
-    
+
     Severity: HIGH
     CVSS: 7.5
     Standard: OWASP Automated Threats OAT-021
-    
+
     Discovery Test:
     Check if CAPTCHA is present to prevent automated abuse.
     """
     logging.info("TC-SEC-[MOD]-BOT-002: Checking CAPTCHA presence")
-    
+
     browser.get(BASE_URL)
-    
+
     # Look for common CAPTCHA implementations
     captcha_indicators = [
         (By.CLASS_NAME, "g-recaptcha"),           # Google reCAPTCHA
@@ -1674,7 +1674,7 @@ def test_captcha_presence_BOT_002(browser):
         (By.XPATH, "//iframe[contains(@src, 'recaptcha')]"),
         (By.XPATH, "//iframe[contains(@src, 'hcaptcha')]"),
     ]
-    
+
     captcha_found = False
     for locator in captcha_indicators:
         try:
@@ -1684,7 +1684,7 @@ def test_captcha_presence_BOT_002(browser):
             break
         except:
             continue
-    
+
     if not captcha_found:
         log_exploitation_attempt(
             test_id="TC-SEC-[MOD]-BOT-002",
@@ -1695,7 +1695,7 @@ def test_captcha_presence_BOT_002(browser):
             standard="OWASP OAT-021"
         )
         pytest.fail("VULNERABILITY: No CAPTCHA protection found")
-    
+
     logging.info("CAPTCHA protection present")
     assert True
 
@@ -1709,36 +1709,36 @@ def test_captcha_presence_BOT_002(browser):
 @pytest.mark.critical
 def test_card_data_client_storage_PCI_001(browser):
     """TC-SEC-[MOD]-PCI-001: PCI-DSS Card Data Storage
-    
+
     Severity: CRITICAL
     CVSS: 10.0
     Standard: PCI-DSS 4.0.1 Requirement 3.2
-    
+
     Compliance Check:
     Verify credit card data NOT stored in client-side storage.
     """
     logging.info("TC-SEC-[MOD]-PCI-001: Checking card data storage")
-    
+
     browser.get(BASE_URL)
-    
+
     # Simulate entering card data (adapt to your module)
     test_card = "4111111111111111"
     inject_payload(browser, VULNERABLE_FIELD_1, test_card)
     browser.find_element(*SUBMIT_BUTTON).click()
-    
+
     time.sleep(2)
-    
+
     # Check all client-side storage
     storage = check_client_side_storage(browser)
-    
+
     if storage:
         # Search for card patterns
         sensitive_patterns = [test_card, "4111", "card", "cvv", "creditcard"]
-        
+
         for pattern in sensitive_patterns:
-            if (pattern in storage["localStorage"].lower() or 
+            if (pattern in storage["localStorage"].lower() or
                 pattern in storage["sessionStorage"].lower()):
-                
+
                 log_exploitation_attempt(
                     test_id="TC-SEC-[MOD]-PCI-001",
                     vulnerability="Card data stored client-side",
@@ -1748,7 +1748,7 @@ def test_card_data_client_storage_PCI_001(browser):
                     standard="PCI-DSS 4.0.1 Req 3.2"
                 )
                 pytest.fail(f"PCI-DSS VIOLATION: Card pattern '{pattern}' found in client storage")
-    
+
     logging.info("Card data not stored client-side (PCI-DSS compliant)")
     assert True
 
@@ -1758,34 +1758,34 @@ def test_card_data_client_storage_PCI_001(browser):
 @pytest.mark.critical
 def test_cvv_storage_prohibition_PCI_002(browser):
     """TC-SEC-[MOD]-PCI-002: CVV Storage Prohibition
-    
+
     Severity: CRITICAL
     CVSS: 10.0
     Standard: PCI-DSS 4.0.1 Requirement 3.2
-    
+
     Compliance Check:
     Verify CVV is NEVER stored anywhere (absolute prohibition).
     """
     logging.info("TC-SEC-[MOD]-PCI-002: Checking CVV storage prohibition")
-    
+
     browser.get(BASE_URL)
-    
+
     # Attempt to inject CVV into storage
     execute_javascript_exploit(browser, """
         document.cookie = 'cvv=123; path=/';
         localStorage.setItem('cvv', '123');
         sessionStorage.setItem('cvv', '123');
     """)
-    
+
     time.sleep(1)
-    
+
     # Verify CVV was NOT stored
     storage = check_client_side_storage(browser)
-    
+
     if storage:
         local_cvv = execute_javascript_exploit(browser, "return localStorage.getItem('cvv');")
         session_cvv = execute_javascript_exploit(browser, "return sessionStorage.getItem('cvv');")
-        
+
         if local_cvv or session_cvv or any('cvv' in str(c) for c in storage["cookies"]):
             log_exploitation_attempt(
                 test_id="TC-SEC-[MOD]-PCI-002",
@@ -1796,7 +1796,7 @@ def test_cvv_storage_prohibition_PCI_002(browser):
                 standard="PCI-DSS 4.0.1 Req 3.2"
             )
             pytest.fail("PCI-DSS VIOLATION: CVV storage detected")
-    
+
     logging.info("CVV not stored (PCI-DSS compliant)")
     assert True
 
@@ -1806,22 +1806,22 @@ def test_cvv_storage_prohibition_PCI_002(browser):
 @pytest.mark.high
 def test_tls_version_PCI_003(browser):
     """TC-SEC-[MOD]-PCI-003: TLS Version Requirement
-    
+
     Severity: HIGH
     CVSS: 8.1
     Standard: PCI-DSS 4.0.1 Requirement 4.2
-    
+
     Compliance Check:
     Verify TLS 1.2 or higher is enforced.
     """
     logging.info("TC-SEC-[MOD]-PCI-003: Checking TLS version")
-    
+
     try:
         response = requests.get(BASE_URL, timeout=5)
-        
+
         if hasattr(response, 'raw') and hasattr(response.raw, 'version'):
             ssl_version = response.raw.version
-            
+
             # TLS versions: 771 = TLS 1.2, 772 = TLS 1.3
             if ssl_version < 771:
                 log_exploitation_attempt(
@@ -1833,10 +1833,10 @@ def test_tls_version_PCI_003(browser):
                     standard="PCI-DSS 4.0.1 Req 4.2"
                 )
                 pytest.fail(f"PCI-DSS VIOLATION: TLS version {ssl_version} < 1.2 (771)")
-        
+
         logging.info("TLS 1.2+ enforced (PCI-DSS compliant)")
         assert True
-        
+
     except Exception as e:
         logging.error(f"TLS check failed: {e}")
         pytest.skip("Could not verify TLS version")
@@ -1851,32 +1851,32 @@ def test_tls_version_PCI_003(browser):
 @pytest.mark.high
 def test_session_fixation_AUTH_001(browser):
     """TC-SEC-[MOD]-AUTH-001: Session Fixation Attack
-    
+
     Severity: HIGH
     CVSS: 8.1
     Standard: OWASP Top 10 2021 - A07 (Authentication Failures)
     Reference: OWASP ASVS v5.0-3.2.1
-    
+
     Exploitation Attempt:
     Check if session ID changes after authentication.
     """
     logging.info("TC-SEC-[MOD]-AUTH-001: Testing session fixation")
-    
+
     browser.get(BASE_URL)
-    
+
     # Capture session before authentication
     cookies_before = browser.get_cookies()
     session_before = next((c['value'] for c in cookies_before if 'session' in c['name'].lower()), None)
-    
+
     # Perform authentication (adapt to your module)
     # login(browser, TEST_USERNAME, TEST_PASSWORD)
-    
+
     time.sleep(2)
-    
+
     # Capture session after authentication
     cookies_after = browser.get_cookies()
     session_after = next((c['value'] for c in cookies_after if 'session' in c['name'].lower()), None)
-    
+
     # Session ID should change after login
     if session_before and session_after and session_before == session_after:
         log_exploitation_attempt(
@@ -1888,7 +1888,7 @@ def test_session_fixation_AUTH_001(browser):
             standard="OWASP ASVS v5.0-3.2.1"
         )
         pytest.fail("VULNERABILITY: Session fixation - Session ID unchanged after login")
-    
+
     logging.info("Session fixation protected (session ID regenerated)")
     assert True
 
@@ -1902,27 +1902,27 @@ def test_session_fixation_AUTH_001(browser):
 @pytest.mark.critical
 def test_idor_vulnerability_AUTHZ_001(browser):
     """TC-SEC-[MOD]-AUTHZ-001: Insecure Direct Object Reference (IDOR)
-    
+
     Severity: CRITICAL
     CVSS: 9.1
     Standard: OWASP Top 10 2021 - A01 (Broken Access Control)
     Reference: CWE-639
-    
+
     Exploitation Attempt:
     Access resources by manipulating object IDs.
     """
     logging.info("TC-SEC-[MOD]-AUTHZ-001: Testing IDOR vulnerability")
-    
+
     # Attempt to access resource with predictable ID
     try:
         # Adapt URL to your module
         browser.get(f"{BASE_URL}/resource/1")
         time.sleep(2)
-        
+
         # Try to access another user's resource
         browser.get(f"{BASE_URL}/resource/2")
         time.sleep(2)
-        
+
         # Check if access granted without authorization
         if "error" not in browser.page_source.lower() and "unauthorized" not in browser.page_source.lower():
             log_exploitation_attempt(
@@ -1934,10 +1934,10 @@ def test_idor_vulnerability_AUTHZ_001(browser):
                 standard="OWASP Top 10 2021 - A01"
             )
             pytest.fail("VULNERABILITY: IDOR - Unauthorized resource access")
-        
+
         logging.info("IDOR protected (access denied)")
         assert True
-        
+
     except Exception as e:
         logging.info(f"IDOR test blocked: {e}")
         assert True
@@ -1952,18 +1952,18 @@ def test_idor_vulnerability_AUTHZ_001(browser):
 @pytest.mark.high
 def test_csrf_protection_CSRF_001(browser):
     """TC-SEC-[MOD]-CSRF-001: CSRF Token Validation
-    
+
     Severity: HIGH
     CVSS: 7.5
     Standard: OWASP Top 10 2021 - A01 (Broken Access Control)
-    
+
     Discovery Test:
     Check if CSRF tokens are implemented.
     """
     logging.info("TC-SEC-[MOD]-CSRF-001: Checking CSRF protection")
-    
+
     browser.get(BASE_URL)
-    
+
     # Look for CSRF tokens
     csrf_indicators = [
         "csrf",
@@ -1971,10 +1971,10 @@ def test_csrf_protection_CSRF_001(browser):
         "_token",
         "authenticity_token",
     ]
-    
+
     page_source = browser.page_source.lower()
     csrf_found = any(indicator in page_source for indicator in csrf_indicators)
-    
+
     if not csrf_found:
         log_exploitation_attempt(
             test_id="TC-SEC-[MOD]-CSRF-001",
@@ -1985,7 +1985,7 @@ def test_csrf_protection_CSRF_001(browser):
             standard="OWASP Top 10 2021 - A01"
         )
         pytest.fail("VULNERABILITY: No CSRF protection detected")
-    
+
     logging.info("CSRF protection present")
     assert True
 
@@ -1999,33 +1999,33 @@ def test_csrf_protection_CSRF_001(browser):
 @pytest.mark.medium
 def test_keyboard_navigation_ACC_001(browser):
     """TC-SEC-[MOD]-ACC-001: Keyboard Accessibility
-    
+
     Severity: MEDIUM
     CVSS: 4.3
     Standard: WCAG 2.1 Success Criterion 2.1.1 (Level A)
-    
+
     Compliance Check:
     Verify all functionality accessible via keyboard.
     """
     logging.info("TC-SEC-[MOD]-ACC-001: Testing keyboard accessibility")
-    
+
     browser.get(BASE_URL)
-    
+
     # Test Tab navigation
     from selenium.webdriver.common.keys import Keys
-    
+
     body = browser.find_element(By.TAG_NAME, "body")
-    
+
     # Count focusable elements
     focusable_count = 0
     for _ in range(20):  # Try 20 tabs
         body.send_keys(Keys.TAB)
         time.sleep(0.1)
-        
+
         active_element = browser.switch_to.active_element
         if active_element.tag_name not in ['body', 'html']:
             focusable_count += 1
-    
+
     if focusable_count < 3:  # At least 3 interactive elements should be focusable
         log_exploitation_attempt(
             test_id="TC-SEC-[MOD]-ACC-001",
@@ -2036,7 +2036,7 @@ def test_keyboard_navigation_ACC_001(browser):
             standard="WCAG 2.1 - 2.1.1"
         )
         pytest.fail(f"WCAG VIOLATION: Only {focusable_count} keyboard-accessible elements")
-    
+
     logging.info(f"Keyboard accessibility OK ({focusable_count} focusable elements)")
     assert True
 
@@ -2378,9 +2378,9 @@ import logging
 - TEMPLATE_functional_business_rules.md (Companion template)
 - README_template.md (Documentation template)
 
-**Author:** Arévalo, Marc  
-**Version:** 2.0 (Universal Edition)  
-**Date:** November 2025  
+**Author:** Arévalo, Marc
+**Version:** 2.0 (Universal Edition)
+**Date:** November 2025
 **Warning:** Use only in authorized testing environments
 
 **Quick Start:**

@@ -1,7 +1,7 @@
 # [MODULE_NAME] Functional Tests - README Template
 
-> **Template Version:** 1.0  
-> **Last Updated:** November 2025  
+> **Template Version:** 1.0
+> **Last Updated:** November 2025
 > **Purpose:** Standard structure for documenting functional test suites
 
 ---
@@ -94,7 +94,7 @@ This suite covers:
 
 ### Core Principle
 
-> **Tests DISCOVER behavior by EXECUTING actions and OBSERVING results.**  
+> **Tests DISCOVER behavior by EXECUTING actions and OBSERVING results.**
 > **Tests NEVER ASSUME how the application will behave.**
 
 ### The DISCOVER Formula
@@ -103,7 +103,7 @@ This suite covers:
 DISCOVER = EXECUTE + OBSERVE + DECIDE
 
 1. EXECUTE: Run the actual action ([action description])
-2. OBSERVE: Capture the real system response  
+2. OBSERVE: Capture the real system response
 3. DECIDE: Compare against objective standards (OWASP, NIST, ISO, WCAG)
 ```
 
@@ -121,15 +121,15 @@ def test_[feature]():
 def test_[feature]_enforcement_BR_XXX():
     """
     [STANDARD_SECTION]: [Feature] should be implemented
-    
+
     Discovers if system has [feature].
     """
     # EXECUTE: Perform [action]
     perform_[action](browser, params)
-    
+
     # OBSERVE: Check if [feature] exists
     feature_exists = check_for_[feature](browser)
-    
+
     # DECIDE: According to [STANDARD], [feature] should exist
     if not feature_exists:
         logging.critical("VIOLATION: NO [FEATURE]")
@@ -598,7 +598,7 @@ pytest test_[module]_functionality.py -v -s --log-cli-level=DEBUG --tb=long
 
 **Sections Validated:**
 - **2.x:** Authentication
-- **3.x:** Session Management  
+- **3.x:** Session Management
 - **5.x:** Validation, Sanitization
 - **[X.x]:** [Additional sections]
 

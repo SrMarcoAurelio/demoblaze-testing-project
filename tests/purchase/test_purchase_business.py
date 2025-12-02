@@ -13,32 +13,38 @@ Philosophy: DISCOVER (EXECUTE → OBSERVE → DECIDE)
 All tests perform real actions, observe actual results, and decide based on objective standards.
 """
 
-import pytest
+import datetime
 import logging
 import time
-import datetime
-from selenium.webdriver.support.ui import WebDriverWait
+
+import pytest
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
 from pages.cart_page import CartPage
-from pages.purchase_page import PurchasePage
 from pages.login_page import LoginPage
+from pages.purchase_page import PurchasePage
 
 logger = logging.getLogger(__name__)
-
 
 
 @pytest.mark.business_rules
 @pytest.mark.validation
 @pytest.mark.critical
-@pytest.mark.parametrize("field_name,test_data", [
-    ("name", ""),
-    ("country", ""),
-    ("city", ""),
-    ("card", ""),
-    ("month", ""),
-    ("year", "")
-])
-def test_empty_field_validation_VAL_001(browser, base_url, field_name, test_data):
+@pytest.mark.parametrize(
+    "field_name,test_data",
+    [
+        ("name", ""),
+        ("country", ""),
+        ("city", ""),
+        ("card", ""),
+        ("month", ""),
+        ("year", ""),
+    ],
+)
+def test_empty_field_validation_VAL_001(
+    browser, base_url, field_name, test_data
+):
     """
     TC-PURCHASE-VAL-001: Empty Field Validation
     Standard: ISO 25010 (Software Quality - Data Validation)
@@ -56,12 +62,12 @@ def test_empty_field_validation_VAL_001(browser, base_url, field_name, test_data
     purchase.wait_for_order_modal()
 
     form_data = {
-        'name': 'QA Tester',
-        'country': 'Spain',
-        'city': 'Barcelona',
-        'card': '1234567890123456',
-        'month': '12',
-        'year': '2028'
+        "name": "QA Tester",
+        "country": "Spain",
+        "city": "Barcelona",
+        "card": "1234567890123456",
+        "month": "12",
+        "year": "2028",
     }
     form_data[field_name] = test_data  # Set target field to empty
 
@@ -73,8 +79,12 @@ def test_empty_field_validation_VAL_001(browser, base_url, field_name, test_data
     alert_text = purchase.get_alert_text(timeout=1)
 
     if is_confirmed:
-        logger.error(f"✗ VIOLATION: Purchase succeeded with empty {field_name} field")
-        pytest.fail(f"DISCOVERED: Empty field validation missing for '{field_name}'")
+        logger.error(
+            f"✗ VIOLATION: Purchase succeeded with empty {field_name} field"
+        )
+        pytest.fail(
+            f"DISCOVERED: Empty field validation missing for '{field_name}'"
+        )
     else:
         logger.info(f"✓ Purchase correctly blocked with empty {field_name}")
 
@@ -82,12 +92,15 @@ def test_empty_field_validation_VAL_001(browser, base_url, field_name, test_data
 @pytest.mark.business_rules
 @pytest.mark.validation
 @pytest.mark.high
-@pytest.mark.parametrize("invalid_card", [
-    "ABCD-1234-5678-9012",  # Letters
-    "1234-ABCD-5678-9012",  # Mixed
-    "XXXX-XXXX-XXXX-XXXX",  # All letters
-    "abcd1234567890ef",      # Lowercase letters
-])
+@pytest.mark.parametrize(
+    "invalid_card",
+    [
+        "ABCD-1234-5678-9012",  # Letters
+        "1234-ABCD-5678-9012",  # Mixed
+        "XXXX-XXXX-XXXX-XXXX",  # All letters
+        "abcd1234567890ef",  # Lowercase letters
+    ],
+)
 def test_invalid_card_format_VAL_002(browser, base_url, invalid_card):
     """
     TC-PURCHASE-VAL-002: Invalid Card Format Validation
@@ -110,7 +123,7 @@ def test_invalid_card_format_VAL_002(browser, base_url, invalid_card):
         city="Barcelona",
         card=invalid_card,
         month="12",
-        year="2028"
+        year="2028",
     )
     purchase.click_purchase()
 
@@ -118,21 +131,30 @@ def test_invalid_card_format_VAL_002(browser, base_url, invalid_card):
     is_confirmed = purchase.is_purchase_confirmed(timeout=3)
 
     if is_confirmed:
-        logger.error(f"✗ VIOLATION: Invalid card format accepted: {invalid_card}")
-        pytest.fail(f"DISCOVERED: Card format validation missing - accepted '{invalid_card}'")
+        logger.error(
+            f"✗ VIOLATION: Invalid card format accepted: {invalid_card}"
+        )
+        pytest.fail(
+            f"DISCOVERED: Card format validation missing - accepted '{invalid_card}'"
+        )
     else:
-        logger.info(f"✓ Invalid card format correctly rejected: {invalid_card}")
+        logger.info(
+            f"✓ Invalid card format correctly rejected: {invalid_card}"
+        )
 
 
 @pytest.mark.business_rules
 @pytest.mark.validation
 @pytest.mark.high
-@pytest.mark.parametrize("short_card", [
-    "123",           # Too short
-    "12345678",      # 8 digits
-    "123456789012",  # 12 digits
-    "12345",         # 5 digits
-])
+@pytest.mark.parametrize(
+    "short_card",
+    [
+        "123",  # Too short
+        "12345678",  # 8 digits
+        "123456789012",  # 12 digits
+        "12345",  # 5 digits
+    ],
+)
 def test_invalid_card_length_VAL_003(browser, base_url, short_card):
     """
     TC-PURCHASE-VAL-003: Invalid Card Length Validation
@@ -155,7 +177,7 @@ def test_invalid_card_length_VAL_003(browser, base_url, short_card):
         city="Barcelona",
         card=short_card,
         month="12",
-        year="2028"
+        year="2028",
     )
     purchase.click_purchase()
 
@@ -164,7 +186,9 @@ def test_invalid_card_length_VAL_003(browser, base_url, short_card):
 
     if is_confirmed:
         logger.error(f"✗ VIOLATION: Short card accepted: {short_card}")
-        pytest.fail(f"DISCOVERED: Card length validation missing - accepted '{short_card}'")
+        pytest.fail(
+            f"DISCOVERED: Card length validation missing - accepted '{short_card}'"
+        )
     else:
         logger.info(f"✓ Short card correctly rejected: {short_card}")
 
@@ -196,7 +220,7 @@ def test_expired_card_validation_VAL_004(browser, base_url):
         city="Barcelona",
         card="1234567890123456",
         month="12",
-        year=expired_year
+        year=expired_year,
     )
     purchase.click_purchase()
 
@@ -204,7 +228,9 @@ def test_expired_card_validation_VAL_004(browser, base_url):
     is_confirmed = purchase.is_purchase_confirmed(timeout=3)
 
     if is_confirmed:
-        logger.error(f"✗ VIOLATION: Expired card accepted (year: {expired_year})")
+        logger.error(
+            f"✗ VIOLATION: Expired card accepted (year: {expired_year})"
+        )
         pytest.fail(f"DISCOVERED: Expired card validation missing")
     else:
         logger.info(f"✓ Expired card correctly rejected")
@@ -213,12 +239,15 @@ def test_expired_card_validation_VAL_004(browser, base_url):
 @pytest.mark.business_rules
 @pytest.mark.validation
 @pytest.mark.medium
-@pytest.mark.parametrize("invalid_month", [
-    "00",  # Too low
-    "13",  # Too high
-    "99",  # Way too high
-    "-1",  # Negative
-])
+@pytest.mark.parametrize(
+    "invalid_month",
+    [
+        "00",  # Too low
+        "13",  # Too high
+        "99",  # Way too high
+        "-1",  # Negative
+    ],
+)
 def test_invalid_month_validation_VAL_005(browser, base_url, invalid_month):
     """
     TC-PURCHASE-VAL-005: Invalid Month Validation
@@ -241,7 +270,7 @@ def test_invalid_month_validation_VAL_005(browser, base_url, invalid_month):
         city="Barcelona",
         card="1234567890123456",
         month=invalid_month,
-        year="2028"
+        year="2028",
     )
     purchase.click_purchase()
 
@@ -250,7 +279,9 @@ def test_invalid_month_validation_VAL_005(browser, base_url, invalid_month):
 
     if is_confirmed:
         logger.error(f"✗ VIOLATION: Invalid month accepted: {invalid_month}")
-        pytest.fail(f"DISCOVERED: Month validation missing - accepted '{invalid_month}'")
+        pytest.fail(
+            f"DISCOVERED: Month validation missing - accepted '{invalid_month}'"
+        )
     else:
         logger.info(f"✓ Invalid month correctly rejected: {invalid_month}")
 
@@ -258,13 +289,16 @@ def test_invalid_month_validation_VAL_005(browser, base_url, invalid_month):
 @pytest.mark.business_rules
 @pytest.mark.security
 @pytest.mark.critical
-@pytest.mark.parametrize("sql_payload", [
-    "' OR '1'='1",
-    "admin'--",
-    "') OR ('1'='1",
-    "' OR 1=1--",
-    "1' UNION SELECT NULL--",
-])
+@pytest.mark.parametrize(
+    "sql_payload",
+    [
+        "' OR '1'='1",
+        "admin'--",
+        "') OR ('1'='1",
+        "' OR 1=1--",
+        "1' UNION SELECT NULL--",
+    ],
+)
 def test_sql_injection_protection_VAL_006(browser, base_url, sql_payload):
     """
     TC-PURCHASE-VAL-006: SQL Injection Protection
@@ -289,7 +323,7 @@ def test_sql_injection_protection_VAL_006(browser, base_url, sql_payload):
         city="Barcelona",
         card="1234567890123456",
         month="12",
-        year="2028"
+        year="2028",
     )
     purchase.click_purchase()
 
@@ -297,16 +331,30 @@ def test_sql_injection_protection_VAL_006(browser, base_url, sql_payload):
     is_confirmed = purchase.is_purchase_confirmed(timeout=3)
     page_source = browser.page_source.lower()
 
-    error_indicators = ["sql syntax", "mysql", "postgresql", "sqlite", "database error"]
+    error_indicators = [
+        "sql syntax",
+        "mysql",
+        "postgresql",
+        "sqlite",
+        "database error",
+    ]
 
     if is_confirmed:
-        logger.critical(f"✗ CRITICAL: SQL injection may have succeeded: {sql_payload}")
-        pytest.fail(f"DISCOVERED: Possible SQL injection vulnerability with '{sql_payload}'")
+        logger.critical(
+            f"✗ CRITICAL: SQL injection may have succeeded: {sql_payload}"
+        )
+        pytest.fail(
+            f"DISCOVERED: Possible SQL injection vulnerability with '{sql_payload}'"
+        )
 
     for indicator in error_indicators:
         if indicator in page_source:
-            logger.critical(f"✗ CRITICAL: SQL error disclosure detected: {indicator}")
-            pytest.fail(f"DISCOVERED: SQL error disclosure with indicator '{indicator}'")
+            logger.critical(
+                f"✗ CRITICAL: SQL error disclosure detected: {indicator}"
+            )
+            pytest.fail(
+                f"DISCOVERED: SQL error disclosure with indicator '{indicator}'"
+            )
 
     logger.info(f"✓ SQL injection correctly prevented: {sql_payload}")
 
@@ -314,12 +362,15 @@ def test_sql_injection_protection_VAL_006(browser, base_url, sql_payload):
 @pytest.mark.business_rules
 @pytest.mark.security
 @pytest.mark.critical
-@pytest.mark.parametrize("xss_payload", [
-    "<script>alert('XSS')</script>",
-    "<img src=x onerror=alert('XSS')>",
-    "javascript:alert('XSS')",
-    "<svg/onload=alert('XSS')>",
-])
+@pytest.mark.parametrize(
+    "xss_payload",
+    [
+        "<script>alert('XSS')</script>",
+        "<img src=x onerror=alert('XSS')>",
+        "javascript:alert('XSS')",
+        "<svg/onload=alert('XSS')>",
+    ],
+)
 def test_xss_protection_VAL_007(browser, base_url, xss_payload):
     """
     TC-PURCHASE-VAL-007: XSS Protection
@@ -344,7 +395,7 @@ def test_xss_protection_VAL_007(browser, base_url, xss_payload):
         city=xss_payload,
         card="1234567890123456",
         month="12",
-        year="2028"
+        year="2028",
     )
     purchase.click_purchase()
 
@@ -356,14 +407,20 @@ def test_xss_protection_VAL_007(browser, base_url, xss_payload):
         page_source = browser.page_source
 
         if xss_payload in page_source and "<script>" in xss_payload:
-            logger.critical(f"✗ CRITICAL: XSS payload reflected unescaped: {xss_payload}")
-            pytest.fail(f"DISCOVERED: XSS vulnerability - unescaped payload in confirmation")
+            logger.critical(
+                f"✗ CRITICAL: XSS payload reflected unescaped: {xss_payload}"
+            )
+            pytest.fail(
+                f"DISCOVERED: XSS vulnerability - unescaped payload in confirmation"
+            )
 
         try:
             alert = browser.switch_to.alert
             alert_text = alert.text
             alert.accept()
-            logger.critical(f"✗ CRITICAL: XSS executed - alert triggered: {alert_text}")
+            logger.critical(
+                f"✗ CRITICAL: XSS executed - alert triggered: {alert_text}"
+            )
             pytest.fail(f"DISCOVERED: XSS execution detected")
         except:
             pass  # No alert = good
@@ -374,11 +431,14 @@ def test_xss_protection_VAL_007(browser, base_url, xss_payload):
 @pytest.mark.business_rules
 @pytest.mark.validation
 @pytest.mark.medium
-@pytest.mark.parametrize("long_input,field", [
-    ("A" * 1000, "name"),
-    ("B" * 1000, "country"),
-    ("C" * 1000, "city"),
-])
+@pytest.mark.parametrize(
+    "long_input,field",
+    [
+        ("A" * 1000, "name"),
+        ("B" * 1000, "country"),
+        ("C" * 1000, "city"),
+    ],
+)
 def test_max_length_validation_VAL_008(browser, base_url, long_input, field):
     """
     TC-PURCHASE-VAL-008: Maximum Length Validation
@@ -397,12 +457,12 @@ def test_max_length_validation_VAL_008(browser, base_url, long_input, field):
     purchase.wait_for_order_modal()
 
     form_data = {
-        'name': 'QA Tester',
-        'country': 'Spain',
-        'city': 'Barcelona',
-        'card': '1234567890123456',
-        'month': '12',
-        'year': '2028'
+        "name": "QA Tester",
+        "country": "Spain",
+        "city": "Barcelona",
+        "card": "1234567890123456",
+        "month": "12",
+        "year": "2028",
     }
     form_data[field] = long_input
 
@@ -415,7 +475,9 @@ def test_max_length_validation_VAL_008(browser, base_url, long_input, field):
     if is_confirmed:
         confirm_text = purchase.get_purchase_confirmation_text()
         if len(confirm_text) > 5000:
-            logger.warning(f"⚠ WARNING: Very long confirmation text ({len(confirm_text)} chars)")
+            logger.warning(
+                f"⚠ WARNING: Very long confirmation text ({len(confirm_text)} chars)"
+            )
 
     logger.info(f"✓ Long input handled for {field}: {len(long_input)} chars")
 
@@ -423,13 +485,18 @@ def test_max_length_validation_VAL_008(browser, base_url, long_input, field):
 @pytest.mark.business_rules
 @pytest.mark.validation
 @pytest.mark.medium
-@pytest.mark.parametrize("whitespace_input,field", [
-    ("   ", "name"),
-    ("\t\t\t", "country"),
-    ("\n\n\n", "city"),
-    ("     ", "card"),
-])
-def test_whitespace_only_validation_VAL_009(browser, base_url, whitespace_input, field):
+@pytest.mark.parametrize(
+    "whitespace_input,field",
+    [
+        ("   ", "name"),
+        ("\t\t\t", "country"),
+        ("\n\n\n", "city"),
+        ("     ", "card"),
+    ],
+)
+def test_whitespace_only_validation_VAL_009(
+    browser, base_url, whitespace_input, field
+):
     """
     TC-PURCHASE-VAL-009: Whitespace-Only Input Validation
     Standard: ISO 25010 (Software Quality)
@@ -447,12 +514,12 @@ def test_whitespace_only_validation_VAL_009(browser, base_url, whitespace_input,
     purchase.wait_for_order_modal()
 
     form_data = {
-        'name': 'QA Tester',
-        'country': 'Spain',
-        'city': 'Barcelona',
-        'card': '1234567890123456',
-        'month': '12',
-        'year': '2028'
+        "name": "QA Tester",
+        "country": "Spain",
+        "city": "Barcelona",
+        "card": "1234567890123456",
+        "month": "12",
+        "year": "2028",
     }
     form_data[field] = whitespace_input
 
@@ -466,7 +533,6 @@ def test_whitespace_only_validation_VAL_009(browser, base_url, whitespace_input,
         logger.warning(f"⚠ WARNING: Whitespace-only accepted for {field}")
     else:
         logger.info(f"✓ Whitespace-only handled for {field}")
-
 
 
 @pytest.mark.business_rules
@@ -522,7 +588,7 @@ def test_card_format_numeric_validation_BR_002(browser, base_url):
     non_numeric_cards = [
         "ABCD-EFGH-IJKL-MNOP",
         "1234-ABCD-5678-9012",
-        "VISA1234567890AB"
+        "VISA1234567890AB",
     ]
 
     violations = []
@@ -539,7 +605,7 @@ def test_card_format_numeric_validation_BR_002(browser, base_url):
             city="Barcelona",
             card=test_card,
             month="12",
-            year="2028"
+            year="2028",
         )
         purchase.click_purchase()
 
@@ -548,10 +614,14 @@ def test_card_format_numeric_validation_BR_002(browser, base_url):
 
         if is_confirmed:
             violations.append(test_card)
-            logger.error(f"✗ VIOLATION: Non-numeric card accepted: {test_card}")
+            logger.error(
+                f"✗ VIOLATION: Non-numeric card accepted: {test_card}"
+            )
 
     if violations:
-        pytest.fail(f"DISCOVERED: Non-numeric card validation missing - accepted {len(violations)} cards")
+        pytest.fail(
+            f"DISCOVERED: Non-numeric card validation missing - accepted {len(violations)} cards"
+        )
 
     logger.info("✓ Non-numeric card formats correctly rejected")
 
@@ -580,7 +650,7 @@ def test_card_length_16_digits_BR_003(browser, base_url):
         ("123456789012345", "15 digits"),
         ("12345678901234567", "17 digits"),
         ("123456789012", "12 digits"),
-        ("12345678901234567890", "20 digits")
+        ("12345678901234567890", "20 digits"),
     ]
 
     violations = []
@@ -597,7 +667,7 @@ def test_card_length_16_digits_BR_003(browser, base_url):
             city="Barcelona",
             card=test_card,
             month="12",
-            year="2028"
+            year="2028",
         )
         purchase.click_purchase()
 
@@ -609,7 +679,9 @@ def test_card_length_16_digits_BR_003(browser, base_url):
             logger.error(f"✗ VIOLATION: {description} card accepted")
 
     if violations:
-        pytest.fail(f"DISCOVERED: Card length validation missing - accepted {len(violations)} invalid lengths")
+        pytest.fail(
+            f"DISCOVERED: Card length validation missing - accepted {len(violations)} invalid lengths"
+        )
 
     logger.info("✓ Card length validation enforced (16 digits)")
 
@@ -655,7 +727,7 @@ def test_card_expiration_validation_BR_004(browser, base_url):
             city="Barcelona",
             card="1234567890123456",
             month=month,
-            year=year
+            year=year,
         )
         purchase.click_purchase()
 
@@ -667,7 +739,9 @@ def test_card_expiration_validation_BR_004(browser, base_url):
             logger.error(f"✗ VIOLATION: Expired card accepted: {month}/{year}")
 
     if violations:
-        pytest.fail(f"DISCOVERED: Expiration validation missing - accepted {len(violations)} expired cards")
+        pytest.fail(
+            f"DISCOVERED: Expiration validation missing - accepted {len(violations)} expired cards"
+        )
 
     logger.info("✓ Expired card validation enforced")
 
@@ -706,7 +780,7 @@ def test_month_range_01_to_12_BR_005(browser, base_url):
             city="Barcelona",
             card="1234567890123456",
             month=invalid_month,
-            year="2028"
+            year="2028",
         )
         purchase.click_purchase()
 
@@ -715,10 +789,14 @@ def test_month_range_01_to_12_BR_005(browser, base_url):
 
         if is_confirmed:
             violations.append(invalid_month)
-            logger.error(f"✗ VIOLATION: Invalid month accepted: {invalid_month}")
+            logger.error(
+                f"✗ VIOLATION: Invalid month accepted: {invalid_month}"
+            )
 
     if violations:
-        pytest.fail(f"DISCOVERED: Month range validation missing - accepted {len(violations)} invalid months")
+        pytest.fail(
+            f"DISCOVERED: Month range validation missing - accepted {len(violations)} invalid months"
+        )
 
     logger.info("✓ Month range validation enforced (01-12)")
 
@@ -761,12 +839,12 @@ def test_sql_injection_all_fields_BR_006(browser, base_url):
         purchase.wait_for_order_modal()
 
         form_data = {
-            'name': 'QA Tester',
-            'country': 'Spain',
-            'city': 'Barcelona',
-            'card': '1234567890123456',
-            'month': '12',
-            'year': '2028'
+            "name": "QA Tester",
+            "country": "Spain",
+            "city": "Barcelona",
+            "card": "1234567890123456",
+            "month": "12",
+            "year": "2028",
         }
         form_data[field_name] = payload
 
@@ -781,12 +859,19 @@ def test_sql_injection_all_fields_BR_006(browser, base_url):
             violations.append(f"{field_name} (injection succeeded)")
             logger.critical(f"✗ CRITICAL: SQL injection in {field_name}")
 
-        if any(indicator in page_source for indicator in ["sql syntax", "mysql", "database error"]):
+        if any(
+            indicator in page_source
+            for indicator in ["sql syntax", "mysql", "database error"]
+        ):
             violations.append(f"{field_name} (error disclosure)")
-            logger.critical(f"✗ CRITICAL: SQL error disclosure in {field_name}")
+            logger.critical(
+                f"✗ CRITICAL: SQL error disclosure in {field_name}"
+            )
 
     if violations:
-        pytest.fail(f"DISCOVERED: SQL injection vulnerabilities in {len(violations)} fields: {violations}")
+        pytest.fail(
+            f"DISCOVERED: SQL injection vulnerabilities in {len(violations)} fields: {violations}"
+        )
 
     logger.info("✓ SQL injection protection enforced on all fields")
 
@@ -825,12 +910,12 @@ def test_xss_protection_all_fields_BR_007(browser, base_url):
         purchase.wait_for_order_modal()
 
         form_data = {
-            'name': 'QA Tester',
-            'country': 'Spain',
-            'city': 'Barcelona',
-            'card': '1234567890123456',
-            'month': '12',
-            'year': '2028'
+            "name": "QA Tester",
+            "country": "Spain",
+            "city": "Barcelona",
+            "card": "1234567890123456",
+            "month": "12",
+            "year": "2028",
         }
         form_data[field_name] = xss_payload
 
@@ -856,7 +941,9 @@ def test_xss_protection_all_fields_BR_007(browser, base_url):
                 pass
 
     if violations:
-        pytest.fail(f"DISCOVERED: XSS vulnerabilities in {len(violations)} fields: {violations}")
+        pytest.fail(
+            f"DISCOVERED: XSS vulnerabilities in {len(violations)} fields: {violations}"
+        )
 
     logger.info("✓ XSS protection enforced on all fields")
 
@@ -888,7 +975,7 @@ def test_name_max_length_enforcement_BR_008(browser, base_url):
         city="Barcelona",
         card="1234567890123456",
         month="12",
-        year="2028"
+        year="2028",
     )
     purchase.click_purchase()
 
@@ -897,7 +984,9 @@ def test_name_max_length_enforcement_BR_008(browser, base_url):
 
     if is_confirmed:
         confirm_text = purchase.get_purchase_confirmation_text()
-        logger.info(f"✓ System accepted long name (confirmation length: {len(confirm_text)} chars)")
+        logger.info(
+            f"✓ System accepted long name (confirmation length: {len(confirm_text)} chars)"
+        )
     else:
         logger.info("✓ System rejected extremely long name")
 
@@ -927,7 +1016,7 @@ def test_whitespace_only_rejection_BR_009(browser, base_url):
         city="     ",
         card="1234567890123456",
         month="12",
-        year="2028"
+        year="2028",
     )
     purchase.click_purchase()
 
@@ -954,9 +1043,7 @@ def test_contact_form_validation_BR_010(browser, base_url):
     purchase = PurchasePage(browser)
 
     alert_text = purchase.send_contact_message(
-        email="test@example.com",
-        name="QA Tester",
-        message="Test message"
+        email="test@example.com", name="QA Tester", message="Test message"
     )
 
     if alert_text:
@@ -966,9 +1053,7 @@ def test_contact_form_validation_BR_010(browser, base_url):
 
     browser.get(base_url)
     alert_text_empty = purchase.send_contact_message(
-        email="",
-        name="",
-        message=""
+        email="", name="", message=""
     )
 
     if alert_text_empty and "thanks" in alert_text_empty.lower():
