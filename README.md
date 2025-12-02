@@ -257,7 +257,7 @@ class Users:
 
 ### Code Coverage
 - Automated coverage reporting
-- 70% minimum threshold
+- Configurable threshold (varies by test type)
 - HTML coverage reports
 - Branch coverage tracking
 

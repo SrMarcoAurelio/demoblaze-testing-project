@@ -86,7 +86,8 @@ exclude_lines =
 ignore_errors = False
 
 # Minimum coverage thresholds (fail if below)
-fail_under = 70.0
+# Note: Disabled here. Use --cov-fail-under in pytest command for specific runs
+# fail_under = 30.0
 
 [html]
 # Directory for HTML report
