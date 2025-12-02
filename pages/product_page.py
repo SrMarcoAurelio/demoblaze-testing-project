@@ -35,7 +35,6 @@ class ProductPage(BasePage):
     - Product validation across all catalog items
     """
 
-
     PRODUCT_LINKS = (By.CSS_SELECTOR, ".hrefch")
     PRODUCT_CARDS = (By.CSS_SELECTOR, ".card")
     FIRST_PRODUCT_LINK = (By.XPATH, "(//a[@class='hrefch'])[1]")
@@ -56,7 +55,6 @@ class ProductPage(BasePage):
 
     NEXT_BUTTON = (By.ID, "next2")
     PREV_BUTTON = (By.ID, "prev2")
-
 
     def navigate_to_first_product(self) -> Tuple[bool, Optional[str]]:
         """
@@ -82,7 +80,9 @@ class ProductPage(BasePage):
             logger.error(f"Failed to navigate to first product: {e}")
             return False, None
 
-    def navigate_to_product_by_index(self, index: int = 1) -> Tuple[bool, Optional[str]]:
+    def navigate_to_product_by_index(
+        self, index: int = 1
+    ) -> Tuple[bool, Optional[str]]:
         """
         Navigate to a specific product by its index in the catalog
         Args:
@@ -117,7 +117,9 @@ class ProductPage(BasePage):
         Returns: bool - success status
         """
         try:
-            url = f"{self.base_url}{config.PRODUCT_URL_PATTERN}".format(product_id=product_id)
+            url = f"{self.base_url}{config.PRODUCT_URL_PATTERN}".format(
+                product_id=product_id
+            )
             self.driver.get(url)
             self.wait_for_page_load()
             time.sleep(config.SLEEP_LONG)
@@ -139,14 +141,15 @@ class ProductPage(BasePage):
         self.wait_for_page_load()
         time.sleep(1)
 
-
     def get_product_name(self, timeout: int = 10) -> Optional[str]:
         """
         Get product name from detail page
         Returns: str or None
         """
         try:
-            element = self.wait_for_element_visible(self.PRODUCT_NAME, timeout=timeout)
+            element = self.wait_for_element_visible(
+                self.PRODUCT_NAME, timeout=timeout
+            )
             return element.text
         except TimeoutException:
             logger.warning("Product name not found")
@@ -158,7 +161,9 @@ class ProductPage(BasePage):
         Returns: str or None
         """
         try:
-            element = self.wait_for_element_visible(self.PRODUCT_PRICE, timeout=timeout)
+            element = self.wait_for_element_visible(
+                self.PRODUCT_PRICE, timeout=timeout
+            )
             return element.text
         except TimeoutException:
             logger.warning("Product price not found")
@@ -171,7 +176,7 @@ class ProductPage(BasePage):
         """
         price_text = self.get_product_price(timeout=timeout)
         if price_text:
-            match = re.search(r'\$(\d+)', price_text)
+            match = re.search(r"\$(\d+)", price_text)
             if match:
                 return int(match.group(1))
         return None
@@ -182,7 +187,9 @@ class ProductPage(BasePage):
         Returns: str or None
         """
         try:
-            element = self.wait_for_element_visible(self.PRODUCT_DESCRIPTION, timeout=timeout)
+            element = self.wait_for_element_visible(
+                self.PRODUCT_DESCRIPTION, timeout=timeout
+            )
             return element.text
         except TimeoutException:
             logger.warning("Product description not found")
@@ -194,8 +201,10 @@ class ProductPage(BasePage):
         Returns: str or None
         """
         try:
-            element = self.wait_for_element_visible(self.PRODUCT_IMAGE, timeout=timeout)
-            return element.get_attribute('src')
+            element = self.wait_for_element_visible(
+                self.PRODUCT_IMAGE, timeout=timeout
+            )
+            return element.get_attribute("src")
         except TimeoutException:
             logger.warning("Product image not found")
             return None
@@ -206,8 +215,10 @@ class ProductPage(BasePage):
         Returns: str or None
         """
         try:
-            element = self.wait_for_element_visible(self.PRODUCT_IMAGE, timeout=timeout)
-            return element.get_attribute('alt')
+            element = self.wait_for_element_visible(
+                self.PRODUCT_IMAGE, timeout=timeout
+            )
+            return element.get_attribute("alt")
         except TimeoutException:
             logger.warning("Product image not found")
             return None
@@ -218,16 +229,17 @@ class ProductPage(BasePage):
         Returns: dict with name, price, description, image_src, add_to_cart_present
         """
         details = {
-            'name': self.get_product_name(timeout=timeout),
-            'price': self.get_product_price(timeout=timeout),
-            'price_value': self.get_product_price_value(timeout=timeout),
-            'description': self.get_product_description(timeout=timeout),
-            'image_src': self.get_product_image_src(timeout=timeout),
-            'image_alt': self.get_product_image_alt(timeout=timeout),
-            'add_to_cart_present': self.is_add_to_cart_visible(timeout=timeout)
+            "name": self.get_product_name(timeout=timeout),
+            "price": self.get_product_price(timeout=timeout),
+            "price_value": self.get_product_price_value(timeout=timeout),
+            "description": self.get_product_description(timeout=timeout),
+            "image_src": self.get_product_image_src(timeout=timeout),
+            "image_alt": self.get_product_image_alt(timeout=timeout),
+            "add_to_cart_present": self.is_add_to_cart_visible(
+                timeout=timeout
+            ),
         }
         return details
-
 
     def is_add_to_cart_visible(self, timeout: int = 5) -> bool:
         """
@@ -235,7 +247,9 @@ class ProductPage(BasePage):
         Returns: bool
         """
         try:
-            self.wait_for_element_visible(self.ADD_TO_CART_BUTTON, timeout=timeout)
+            self.wait_for_element_visible(
+                self.ADD_TO_CART_BUTTON, timeout=timeout
+            )
             return True
         except TimeoutException:
             return False
@@ -246,14 +260,18 @@ class ProductPage(BasePage):
         Returns: bool - success status
         """
         try:
-            button = self.wait_for_element_clickable(self.ADD_TO_CART_BUTTON, timeout=10)
+            button = self.wait_for_element_clickable(
+                self.ADD_TO_CART_BUTTON, timeout=10
+            )
             button.click()
             return True
         except TimeoutException:
             logger.error("Add to Cart button not clickable")
             return False
 
-    def add_to_cart_and_handle_alert(self, timeout: int = 5) -> Tuple[bool, Optional[str]]:
+    def add_to_cart_and_handle_alert(
+        self, timeout: int = 5
+    ) -> Tuple[bool, Optional[str]]:
         """
         Add product to cart and handle the alert
         Returns: (success, alert_text)
@@ -264,7 +282,9 @@ class ProductPage(BasePage):
         alert_text = self.get_alert_text(timeout=timeout)
         return True, alert_text
 
-    def add_product_to_cart_complete(self) -> Tuple[bool, Optional[str], Optional[str]]:
+    def add_product_to_cart_complete(
+        self,
+    ) -> Tuple[bool, Optional[str], Optional[str]]:
         """
         Complete flow: add to cart and return to home
         Returns: (success, product_name, alert_text)
@@ -276,7 +296,6 @@ class ProductPage(BasePage):
             self.go_home()
 
         return success, product_name, alert_text
-
 
     def get_all_product_links_on_page(self) -> List[Any]:
         """
@@ -302,7 +321,9 @@ class ProductPage(BasePage):
         products = self.get_all_product_links_on_page()
         return len(products)
 
-    def iterate_all_products(self, max_products: Optional[int] = None) -> Generator[Tuple[int, str, Dict[str, Any]], None, None]:
+    def iterate_all_products(
+        self, max_products: Optional[int] = None
+    ) -> Generator[Tuple[int, str, Dict[str, Any]], None, None]:
         """
         Generator that yields (index, product_name, details) for each product
         Useful for validation tests across all products
@@ -315,7 +336,11 @@ class ProductPage(BasePage):
         time.sleep(1)
 
         products = self.get_all_product_links_on_page()
-        count = len(products) if max_products is None else min(len(products), max_products)
+        count = (
+            len(products)
+            if max_products is None
+            else min(len(products), max_products)
+        )
 
         for i in range(1, count + 1):
             success, product_name = self.navigate_to_product_by_index(i)
@@ -328,7 +353,6 @@ class ProductPage(BasePage):
             self.wait_for_page_load()
             time.sleep(1)
 
-
     def validate_product_data_completeness(self) -> Tuple[bool, List[str]]:
         """
         Validate that all essential product data is present
@@ -337,16 +361,16 @@ class ProductPage(BasePage):
         details = self.get_all_product_details()
 
         missing = []
-        if not details['name']:
-            missing.append('name')
-        if not details['price']:
-            missing.append('price')
-        if not details['description']:
-            missing.append('description')
-        if not details['image_src']:
-            missing.append('image')
-        if not details['add_to_cart_present']:
-            missing.append('add_to_cart_button')
+        if not details["name"]:
+            missing.append("name")
+        if not details["price"]:
+            missing.append("price")
+        if not details["description"]:
+            missing.append("description")
+        if not details["image_src"]:
+            missing.append("image")
+        if not details["add_to_cart_present"]:
+            missing.append("add_to_cart_button")
 
         is_valid = len(missing) == 0
         return is_valid, missing
@@ -361,12 +385,14 @@ class ProductPage(BasePage):
         if not price:
             return False, None
 
-        pattern = r'^\$\d+\s+\*includes tax$'
+        pattern = r"^\$\d+\s+\*includes tax$"
         is_valid = bool(re.match(pattern, price))
 
         return is_valid, price
 
-    def verify_image_loads(self, timeout: int = 10) -> Tuple[bool, Optional[int], Optional[str]]:
+    def verify_image_loads(
+        self, timeout: int = 10
+    ) -> Tuple[bool, Optional[int], Optional[str]]:
         """
         Verify product image loads successfully by checking HTTP status
         Returns: (loads_successfully, status_code, image_url)
@@ -385,16 +411,15 @@ class ProductPage(BasePage):
             logger.error(f"Failed to verify image: {e}")
             return False, None, image_url
 
-
     def test_keyboard_navigation(self) -> Dict[str, bool]:
         """
         Test keyboard navigation on product page (Tab key)
         Returns: dict with navigation results
         """
         results = {
-            'add_to_cart_focusable': False,
-            'home_link_focusable': False,
-            'tab_navigation_works': False
+            "add_to_cart_focusable": False,
+            "home_link_focusable": False,
+            "tab_navigation_works": False,
         }
 
         try:
@@ -407,20 +432,22 @@ class ProductPage(BasePage):
                 active_element = self.driver.switch_to.active_element
                 tag_name = active_element.tag_name
 
-                if tag_name == 'a':
+                if tag_name == "a":
                     text = active_element.text
-                    if 'Add to cart' in text:
-                        results['add_to_cart_focusable'] = True
-                    if 'Home' in text:
-                        results['home_link_focusable'] = True
+                    if "Add to cart" in text:
+                        results["add_to_cart_focusable"] = True
+                    if "Home" in text:
+                        results["home_link_focusable"] = True
 
-            results['tab_navigation_works'] = results['add_to_cart_focusable'] or results['home_link_focusable']
+            results["tab_navigation_works"] = (
+                results["add_to_cart_focusable"]
+                or results["home_link_focusable"]
+            )
 
         except Exception as e:
             logger.error(f"Keyboard navigation test failed: {e}")
 
         return results
-
 
     def measure_page_load_time(self) -> Dict[str, Any]:
         """
@@ -428,37 +455,38 @@ class ProductPage(BasePage):
         Returns: dict with timing metrics (in seconds)
         """
         try:
-            timing = self.driver.execute_script("""
+            timing = self.driver.execute_script(
+                """
                 var timing = window.performance.timing;
                 return {
                     navigationStart: timing.navigationStart,
                     domContentLoaded: timing.domContentLoadedEventEnd,
                     loadComplete: timing.loadEventEnd
                 };
-            """)
+            """
+            )
 
-            nav_start = timing['navigationStart']
-            dom_loaded = timing['domContentLoaded']
-            load_complete = timing['loadComplete']
+            nav_start = timing["navigationStart"]
+            dom_loaded = timing["domContentLoaded"]
+            load_complete = timing["loadComplete"]
 
             if nav_start and dom_loaded and load_complete:
                 dom_load_time = (dom_loaded - nav_start) / 1000.0
                 total_load_time = (load_complete - nav_start) / 1000.0
 
                 return {
-                    'dom_load_time': dom_load_time,
-                    'total_load_time': total_load_time,
-                    'success': True
+                    "dom_load_time": dom_load_time,
+                    "total_load_time": total_load_time,
+                    "success": True,
                 }
         except Exception as e:
             logger.error(f"Failed to measure load time: {e}")
 
         return {
-            'dom_load_time': None,
-            'total_load_time': None,
-            'success': False
+            "dom_load_time": None,
+            "total_load_time": None,
+            "success": False,
         }
-
 
     def get_current_product_id_from_url(self) -> Optional[str]:
         """
@@ -466,7 +494,7 @@ class ProductPage(BasePage):
         Returns: str or None
         """
         current_url = self.driver.current_url
-        match = re.search(r'idp_=([^&]+)', current_url)
+        match = re.search(r"idp_=([^&]+)", current_url)
         if match:
             return match.group(1)
         return None
@@ -479,16 +507,16 @@ class ProductPage(BasePage):
         page_source = self.driver.page_source.lower()
 
         sql_error_patterns = [
-            'sql syntax',
-            'mysql',
-            'postgresql',
-            'sqlite',
-            'database error',
-            'odbc',
-            'jdbc',
-            'syntax error near',
-            'unclosed quotation mark',
-            'you have an error in your sql syntax'
+            "sql syntax",
+            "mysql",
+            "postgresql",
+            "sqlite",
+            "database error",
+            "odbc",
+            "jdbc",
+            "syntax error near",
+            "unclosed quotation mark",
+            "you have an error in your sql syntax",
         ]
 
         found_indicators = []
@@ -499,7 +527,9 @@ class ProductPage(BasePage):
         has_error = len(found_indicators) > 0
         return has_error, found_indicators
 
-    def check_for_xss_execution(self, payload: str) -> Tuple[bool, Optional[str]]:
+    def check_for_xss_execution(
+        self, payload: str
+    ) -> Tuple[bool, Optional[str]]:
         """
         Check if XSS payload is reflected unescaped or executed
         Args:
@@ -528,8 +558,8 @@ class ProductPage(BasePage):
         Returns: dict with header presence
         """
         return {
-            'note': 'Security header checking requires network log access',
-            'recommendation': 'Use browser DevTools Protocol or proxy like mitmproxy'
+            "note": "Security header checking requires network log access",
+            "recommendation": "Use browser DevTools Protocol or proxy like mitmproxy",
         }
 
     def check_for_information_disclosure(self) -> Tuple[bool, List[str]]:
@@ -540,13 +570,13 @@ class ProductPage(BasePage):
         page_source = self.driver.page_source.lower()
 
         disclosure_patterns = [
-            ('<!-- debug', 'Debug comments'),
-            ('password', 'Password references'),
-            ('api_key', 'API key references'),
-            ('secret', 'Secret references'),
-            ('admin', 'Admin references'),
-            ('todo', 'TODO comments'),
-            ('fixme', 'FIXME comments')
+            ("<!-- debug", "Debug comments"),
+            ("password", "Password references"),
+            ("api_key", "API key references"),
+            ("secret", "Secret references"),
+            ("admin", "Admin references"),
+            ("todo", "TODO comments"),
+            ("fixme", "FIXME comments"),
         ]
 
         findings = []

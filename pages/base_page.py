@@ -21,7 +21,6 @@ from typing import Optional, List, Tuple, Union, Any
 from config import config
 
 
-
 class BasePage:
     """
     Base class for all Page Objects.
@@ -41,7 +40,12 @@ class BasePage:
     SLEEP_LONG = 2.0
     SLEEP_MODAL = 1.5
 
-    def __init__(self, driver: WebDriver, base_url: Optional[str] = None, timeout: int = 10) -> None:
+    def __init__(
+        self,
+        driver: WebDriver,
+        base_url: Optional[str] = None,
+        timeout: int = 10,
+    ) -> None:
         """
         Initialize the BasePage.
 
@@ -53,10 +57,13 @@ class BasePage:
         self.driver: WebDriver = driver
         self.base_url: str = base_url or config.BASE_URL
         self.timeout: int = timeout
-        self.logger: logging.Logger = logging.getLogger(self.__class__.__name__)
+        self.logger: logging.Logger = logging.getLogger(
+            self.__class__.__name__
+        )
 
-
-    def find_element(self, locator: Tuple[str, str], timeout: Optional[int] = None) -> WebElement:
+    def find_element(
+        self, locator: Tuple[str, str], timeout: Optional[int] = None
+    ) -> WebElement:
         """
         Find an element with explicit wait.
 
@@ -81,7 +88,9 @@ class BasePage:
             self.logger.error(f"Element not found: {locator}")
             raise
 
-    def find_elements(self, locator: Tuple[str, str], timeout: Optional[int] = None) -> List[WebElement]:
+    def find_elements(
+        self, locator: Tuple[str, str], timeout: Optional[int] = None
+    ) -> List[WebElement]:
         """
         Find multiple elements with explicit wait.
 
@@ -94,16 +103,18 @@ class BasePage:
         """
         wait_time: int = timeout if timeout else self.timeout
         try:
-            elements: List[WebElement] = WebDriverWait(self.driver, wait_time).until(
-                EC.presence_of_all_elements_located(locator)
-            )
+            elements: List[WebElement] = WebDriverWait(
+                self.driver, wait_time
+            ).until(EC.presence_of_all_elements_located(locator))
             self.logger.debug(f"Found {len(elements)} elements: {locator}")
             return elements
         except TimeoutException:
             self.logger.warning(f"No elements found: {locator}")
             return []
 
-    def wait_for_element_visible(self, locator: Tuple[str, str], timeout: Optional[int] = None) -> WebElement:
+    def wait_for_element_visible(
+        self, locator: Tuple[str, str], timeout: Optional[int] = None
+    ) -> WebElement:
         """
         Wait for element to be visible.
 
@@ -125,7 +136,9 @@ class BasePage:
             self.logger.error(f"Element not visible: {locator}")
             raise
 
-    def wait_for_element_clickable(self, locator: Tuple[str, str], timeout: Optional[int] = None) -> WebElement:
+    def wait_for_element_clickable(
+        self, locator: Tuple[str, str], timeout: Optional[int] = None
+    ) -> WebElement:
         """
         Wait for element to be clickable.
 
@@ -147,7 +160,9 @@ class BasePage:
             self.logger.error(f"Element not clickable: {locator}")
             raise
 
-    def wait_for_element_invisible(self, locator: Tuple[str, str], timeout: Optional[int] = None) -> bool:
+    def wait_for_element_invisible(
+        self, locator: Tuple[str, str], timeout: Optional[int] = None
+    ) -> bool:
         """
         Wait for element to become invisible.
 
@@ -169,7 +184,9 @@ class BasePage:
             self.logger.error(f"Element still visible: {locator}")
             raise
 
-    def click(self, locator: Tuple[str, str], timeout: Optional[int] = None) -> None:
+    def click(
+        self, locator: Tuple[str, str], timeout: Optional[int] = None
+    ) -> None:
         """
         Click an element.
 
@@ -181,7 +198,13 @@ class BasePage:
         element.click()
         self.logger.info(f"Clicked: {locator}")
 
-    def type(self, locator: Tuple[str, str], text: str, clear_first: bool = True, timeout: Optional[int] = None) -> None:
+    def type(
+        self,
+        locator: Tuple[str, str],
+        text: str,
+        clear_first: bool = True,
+        timeout: Optional[int] = None,
+    ) -> None:
         """
         Type text into an element.
 
@@ -197,7 +220,9 @@ class BasePage:
         element.send_keys(text)
         self.logger.info(f"Typed '{text}' into: {locator}")
 
-    def get_text(self, locator: Tuple[str, str], timeout: Optional[int] = None) -> str:
+    def get_text(
+        self, locator: Tuple[str, str], timeout: Optional[int] = None
+    ) -> str:
         """
         Get text from an element.
 
@@ -213,7 +238,12 @@ class BasePage:
         self.logger.debug(f"Got text '{text}' from: {locator}")
         return text
 
-    def get_attribute(self, locator: Tuple[str, str], attribute: str, timeout: Optional[int] = None) -> Optional[str]:
+    def get_attribute(
+        self,
+        locator: Tuple[str, str],
+        attribute: str,
+        timeout: Optional[int] = None,
+    ) -> Optional[str]:
         """
         Get attribute value from an element.
 
@@ -227,10 +257,14 @@ class BasePage:
         """
         element = self.find_element(locator, timeout)
         value = element.get_attribute(attribute)
-        self.logger.debug(f"Got attribute '{attribute}' = '{value}' from: {locator}")
+        self.logger.debug(
+            f"Got attribute '{attribute}' = '{value}' from: {locator}"
+        )
         return value
 
-    def is_element_present(self, locator: Tuple[str, str], timeout: int = 2) -> bool:
+    def is_element_present(
+        self, locator: Tuple[str, str], timeout: int = 2
+    ) -> bool:
         """
         Check if element is present (short timeout).
 
@@ -247,7 +281,9 @@ class BasePage:
         except TimeoutException:
             return False
 
-    def is_element_visible(self, locator: Tuple[str, str], timeout: int = 2) -> bool:
+    def is_element_visible(
+        self, locator: Tuple[str, str], timeout: int = 2
+    ) -> bool:
         """
         Check if element is visible (short timeout).
 
@@ -263,7 +299,6 @@ class BasePage:
             return True
         except TimeoutException:
             return False
-
 
     def wait_for_alert(self, timeout: int = 5) -> Optional[Alert]:
         """
@@ -326,7 +361,6 @@ class BasePage:
             alert.dismiss()
             self.logger.info("Alert dismissed")
 
-
     def navigate_to(self, url: str) -> None:
         """
         Navigate to a URL.
@@ -369,7 +403,6 @@ class BasePage:
         self.logger.debug(f"Page title: {title}")
         return title
 
-
     def execute_script(self, script: str, *args: Any) -> Any:
         """
         Execute JavaScript.
@@ -393,16 +426,24 @@ class BasePage:
             locator: Tuple (By.TYPE, "value")
         """
         element = self.find_element(locator)
-        self.driver.execute_script("arguments[0].scrollIntoView(true);", element)
+        self.driver.execute_script(
+            "arguments[0].scrollIntoView(true);", element
+        )
         self.logger.info(f"Scrolled to: {locator}")
 
     def scroll_to_bottom(self) -> None:
         """Scroll to bottom of page."""
-        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        self.driver.execute_script(
+            "window.scrollTo(0, document.body.scrollHeight);"
+        )
         self.logger.info("Scrolled to bottom")
 
-
-    def send_keys(self, locator: Tuple[str, str], keys: str, timeout: Optional[int] = None) -> None:
+    def send_keys(
+        self,
+        locator: Tuple[str, str],
+        keys: str,
+        timeout: Optional[int] = None,
+    ) -> None:
         """
         Send keyboard keys to element.
 
@@ -425,7 +466,9 @@ class BasePage:
         ActionChains(self.driver).send_keys(key).perform()
         self.logger.info(f"Pressed key: {key}")
 
-    def hover(self, locator: Tuple[str, str], timeout: Optional[int] = None) -> None:
+    def hover(
+        self, locator: Tuple[str, str], timeout: Optional[int] = None
+    ) -> None:
         """
         Hover over element.
 
@@ -436,7 +479,6 @@ class BasePage:
         element = self.find_element(locator, timeout)
         ActionChains(self.driver).move_to_element(element).perform()
         self.logger.info(f"Hovered over: {locator}")
-
 
     def wait(self, seconds: Union[int, float]) -> None:
         """
@@ -465,7 +507,8 @@ class BasePage:
         """
         try:
             WebDriverWait(self.driver, timeout).until(
-                lambda d: d.execute_script('return document.readyState') == 'complete'
+                lambda d: d.execute_script("return document.readyState")
+                == "complete"
             )
             self.logger.debug("Page loaded successfully")
             return True

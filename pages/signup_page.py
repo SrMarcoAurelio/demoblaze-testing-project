@@ -14,7 +14,6 @@ from selenium.webdriver.common.keys import Keys
 from pages.base_page import BasePage
 
 
-
 class SignupPage(BasePage):
     """
     Page Object for Signup & Registration functionality.
@@ -26,19 +25,27 @@ class SignupPage(BasePage):
     - Error handling
     """
 
-
     SIGNUP_BUTTON_NAV = (By.ID, "signin2")
     LOGIN_BUTTON_NAV = (By.ID, "login2")
     LOGOUT_BUTTON_NAV = (By.ID, "logout2")
     HOME_NAV_LINK = (By.XPATH, "//a[contains(text(), 'Home')]")
 
     SIGNUP_MODAL = (By.ID, "signInModal")
-    SIGNUP_MODAL_TITLE = (By.XPATH, "//div[@id='signInModal']//h5[@class='modal-title']")
+    SIGNUP_MODAL_TITLE = (
+        By.XPATH,
+        "//div[@id='signInModal']//h5[@class='modal-title']",
+    )
     SIGNUP_USERNAME_FIELD = (By.ID, "sign-username")
     SIGNUP_PASSWORD_FIELD = (By.ID, "sign-password")
     SIGNUP_SUBMIT_BUTTON = (By.XPATH, "//button[text()='Sign up']")
-    SIGNUP_CLOSE_BUTTON = (By.XPATH, "//div[@id='signInModal']//button[@class='close']")
-    SIGNUP_CLOSE_FOOTER_BUTTON = (By.XPATH, "//div[@id='signInModal']//button[text()='Close']")
+    SIGNUP_CLOSE_BUTTON = (
+        By.XPATH,
+        "//div[@id='signInModal']//button[@class='close']",
+    )
+    SIGNUP_CLOSE_FOOTER_BUTTON = (
+        By.XPATH,
+        "//div[@id='signInModal']//button[text()='Close']",
+    )
 
     LOGIN_MODAL = (By.ID, "logInModal")
     LOGIN_USERNAME_FIELD = (By.ID, "loginusername")
@@ -46,7 +53,6 @@ class SignupPage(BasePage):
     LOGIN_SUBMIT_BUTTON = (By.XPATH, "//button[text()='Log in']")
 
     WELCOME_USER_TEXT = (By.ID, "nameofuser")
-
 
     def open_signup_modal(self) -> bool:
         """
@@ -88,8 +94,9 @@ class SignupPage(BasePage):
         """
         return self.is_element_visible(self.SIGNUP_MODAL, timeout=2)
 
-
-    def fill_signup_username(self, username: str, clear_first: bool = True) -> None:
+    def fill_signup_username(
+        self, username: str, clear_first: bool = True
+    ) -> None:
         """
         Fill the username field in signup modal.
 
@@ -97,10 +104,14 @@ class SignupPage(BasePage):
             username: Username to enter
             clear_first: Clear field before typing (default: True)
         """
-        self.type(self.SIGNUP_USERNAME_FIELD, username, clear_first=clear_first)
+        self.type(
+            self.SIGNUP_USERNAME_FIELD, username, clear_first=clear_first
+        )
         self.logger.info(f"Entered signup username: {username}")
 
-    def fill_signup_password(self, password: str, clear_first: bool = True) -> None:
+    def fill_signup_password(
+        self, password: str, clear_first: bool = True
+    ) -> None:
         """
         Fill the password field in signup modal.
 
@@ -108,7 +119,9 @@ class SignupPage(BasePage):
             password: Password to enter
             clear_first: Clear field before typing (default: True)
         """
-        self.type(self.SIGNUP_PASSWORD_FIELD, password, clear_first=clear_first)
+        self.type(
+            self.SIGNUP_PASSWORD_FIELD, password, clear_first=clear_first
+        )
         self.logger.info("Entered signup password")
 
     def click_signup_submit(self) -> None:
@@ -121,7 +134,9 @@ class SignupPage(BasePage):
         self.send_keys(self.SIGNUP_PASSWORD_FIELD, Keys.ENTER)
         self.logger.info("Submitted signup via ENTER key")
 
-    def signup(self, username: str, password: str, use_enter_key: bool = False) -> bool:
+    def signup(
+        self, username: str, password: str, use_enter_key: bool = False
+    ) -> bool:
         """
         Complete signup flow: open modal, fill fields, submit.
 
@@ -145,7 +160,6 @@ class SignupPage(BasePage):
         self.logger.info(f"Signup attempted for user: {username}")
         return True
 
-
     def login_after_signup(self, username: str, password: str) -> bool:
         """
         Login with newly created account (for verification).
@@ -162,7 +176,9 @@ class SignupPage(BasePage):
         self.type(self.LOGIN_USERNAME_FIELD, username)
         self.type(self.LOGIN_PASSWORD_FIELD, password)
         self.click(self.LOGIN_SUBMIT_BUTTON)
-        self.logger.info(f"Login attempted for newly signed up user: {username}")
+        self.logger.info(
+            f"Login attempted for newly signed up user: {username}"
+        )
         return True
 
     def logout(self) -> bool:
@@ -187,7 +203,9 @@ class SignupPage(BasePage):
         Returns:
             True if user is logged in, False otherwise
         """
-        is_logged_in = self.is_element_visible(self.WELCOME_USER_TEXT, timeout=timeout)
+        is_logged_in = self.is_element_visible(
+            self.WELCOME_USER_TEXT, timeout=timeout
+        )
         if is_logged_in:
             self.logger.info("User is logged in")
         else:
@@ -206,7 +224,6 @@ class SignupPage(BasePage):
             self.logger.info(f"Welcome message: {text}")
             return text
         return None
-
 
     def get_signup_username_value(self) -> Optional[str]:
         """Get current value of signup username field."""
@@ -234,7 +251,6 @@ class SignupPage(BasePage):
         enabled = self.get_attribute(self.SIGNUP_PASSWORD_FIELD, "disabled")
         return enabled is None
 
-
     def get_signup_username_aria_label(self) -> Optional[str]:
         """Get aria-label of signup username field (for accessibility testing)."""
         return self.get_attribute(self.SIGNUP_USERNAME_FIELD, "aria-label")
@@ -259,7 +275,6 @@ class SignupPage(BasePage):
         self.logger.info("Tabbed through signup form")
         return True
 
-
     def inject_sql_payload_username(self, payload: str) -> bool:
         """
         Inject SQL payload into signup username field (for security testing).
@@ -274,7 +289,9 @@ class SignupPage(BasePage):
         self.fill_signup_username(payload)
         self.fill_signup_password("anypassword")
         self.click_signup_submit()
-        self.logger.warning(f"SQL injection payload tested in signup: {payload}")
+        self.logger.warning(
+            f"SQL injection payload tested in signup: {payload}"
+        )
         return True
 
     def inject_xss_payload_username(self, payload: str) -> bool:
@@ -304,7 +321,9 @@ class SignupPage(BasePage):
         self.open_signup_modal()
         page_source = self.get_page_source()
 
-        has_csrf = 'csrf' in page_source.lower() or 'token' in page_source.lower()
+        has_csrf = (
+            "csrf" in page_source.lower() or "token" in page_source.lower()
+        )
 
         if has_csrf:
             self.logger.info("CSRF token detected in signup form")
@@ -312,5 +331,3 @@ class SignupPage(BasePage):
             self.logger.warning("No CSRF token found in signup form")
 
         return has_csrf
-
-

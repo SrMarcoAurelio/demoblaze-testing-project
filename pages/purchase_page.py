@@ -20,12 +20,15 @@ import time
 import re
 import datetime
 
+
 class PurchasePage(BasePage):
     """Purchase Page Object - handles order form and checkout"""
 
-
     ORDER_MODAL = (By.ID, "orderModal")
-    ORDER_MODAL_TITLE = (By.XPATH, "//div[@id='orderModal']//h5[@class='modal-title']")
+    ORDER_MODAL_TITLE = (
+        By.XPATH,
+        "//div[@id='orderModal']//h5[@class='modal-title']",
+    )
 
     ORDER_NAME_FIELD = (By.ID, "name")
     ORDER_COUNTRY_FIELD = (By.ID, "country")
@@ -35,16 +38,24 @@ class PurchasePage(BasePage):
     ORDER_YEAR_FIELD = (By.ID, "year")
 
     PURCHASE_BUTTON = (By.XPATH, "//button[text()='Purchase']")
-    CLOSE_ORDER_MODAL_BUTTON = (By.XPATH, "//div[@id='orderModal']//button[@class='close']")
-    CLOSE_ORDER_MODAL_BUTTON_TEXT = (By.XPATH, "//div[@id='orderModal']//button[text()='Close']")
+    CLOSE_ORDER_MODAL_BUTTON = (
+        By.XPATH,
+        "//div[@id='orderModal']//button[@class='close']",
+    )
+    CLOSE_ORDER_MODAL_BUTTON_TEXT = (
+        By.XPATH,
+        "//div[@id='orderModal']//button[text()='Close']",
+    )
 
     PURCHASE_CONFIRM_MODAL = (By.CLASS_NAME, "sweet-alert")
-    PURCHASE_CONFIRM_MSG = (By.XPATH, "//h2[text()='Thank you for your purchase!']")
+    PURCHASE_CONFIRM_MSG = (
+        By.XPATH,
+        "//h2[text()='Thank you for your purchase!']",
+    )
     PURCHASE_CONFIRM_TEXT = (By.CLASS_NAME, "sweet-alert")
     CONFIRM_OK_BUTTON = (By.XPATH, "//button[contains(@class, 'confirm')]")
 
     CART_TOTAL_PRICE = (By.ID, "totalp")
-
 
     def is_order_modal_visible(self) -> bool:
         """Check if order modal is open"""
@@ -58,7 +69,9 @@ class PurchasePage(BasePage):
     def wait_for_order_modal(self, timeout: int = 10) -> bool:
         """Wait for order modal to appear"""
         try:
-            self.wait_for_element_visible(self.ORDER_NAME_FIELD, timeout=timeout)
+            self.wait_for_element_visible(
+                self.ORDER_NAME_FIELD, timeout=timeout
+            )
             self.logger.info("Order modal opened")
             return True
         except TimeoutException:
@@ -108,8 +121,15 @@ class PurchasePage(BasePage):
             self.logger.info("Order modal did NOT close with ESC key")
             return False
 
-
-    def fill_order_form(self, name: str = "", country: str = "", city: str = "", card: str = "", month: str = "", year: str = "") -> bool:
+    def fill_order_form(
+        self,
+        name: str = "",
+        country: str = "",
+        city: str = "",
+        card: str = "",
+        month: str = "",
+        year: str = "",
+    ) -> bool:
         """Fill all order form fields"""
         try:
             self.wait_for_element_visible(self.ORDER_NAME_FIELD)
@@ -151,7 +171,12 @@ class PurchasePage(BasePage):
             self.logger.error(f"Failed to fill order form: {str(e)}")
             return False
 
-    def fill_valid_order_form(self, name: str = "QA Tester", country: str = "Spain", city: str = "Barcelona") -> bool:
+    def fill_valid_order_form(
+        self,
+        name: str = "QA Tester",
+        country: str = "Spain",
+        city: str = "Barcelona",
+    ) -> bool:
         """Fill form with valid test data"""
         return self.fill_order_form(
             name=name,
@@ -159,10 +184,12 @@ class PurchasePage(BasePage):
             city=city,
             card="1234567890123456",
             month="12",
-            year="2028"
+            year="2028",
         )
 
-    def get_form_field_value(self, field_locator: Tuple[str, str]) -> Optional[str]:
+    def get_form_field_value(
+        self, field_locator: Tuple[str, str]
+    ) -> Optional[str]:
         """Get current value of a form field"""
         try:
             field = self.find_element(field_locator)
@@ -171,8 +198,9 @@ class PurchasePage(BasePage):
             # Field not found
             return None
 
-
-    def navigate_form_with_tab(self, fill_data: Optional[List[str]] = None) -> Dict[str, Optional[str]]:
+    def navigate_form_with_tab(
+        self, fill_data: Optional[List[str]] = None
+    ) -> Dict[str, Optional[str]]:
         """
         Navigate through form fields using Tab key
         Optionally fill data as you go
@@ -193,16 +221,15 @@ class PurchasePage(BasePage):
             self.logger.info(f"Tabbed to field {i+2}/{len(fill_data)+1}")
 
         filled_values = {
-            'name': self.get_form_field_value(self.ORDER_NAME_FIELD),
-            'country': self.get_form_field_value(self.ORDER_COUNTRY_FIELD),
-            'city': self.get_form_field_value(self.ORDER_CITY_FIELD),
-            'card': self.get_form_field_value(self.ORDER_CARD_FIELD),
-            'month': self.get_form_field_value(self.ORDER_MONTH_FIELD),
-            'year': self.get_form_field_value(self.ORDER_YEAR_FIELD)
+            "name": self.get_form_field_value(self.ORDER_NAME_FIELD),
+            "country": self.get_form_field_value(self.ORDER_COUNTRY_FIELD),
+            "city": self.get_form_field_value(self.ORDER_CITY_FIELD),
+            "card": self.get_form_field_value(self.ORDER_CARD_FIELD),
+            "month": self.get_form_field_value(self.ORDER_MONTH_FIELD),
+            "year": self.get_form_field_value(self.ORDER_YEAR_FIELD),
         }
 
         return filled_values
-
 
     def click_purchase(self) -> bool:
         """Click Purchase button"""
@@ -230,8 +257,15 @@ class PurchasePage(BasePage):
 
         return True
 
-    def complete_purchase(self, name: str = "QA Tester", country: str = "Spain", city: str = "Barcelona",
-                         card: str = "1234567890123456", month: str = "12", year: str = "2028") -> Tuple[bool, Optional[str], Optional[Dict[str, Any]]]:
+    def complete_purchase(
+        self,
+        name: str = "QA Tester",
+        country: str = "Spain",
+        city: str = "Barcelona",
+        card: str = "1234567890123456",
+        month: str = "12",
+        year: str = "2028",
+    ) -> Tuple[bool, Optional[str], Optional[Dict[str, Any]]]:
         """
         Complete entire purchase flow:
         1. Fill form
@@ -254,17 +288,19 @@ class PurchasePage(BasePage):
             confirm_modal = self.find_element(self.PURCHASE_CONFIRM_MODAL)
             confirm_text = confirm_modal.text
 
-            amount_match = re.search(r'Amount:\s*(\d+)\s*USD', confirm_text)
-            confirmed_amount = int(amount_match.group(1)) if amount_match else 0
+            amount_match = re.search(r"Amount:\s*(\d+)\s*USD", confirm_text)
+            confirmed_amount = (
+                int(amount_match.group(1)) if amount_match else 0
+            )
 
-            card_match = re.search(r'Card Number:\s*(\d+)', confirm_text)
-            name_match = re.search(r'Name:\s*(.+)', confirm_text, re.MULTILINE)
+            card_match = re.search(r"Card Number:\s*(\d+)", confirm_text)
+            name_match = re.search(r"Name:\s*(.+)", confirm_text, re.MULTILINE)
 
             details = {
-                'amount': confirmed_amount,
-                'card': card_match.group(1) if card_match else None,
-                'name': name_match.group(1).strip() if name_match else None,
-                'full_text': confirm_text
+                "amount": confirmed_amount,
+                "card": card_match.group(1) if card_match else None,
+                "name": name_match.group(1).strip() if name_match else None,
+                "full_text": confirm_text,
             }
 
             self.logger.info(f"Purchase confirmed: ${confirmed_amount}")
@@ -276,7 +312,6 @@ class PurchasePage(BasePage):
         except TimeoutException:
             self.logger.error("Purchase confirmation did not appear")
             return (False, None, None)
-
 
     def is_purchase_confirmed(self, timeout: int = 10) -> bool:
         """Check if purchase confirmation appeared"""
@@ -301,7 +336,7 @@ class PurchasePage(BasePage):
         """Extract confirmed amount from confirmation modal"""
         confirm_text = self.get_purchase_confirmation_text()
         if confirm_text:
-            amount_match = re.search(r'Amount:\s*(\d+)\s*USD', confirm_text)
+            amount_match = re.search(r"Amount:\s*(\d+)\s*USD", confirm_text)
             if amount_match:
                 return int(amount_match.group(1))
         return None
@@ -322,7 +357,6 @@ class PurchasePage(BasePage):
             # OK button not found or timeout waiting for modal to close
             return False
 
-
     def get_current_year(self) -> int:
         """Get current year for validation tests"""
         return datetime.date.today().year
@@ -334,64 +368,63 @@ class PurchasePage(BasePage):
     def create_validation_test_data(self) -> Dict[str, Dict[str, str]]:
         """Create standard test data for validation tests"""
         return {
-            'valid': {
-                'name': 'QA Tester',
-                'country': 'Spain',
-                'city': 'Barcelona',
-                'card': '1234567890123456',
-                'month': '12',
-                'year': '2028'
+            "valid": {
+                "name": "QA Tester",
+                "country": "Spain",
+                "city": "Barcelona",
+                "card": "1234567890123456",
+                "month": "12",
+                "year": "2028",
             },
-            'invalid_card_format': {
-                'name': 'Test',
-                'country': 'Spain',
-                'city': 'Madrid',
-                'card': 'ABCD-1234',
-                'month': '12',
-                'year': '2028'
+            "invalid_card_format": {
+                "name": "Test",
+                "country": "Spain",
+                "city": "Madrid",
+                "card": "ABCD-1234",
+                "month": "12",
+                "year": "2028",
             },
-            'short_card': {
-                'name': 'Test',
-                'country': 'Spain',
-                'city': 'Madrid',
-                'card': '123',
-                'month': '12',
-                'year': '2028'
+            "short_card": {
+                "name": "Test",
+                "country": "Spain",
+                "city": "Madrid",
+                "card": "123",
+                "month": "12",
+                "year": "2028",
             },
-            'expired_card': {
-                'name': 'Test',
-                'country': 'Spain',
-                'city': 'Madrid',
-                'card': '1234567890123456',
-                'month': '12',
-                'year': self.get_expired_year()
+            "expired_card": {
+                "name": "Test",
+                "country": "Spain",
+                "city": "Madrid",
+                "card": "1234567890123456",
+                "month": "12",
+                "year": self.get_expired_year(),
             },
-            'invalid_month': {
-                'name': 'Test',
-                'country': 'Spain',
-                'city': 'Madrid',
-                'card': '1234567890123456',
-                'month': '13',
-                'year': '2028'
+            "invalid_month": {
+                "name": "Test",
+                "country": "Spain",
+                "city": "Madrid",
+                "card": "1234567890123456",
+                "month": "13",
+                "year": "2028",
             },
-            'sql_injection': {
-                'name': "' OR '1'='1",
-                'country': 'Spain',
-                'city': 'Madrid',
-                'card': '1234567890123456',
-                'month': '12',
-                'year': '2028'
+            "sql_injection": {
+                "name": "' OR '1'='1",
+                "country": "Spain",
+                "city": "Madrid",
+                "card": "1234567890123456",
+                "month": "12",
+                "year": "2028",
             },
-            'xss': {
-                'name': 'Test',
-                'country': 'Spain',
-                'city': "<script>alert('XSS')</script>",
-                'card': '1234567890123456',
-                'month': '12',
-                'year': '2028'
-            }
+            "xss": {
+                "name": "Test",
+                "country": "Spain",
+                "city": "<script>alert('XSS')</script>",
+                "card": "1234567890123456",
+                "month": "12",
+                "year": "2028",
+            },
         }
-
 
     CONTACT_NAV_LINK = (By.XPATH, "//a[text()='Contact']")
     CONTACT_EMAIL_FIELD = (By.ID, "recipient-email")
@@ -402,9 +435,17 @@ class PurchasePage(BasePage):
     ABOUT_US_NAV_LINK = (By.XPATH, "//a[text()='About us']")
     ABOUT_US_MODAL = (By.ID, "videoModal")
     ABOUT_US_VIDEO = (By.ID, "example-video")
-    ABOUT_US_CLOSE_BUTTON = (By.XPATH, "//div[@id='videoModal']//button[text()='Close']")
+    ABOUT_US_CLOSE_BUTTON = (
+        By.XPATH,
+        "//div[@id='videoModal']//button[text()='Close']",
+    )
 
-    def send_contact_message(self, email: str = "test@example.com", name: str = "Test User", message: str = "Test message") -> Optional[str]:
+    def send_contact_message(
+        self,
+        email: str = "test@example.com",
+        name: str = "Test User",
+        message: str = "Test message",
+    ) -> Optional[str]:
         """Send a contact form message"""
         self.click(self.CONTACT_NAV_LINK)
         self.wait_for_element_visible(self.CONTACT_EMAIL_FIELD)
