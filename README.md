@@ -317,7 +317,7 @@ MIT License - Free to use, modify, and distribute.
 
 ## About This Project
 
-This framework was built over 20 days with significant AI assistance (Claude AI & Gemini) as a learning project. The AI helped with understanding QA fundamentals, learning Python/Selenium/Pytest, code structure, and documentation. All architectural decisions, testing strategy, and code validation were done manually.
+This framework was built over 4 months with significant AI assistance (Claude AI & Gemini) as a learning project. The AI helped with understanding QA fundamentals, learning Python/Selenium/Pytest, code structure, and documentation. All architectural decisions, testing strategy, and code validation were done manually.
 
 AI-assisted development is increasingly common. What matters is understanding the code you deploy, taking responsibility for the architecture, and delivering real value regardless of tools used.
 
