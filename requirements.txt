@@ -1,5 +1,7 @@
 selenium==4.25.0
+selenium-wire==5.1.0
 webdriver-manager==4.0.2
+requests==2.32.3
 pytest==8.3.3
 pytest-html==4.1.1
 pytest-xdist==3.5.0
@@ -14,3 +16,5 @@ types-requests==2.32.4.20250913
 black==25.11.0
 isort==5.13.2
 pre-commit==4.5.0
+Faker==33.1.0
+jsonschema==4.23.0
