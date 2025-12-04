@@ -4,6 +4,34 @@ Comprehensive library of attack payloads for security testing.
 
 Author: Marc Arévalo
 Version: 1.0
+
+⚠️  CRITICAL SECURITY WARNING ⚠️
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+This library contains DESTRUCTIVE payloads that can cause data loss!
+
+DESTRUCTIVE PAYLOADS INCLUDE:
+- DROP TABLE statements (can delete entire database tables)
+- DELETE/TRUNCATE operations (can remove all data)
+- File system operations (can delete files)
+
+⚠️  NEVER USE AGAINST:
+- Production systems
+- Live databases
+- Shared environments
+- Any system with real data
+
+✓  ONLY USE FOR:
+- Isolated test environments
+- Test databases with dummy data
+- Security testing with explicit authorization
+- CTF challenges and practice environments
+
+🔒 ENSURE BEFORE TESTING:
+1. Database backups exist
+2. Test isolation is confirmed
+3. Authorization is documented
+4. Rollback procedures are ready
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 
 import logging
@@ -95,8 +123,12 @@ class PayloadLibrary:
             ),
             Payload(
                 value="'; DROP TABLE users--",
-                name="Destructive SQL Injection",
-                description="Attempt to drop table (dangerous!)",
+                name="⚠️ DESTRUCTIVE SQL Injection - DROP TABLE",
+                description=(
+                    "⚠️ DANGER: This payload attempts to DELETE ENTIRE TABLE! "
+                    "ONLY use in isolated test environment with backups. "
+                    "NEVER use against production or shared systems."
+                ),
                 category="sql_injection",
                 expected_indicators=["drop", "delete", "sql", "error"],
             ),

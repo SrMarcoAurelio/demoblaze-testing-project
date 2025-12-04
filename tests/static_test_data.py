@@ -5,13 +5,31 @@ Version: 1.0
 
 Centralized test data for all test suites.
 Separates test data from test logic for better maintainability.
+
+SECURITY WARNING:
+- Default credentials are provided for testing purposes only
+- Use environment variables for production/sensitive credentials:
+  * TEST_USERNAME - Valid test username
+  * TEST_PASSWORD - Valid test password
+- Never commit real production credentials to version control
 """
+
+import os
 
 
 class Users:
-    """Test user credentials and account data."""
+    """Test user credentials and account data.
 
-    VALID = {"username": "Apolo2025", "password": "apolo2025"}
+    Security Note:
+    - Uses environment variables when available
+    - Falls back to default test credentials
+    - Default credentials are for demo/test environments only
+    """
+
+    VALID = {
+        "username": os.getenv("TEST_USERNAME", "Apolo2025"),
+        "password": os.getenv("TEST_PASSWORD", "apolo2025"),
+    }
 
     INVALID_USERNAME = {
         "username": "nonexistent_user_99999",

@@ -531,3 +531,67 @@ class BasePage:
             Page source HTML
         """
         return self.driver.page_source
+
+    # ============================================================================
+    # MODAL OPERATIONS (Generic methods for all modals)
+    # ============================================================================
+
+    def close_modal_with_button(
+        self,
+        close_button_locator: Tuple[str, str],
+        modal_locator: Tuple[str, str],
+    ) -> None:
+        """
+        Close modal using close button.
+
+        Args:
+            close_button_locator: Locator for close button
+            modal_locator: Locator for modal to wait for invisibility
+
+        Example:
+            self.close_modal_with_button(
+                self.LOGIN_CLOSE_BUTTON,
+                self.LOGIN_MODAL
+            )
+        """
+        self.click(close_button_locator)
+        self.wait_for_element_invisible(modal_locator)
+        self.logger.debug("Modal closed with button")
+
+    def close_modal_with_esc(
+        self, modal_locator: Tuple[str, str], timeout: int = 3
+    ) -> None:
+        """
+        Close modal using ESC key.
+
+        Args:
+            modal_locator: Locator for modal to wait for invisibility
+            timeout: Maximum time to wait for modal to close
+
+        Example:
+            self.close_modal_with_esc(self.LOGIN_MODAL)
+        """
+        from selenium.webdriver.common.keys import Keys
+
+        self.press_key(Keys.ESCAPE)
+        self.wait_for_element_invisible(modal_locator, timeout=timeout)
+        self.logger.debug("Modal closed with ESC key")
+
+    def is_modal_visible(
+        self, modal_locator: Tuple[str, str], timeout: int = 2
+    ) -> bool:
+        """
+        Check if modal is visible.
+
+        Args:
+            modal_locator: Locator for modal
+            timeout: Maximum time to wait
+
+        Returns:
+            True if modal is visible, False otherwise
+
+        Example:
+            if self.is_modal_visible(self.LOGIN_MODAL):
+                print("Login modal is open")
+        """
+        return self.is_element_visible(modal_locator, timeout=timeout)

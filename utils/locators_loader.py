@@ -84,10 +84,15 @@ class LocatorsLoader:
             )
         except json.JSONDecodeError as e:
             raise json.JSONDecodeError(
-                f"Invalid JSON in locators config: {self.config_path}",
-                e.doc,
-                e.pos,
-            )
+                msg=(
+                    f"Invalid JSON in locators config: {self.config_path}\n"
+                    f"Error: {str(e)}\n"
+                    f"Line {e.lineno}, Column {e.colno}\n"
+                    f"Check JSON syntax at position {e.pos}"
+                ),
+                doc=e.doc,
+                pos=e.pos,
+            ) from e
 
     def get_locator(self, page: str, element: str) -> Tuple[str, str]:
         """
