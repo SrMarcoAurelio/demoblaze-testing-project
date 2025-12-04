@@ -18,3 +18,6 @@ isort==5.13.2
 pre-commit==4.5.0
 Faker==33.1.0
 jsonschema==4.23.0
+pymysql==1.1.1
+psycopg2-binary==2.9.10
+pyodbc==5.2.0
