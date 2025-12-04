@@ -37,11 +37,6 @@ class BasePage:
     Universal and reusable across any web application.
     """
 
-    SLEEP_SHORT = 0.5
-    SLEEP_MEDIUM = 1.0
-    SLEEP_LONG = 2.0
-    SLEEP_MODAL = 1.5
-
     def __init__(
         self,
         driver: WebDriver,
