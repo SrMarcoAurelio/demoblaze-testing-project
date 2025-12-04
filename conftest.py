@@ -354,7 +354,7 @@ def valid_user():
         >>> def test_login(browser, base_url, valid_user):
         ...     login_page.login(**valid_user)
     """
-    from tests.test_data import Users
+    from tests.static_test_data import Users
 
     return Users.VALID.copy()
 
@@ -362,7 +362,7 @@ def valid_user():
 @pytest.fixture(scope="session")
 def invalid_user_username():
     """Provide user with invalid username."""
-    from tests.test_data import Users
+    from tests.static_test_data import Users
 
     return Users.INVALID_USERNAME.copy()
 
@@ -370,7 +370,7 @@ def invalid_user_username():
 @pytest.fixture(scope="session")
 def invalid_user_password():
     """Provide user with invalid password."""
-    from tests.test_data import Users
+    from tests.static_test_data import Users
 
     return Users.INVALID_PASSWORD.copy()
 
@@ -389,12 +389,12 @@ def new_user():
         >>> def test_signup(browser, base_url, new_user):
         ...     signup_page.signup(**new_user)
     """
-    from utils.helpers.data_generator import generate_random_username
+    from utils.helpers.data_generator import generate_random_password
 
     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
     return {
         "username": f"user_{timestamp}",
-        "password": generate_random_username(length=12),
+        "password": generate_random_password(length=12),
     }
 
 
@@ -410,7 +410,7 @@ def purchase_data():
         >>> def test_checkout(browser, purchase_data):
         ...     purchase_page.fill_form(**purchase_data)
     """
-    from tests.test_data import PurchaseData
+    from tests.static_test_data import PurchaseData
 
     return PurchaseData.VALID_PURCHASE.copy()
 
@@ -418,7 +418,7 @@ def purchase_data():
 @pytest.fixture(scope="function")
 def minimal_purchase_data():
     """Provide minimal valid purchase data."""
-    from tests.test_data import PurchaseData
+    from tests.static_test_data import PurchaseData
 
     return PurchaseData.MINIMAL_PURCHASE.copy()
 
@@ -499,7 +499,7 @@ def purchase_page(browser, base_url):
 @pytest.fixture(scope="session")
 def product_phone():
     """Provide phone product name."""
-    from tests.test_data import Products
+    from tests.static_test_data import Products
 
     return Products.SAMSUNG_GALAXY_S6
 
@@ -507,7 +507,7 @@ def product_phone():
 @pytest.fixture(scope="session")
 def product_laptop():
     """Provide laptop product name."""
-    from tests.test_data import Products
+    from tests.static_test_data import Products
 
     return Products.LAPTOPS["SONY_VAIO_I5"]
 
@@ -515,7 +515,7 @@ def product_laptop():
 @pytest.fixture(scope="session")
 def product_monitor():
     """Provide monitor product name."""
-    from tests.test_data import Products
+    from tests.static_test_data import Products
 
     return Products.MONITORS["APPLE_MONITOR_24"]
 
@@ -525,7 +525,7 @@ def random_product():
     """Provide random product from available products."""
     import random
 
-    from tests.test_data import Products
+    from tests.static_test_data import Products
 
     all_products = [
         Products.SAMSUNG_GALAXY_S6,
