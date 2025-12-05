@@ -1,9 +1,7 @@
 """
-Login Module Tests
-Author: Arévalo, Marc
+Login Tests Package
+Author: Marc Arévalo
 
-Test Files:
-- test_login_functional.py: Core login functionality
-- test_login_business.py: Business rules validation
-- test_login_security.py: Security and authentication tests
+Tests for login functionality:
+- Accessibility: WCAG 2.1 compliance
 """
