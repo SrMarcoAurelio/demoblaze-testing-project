@@ -15,6 +15,7 @@ SECURITY WARNING:
 """
 
 import os
+from typing import Dict
 
 
 class Users:
@@ -242,7 +243,7 @@ class EdgeCases:
     }
 
 
-def get_user_credentials(user_type: str = "valid") -> dict:
+def get_user_credentials(user_type: str = "valid") -> Dict[str, str]:
     """
     Get user credentials by type.
 
@@ -267,7 +268,7 @@ def get_user_credentials(user_type: str = "valid") -> dict:
     return user_map.get(user_type, Users.VALID)
 
 
-def get_purchase_data(data_type: str = "valid") -> dict:
+def get_purchase_data(data_type: str = "valid") -> Dict[str, str]:
     """
     Get purchase/checkout data by type.
 

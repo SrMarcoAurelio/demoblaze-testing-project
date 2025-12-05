@@ -27,7 +27,7 @@ def validate_email(email: str) -> bool:
         >>> validate_email("invalid.email")
         False
     """
-    if not email:
+    if not isinstance(email, str) or not email:
         return False
 
     email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
