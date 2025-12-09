@@ -1,361 +1,665 @@
 # Issue Reporting Guide - Quality Assurance Standards
 
-## 📋 **Table of Contents**
+## Table of Contents
 1. [Introduction](#introduction)
-2. [QA Mindset](#qa-mindset)
+2. [Quality Assurance Responsibilities](#quality-assurance-responsibilities)
 3. [Issue Reporting Methodology](#issue-reporting-methodology)
 4. [Issue Report Structure](#issue-report-structure)
-5. [Testing Criteria](#testing-criteria)
-6. [Examples](#examples)
-7. [Best Practices](#best-practices)
+5. [Testing Criteria and Coverage](#testing-criteria-and-coverage)
+6. [Severity and Priority Classification](#severity-and-priority-classification)
+7. [Examples and Case Studies](#examples-and-case-studies)
+8. [Quality Standards Compliance](#quality-standards-compliance)
 
 ---
 
-## 🎯 **Introduction**
+## Introduction
 
-As a Quality Assurance professional, your role extends beyond simply executing test cases. You are the **last line of defense** before software reaches users. This guide outlines how to properly identify, document, and report issues.
+Quality Assurance serves as the final validation checkpoint before software deployment to production environments. This guide establishes standardized procedures for defect identification, documentation, and reporting based on industry best practices including ISTQB standards, IEEE 829, and ISO/IEC 25010 quality models.
 
-**Remember:** If something seems wrong, unusual, or doesn't make sense - it probably is. Report it.
+### Scope
 
----
+This document covers:
+- Defect detection and analysis procedures
+- Standardized reporting formats
+- Testing coverage requirements
+- Quality criteria verification
+- Standards compliance validation
 
-## 🧠 **QA Mindset**
+### Purpose
 
-### **Your Responsibilities:**
-
-1. **Verify Everything Works** - Not just the specific bug, but the entire feature
-2. **Discover New Issues** - Don't limit yourself to predefined test cases
-3. **Question Everything** - If something doesn't make sense, ask why
-4. **Think Like a User** - Consider real-world usage scenarios
-5. **Protect the Product** - You represent the end users
-
-### **Critical Thinking:**
-
-- ❓ **Why does this button exist?**
-- ❓ **What happens if a user does X instead of Y?**
-- ❓ **Does this meet UX/UI standards?**
-- ❓ **Is this accessible to all users?**
-- ❓ **Could this confuse users?**
-
-**Example:** You find a button that seems useless. **Don't ignore it.** Report it and ask IT why it exists. If a manager later asks "Why didn't you catch this?" you need to have done your due diligence.
+To ensure consistent, comprehensive, and actionable defect reporting that enables efficient issue resolution and maintains software quality throughout the development lifecycle.
 
 ---
 
-## 🔍 **Issue Reporting Methodology**
+## Quality Assurance Responsibilities
 
-### **1. Problem Statement**
+### Core Responsibilities
 
-Clearly define what you observed:
+**1. Requirement Verification**
+- Validate functionality against specified requirements
+- Identify requirement gaps or ambiguities
+- Verify acceptance criteria fulfillment
 
-```
-WHAT: Describe the issue
-WHERE: Which page/feature
-WHEN: Under what conditions
-WHO: Which user role/type
-```
+**2. Exploratory Testing**
+- Investigate beyond predefined test cases
+- Identify edge cases and boundary conditions
+- Discover integration issues and unexpected behaviors
 
-### **2. Expected vs Actual Behavior**
+**3. Standards Compliance Validation**
+- Verify accessibility standards (WCAG 2.1, Section 508)
+- Validate security requirements (OWASP Top 10)
+- Confirm UX/UI design system adherence
+- Check performance benchmarks (Web Vitals, response times)
 
-```
-EXPECTED: What should happen according to requirements/standards
-ACTUAL: What actually happened
-IMPACT: How does this affect users?
-```
+**4. Risk Assessment**
+- Evaluate defect impact on end users
+- Assess business criticality
+- Identify potential data integrity issues
+- Flag security vulnerabilities
 
-### **3. Reproducibility**
+### Professional Accountability
 
-```
-STEPS TO REPRODUCE:
-1. Navigate to [page]
-2. Click [element]
-3. Enter [data]
-4. Observe [result]
+Quality Assurance professionals are accountable for:
+- Thoroughness of testing coverage
+- Accuracy of defect documentation
+- Timeliness of issue reporting
+- Verification of issue resolution
 
-FREQUENCY: Always / Sometimes / Rare
-ENVIRONMENT: Browser, OS, version
-```
-
-### **4. Evidence**
-
-- Screenshots with annotations
-- Screen recordings for complex issues
-- Console logs (browser developer tools)
-- Network requests (if applicable)
-- Error messages (full text)
-
-### **5. Severity Assessment**
-
-- **CRITICAL**: Blocks core functionality, data loss, security
-- **HIGH**: Major feature broken, workaround difficult
-- **MEDIUM**: Feature partially broken, workaround exists
-- **LOW**: Cosmetic, minor inconvenience, easy workaround
+Documentation serves as evidence of due diligence. All findings, questions, and anomalies must be properly recorded.
 
 ---
 
-## 📝 **Issue Report Structure**
+## Issue Reporting Methodology
 
-### **Template:**
+### 1. Defect Identification
+
+**Initial Analysis:**
+```
+WHAT: Precise description of the defect
+WHERE: Specific component, module, or page
+WHEN: Conditions under which defect occurs
+WHO: Affected user roles or personas
+WHY: Root cause hypothesis (if identifiable)
+```
+
+**Evidence Collection:**
+- Screenshot with annotations highlighting the issue
+- Screen recording for complex interaction defects
+- Browser console logs (errors, warnings)
+- Network traffic analysis (failed requests, timeouts)
+- Application logs (if accessible)
+- Database state (if relevant and authorized)
+
+### 2. Impact Assessment
+
+**User Impact Analysis:**
+- Number of affected users (percentage/absolute)
+- Frequency of occurrence
+- Workaround availability
+- Business function impact
+- Data integrity implications
+
+**Technical Impact Analysis:**
+- System stability effects
+- Performance degradation
+- Security exposure
+- Integration point failures
+
+### 3. Reproducibility Analysis
+
+**Reproduction Steps:**
+1. Document precise sequence of actions
+2. Include specific test data used
+3. Note timing dependencies
+4. Capture environment conditions
+
+**Consistency Check:**
+- CONSISTENT: Occurs 100% of the time
+- INTERMITTENT: Occurs irregularly
+- ENVIRONMENT-SPECIFIC: Occurs only in certain configurations
+
+### 4. Standards Validation
+
+**Check Against:**
+- Functional requirements documentation
+- Design specifications
+- Accessibility standards (WCAG 2.1 Level AA)
+- Security standards (OWASP, SANS)
+- Performance requirements (SLA/SLO)
+- Industry best practices
+
+---
+
+## Issue Report Structure
+
+### Standard Template
 
 ```markdown
-## 🐛 [Component] Brief Description
+## [COMPONENT] Defect Title - Brief Technical Description
 
-**Priority:** Critical / High / Medium / Low
-**Type:** Bug / Enhancement / Question / Standards Violation
+**Issue ID:** [AUTO-GENERATED or TRACKER-ID]
+**Reporter:** [Name]
+**Date Reported:** [YYYY-MM-DD HH:MM UTC]
+**Severity:** Critical | High | Medium | Low
+**Priority:** P0 | P1 | P2 | P3
+**Type:** Functional Defect | Performance | Security | Accessibility | UI/UX
+
+---
+
+### Environment Details
+- **Application Version:** [build number/commit hash]
+- **Browser:** [name version] (e.g., Chrome 120.0.6099.109)
+- **Operating System:** [OS version] (e.g., Windows 11 22H2)
+- **Screen Resolution:** [width x height]
+- **Device Type:** Desktop | Tablet | Mobile
+- **User Role:** [Admin | Standard User | Guest]
+- **Test Environment:** [Dev | Staging | Pre-Prod]
+
+---
 
 ### Problem Statement
-[Clear description of the issue]
 
-### Environment
-- Browser: Chrome 120
-- OS: Windows 11
-- Screen Resolution: 1920x1080
-- User Role: Admin / Standard User
+[Clear, technical description of the observed defect without assumptions]
 
-### Expected Behavior
-[What should happen according to specs/standards]
+**Expected Behavior:**
+[What should occur according to requirements/specifications]
 
-### Actual Behavior
-[What actually happens]
+**Actual Behavior:**
+[What actually occurs, be specific and objective]
+
+**Deviation:**
+[Explicit statement of how actual differs from expected]
+
+---
 
 ### Steps to Reproduce
-1. Go to login page
-2. Enter valid credentials
-3. Click "Login"
-4. Observe error despite valid data
+
+**Preconditions:**
+- [Any required setup, data state, or configuration]
+
+**Steps:**
+1. [Precise action with specific values]
+2. [Include data entered, buttons clicked, etc.]
+3. [Note timing if relevant]
+4. [Observe result]
+
+**Actual Result:**
+[What happens after following steps]
+
+**Expected Result:**
+[What should happen after following steps]
+
+---
 
 ### Evidence
-- Screenshot: [attach]
-- Console Error: [paste]
-- Network Request: [attach HAR file]
 
-### Impact
-- Users cannot login
-- Blocks all functionality
-- Affects 100% of users
+**Screenshots:**
+- [Attach annotated screenshots]
+- File naming: `[COMPONENT]_[ISSUE]_[DATE].png`
+
+**Console Logs:**
+```
+[Paste relevant console output]
+```
+
+**Network Activity:**
+- [Attach HAR file if relevant]
+- Note failed requests, timeouts, error responses
+
+**Database State:** (if applicable and authorized)
+```sql
+-- Current state query results
+```
+
+---
+
+### Impact Analysis
+
+**User Impact:**
+- Affected Users: [percentage or count]
+- Frequency: [always | often | intermittent | rare]
+- Business Function: [which process is blocked/impaired]
+- Data Risk: [none | low | medium | high]
+
+**Business Impact:**
+- Revenue Impact: [if quantifiable]
+- Compliance Risk: [regulatory/legal implications]
+- Reputation Risk: [user-facing impact]
+
+**Technical Impact:**
+- System Stability: [does it cause crashes/hangs]
+- Performance: [degradation metrics]
+- Security: [vulnerability type if applicable]
+
+---
+
+### Root Cause Hypothesis
+
+[If identifiable, state potential technical cause]
+[Note: This is optional and should be data-driven]
+
+---
+
+### Standards Compliance
+
+**Violated Standards:** (if applicable)
+- WCAG 2.1: [specific criterion]
+- OWASP: [specific vulnerability]
+- Performance: [specific metric]
+- Design System: [specific guideline]
+
+**Regulatory Impact:** (if applicable)
+- ADA Section 508
+- GDPR
+- HIPAA
+- PCI-DSS
+
+---
+
+### Workaround
+
+**Available:** Yes | No
+
+[If yes, document workaround procedure]
+
+---
 
 ### Additional Context
-- First noticed: 2024-12-09 10:30 AM
-- Related to recent deployment: Yes/No
-- Workaround available: Yes/No
-- Standards violated: WCAG 2.1 / Design System
 
-### Suggested Fix (Optional)
-[If you have insights on potential solution]
+- First Observed: [date/build]
+- Related Issues: [IDs of related defects]
+- Regression: [yes/no - if from previous working version]
+- Recent Changes: [deployments/updates that may be related]
+
+---
+
+### Attachments
+
+- [ ] Screenshots
+- [ ] Screen recording
+- [ ] Console logs
+- [ ] Network trace (HAR file)
+- [ ] Application logs
+- [ ] Test data file
 ```
 
 ---
 
-## ✅ **Testing Criteria**
+## Testing Criteria and Coverage
 
-### **Functional Testing:**
+### Functional Testing Coverage
 
-When testing a feature (e.g., Login):
+**For Each Feature:**
 
-**Don't just test:**
-- ✓ Valid credentials work
+**1. Positive Testing**
+- Valid input acceptance
+- Expected output generation
+- State transitions
+- Data persistence
 
-**Also test:**
-- ✓ Invalid credentials fail appropriately
-- ✓ Empty fields show proper validation
-- ✓ Special characters are handled
-- ✓ SQL injection attempts are blocked
-- ✓ Error messages are user-friendly
-- ✓ "Forgot Password" link works
-- ✓ "Remember Me" persists correctly
-- ✓ Session timeout works
-- ✓ Logout clears session
-- ✓ Back button behavior after logout
-- ✓ Multiple failed login attempts are handled
-- ✓ Keyboard navigation works (Tab, Enter)
-- ✓ Screen readers announce properly
-- ✓ Mobile responsive
-- ✓ Performance under load
+**2. Negative Testing**
+- Invalid input rejection
+- Error handling verification
+- Boundary condition validation
+- Exception scenarios
 
-**Think:** What could break? What would users try?
+**3. Edge Cases**
+- Minimum/maximum values
+- Empty inputs
+- Special characters
+- Concurrent operations
+- Network failures
 
-### **Standards Compliance:**
+### Security Testing Coverage
 
-Report violations of:
+**OWASP Top 10 Validation:**
 
-1. **Accessibility Standards (WCAG 2.1)**
-   - Missing alt text on images
-   - Poor color contrast
-   - No keyboard navigation
-   - Missing ARIA labels
+1. **Injection (SQL, XSS, Command)**
+   - Input sanitization verification
+   - Parameterized query usage
+   - Output encoding confirmation
 
-2. **UX/UI Standards**
-   - Inconsistent button styles
-   - Confusing navigation
-   - Poor mobile experience
-   - Misleading labels
+2. **Broken Authentication**
+   - Session management
+   - Password handling
+   - Token validation
+   - Timeout enforcement
 
-3. **Security Standards**
-   - Passwords shown in plain text
-   - No input sanitization
-   - Exposed sensitive data
-   - Missing HTTPS
+3. **Sensitive Data Exposure**
+   - Transport encryption (HTTPS/TLS)
+   - Data storage encryption
+   - PII handling compliance
 
-4. **Performance Standards**
-   - Page load > 3 seconds
-   - Memory leaks
-   - Unnecessary network requests
+4. **Security Misconfiguration**
+   - Default credentials
+   - Error message information disclosure
+   - Unnecessary services/ports
 
-### **Useless/Confusing Elements:**
+5. **Broken Access Control**
+   - Horizontal privilege escalation
+   - Vertical privilege escalation
+   - Direct object reference
 
-**If you find:**
-- A button that does nothing → Report it
-- A field that seems unnecessary → Ask why it exists
-- Misleading labels → Suggest improvements
-- Broken links → Document them
-- Dead code visible to users → Flag it
+### Accessibility Testing Coverage
 
-**Reasoning:** If IT later says "Why didn't you catch this?" you need proof you did your job. Document everything suspicious.
+**WCAG 2.1 Level AA Requirements:**
+
+**Perceivable:**
+- Alternative text for images (1.1.1)
+- Color contrast ratios (1.4.3)
+- Text resizing (1.4.4)
+- Audio descriptions (1.2.5)
+
+**Operable:**
+- Keyboard navigation (2.1.1)
+- No keyboard trap (2.1.2)
+- Timing adjustable (2.2.1)
+- Pause/Stop/Hide (2.2.2)
+
+**Understandable:**
+- Page language (3.1.1)
+- Consistent navigation (3.2.3)
+- Error identification (3.3.1)
+- Labels and instructions (3.3.2)
+
+**Robust:**
+- Parsing validity (4.1.1)
+- Name, Role, Value (4.1.2)
+
+### Performance Testing Coverage
+
+**Key Metrics:**
+
+- **Page Load Time:** < 3 seconds (target)
+- **Time to Interactive (TTI):** < 5 seconds
+- **First Contentful Paint (FCP):** < 1.8 seconds
+- **Cumulative Layout Shift (CLS):** < 0.1
+- **API Response Time:** < 200ms (P95)
 
 ---
 
-## 💡 **Examples**
+## Severity and Priority Classification
 
-### **Example 1: Discovering New Issues**
+### Severity Levels
 
-**Assigned Bug:** "Login button not responding"
+**CRITICAL**
+- Application crash or data loss
+- Security breach or vulnerability exploitation
+- Complete feature failure (no workaround)
+- Legal/compliance violation
 
-**Your Testing:**
-1. ✅ Verify login button works (bug fixed)
-2. 🔍 **But wait...** password field shows text instead of dots
-3. 🔍 **Also found...** no validation for empty username
-4. 🔍 **Additionally...** "Forgot Password" link is broken
-5. 🔍 **Moreover...** error message reveals if username exists (security risk)
+**HIGH**
+- Major feature malfunction
+- Significant user impact
+- Workaround exists but difficult
+- Performance degradation > 50%
 
-**Result:** You found 1 fixed bug + 4 new critical issues
+**MEDIUM**
+- Partial feature malfunction
+- Moderate user impact
+- Reasonable workaround available
+- Standards violation (non-critical)
 
-### **Example 2: Questioning Design**
+**LOW**
+- Cosmetic issues
+- Minor inconvenience
+- Easy workaround
+- Enhancement requests
 
-**Scenario:** Testing checkout page
+### Priority Levels
 
-**Observation:** There's a "Save for Later" button that does nothing
+**P0 (Immediate)**
+- Blocks release
+- Critical business impact
+- Must fix before deployment
 
-**Wrong Approach:** ❌ Ignore it (not in test case)
+**P1 (High)**
+- Should fix in current sprint
+- Significant user impact
+- Affects key workflows
 
-**Correct Approach:** ✅ Report it
+**P2 (Medium)**
+- Fix in near term (1-2 sprints)
+- Affects secondary features
+- Workaround documented
+
+**P3 (Low)**
+- Fix when convenient
+- Minimal impact
+- Enhancement/improvement
+
+---
+
+## Examples and Case Studies
+
+### Example 1: SQL Injection Vulnerability
+
+**Title:** [Authentication] SQL Injection in Login Form
+
+**Severity:** CRITICAL | **Priority:** P0
+
+**Problem Statement:**
+Login form accepts SQL syntax in username field without sanitization, allowing authentication bypass through SQL injection.
+
+**Steps to Reproduce:**
+1. Navigate to login page: `/login`
+2. Enter username: `admin' OR '1'='1' --`
+3. Enter any password: `test123`
+4. Click "Login"
+5. Observe: Successfully authenticated without valid credentials
+
+**Evidence:**
 ```
-Title: [Checkout] "Save for Later" button has no functionality
-
-Description:
-The "Save for Later" button on checkout page appears to do nothing
-when clicked. No visual feedback, no items saved, no error.
-
-Questions for IT:
-1. Is this button supposed to be functional?
-2. If yes, it's broken and needs fixing
-3. If no, it should be removed (confuses users)
-4. If it's for future implementation, should be disabled with tooltip
-
-Impact: Users click expecting functionality, get confused
-Recommendation: Either implement or remove to avoid user frustration
+Input: username=admin' OR '1'='1' --&password=test123
+Response: HTTP 302 Redirect to /dashboard
+Set-Cookie: session_id=abc123...
 ```
 
-### **Example 3: Standards Violation**
+**Impact:**
+- Complete authentication bypass
+- Unauthorized access to all user accounts
+- OWASP A03:2021 Injection vulnerability
+- Violation of security requirements
 
-**Scenario:** Testing product images
+**Standards Violated:**
+- OWASP Top 10: A03:2021 Injection
+- CWE-89: SQL Injection
 
-**Observation:** Images load but have no alt text
+**Recommendation:**
+Implement parameterized queries for all database operations. Use prepared statements or ORM frameworks that handle input sanitization automatically.
 
-**Report:**
+---
+
+### Example 2: Accessibility Violation
+
+**Title:** [Product Catalog] Images Missing Alternative Text
+
+**Severity:** HIGH | **Priority:** P1
+
+**Problem Statement:**
+Product images throughout the catalog lack alt attributes, preventing screen reader users from understanding product visuals and violating WCAG 2.1 Level A requirements.
+
+**Steps to Reproduce:**
+1. Navigate to `/products`
+2. Inspect any product image element
+3. Observe: `<img src="product.jpg">` without alt attribute
+
+**Evidence:**
+```html
+<!-- Current (Incorrect) -->
+<img src="samsung-galaxy-s23.jpg" class="product-image">
+
+<!-- Expected (Correct) -->
+<img src="samsung-galaxy-s23.jpg"
+     alt="Samsung Galaxy S23 smartphone in Phantom Black, 256GB storage"
+     class="product-image">
 ```
-Title: [Accessibility] Product images missing alt text - WCAG 2.1 Violation
 
-Priority: HIGH (Legal compliance issue)
+**Impact:**
+- Estimated 8-10% of users affected (screen reader users)
+- ADA/Section 508 compliance violation
+- Poor SEO performance
+- Legal liability risk
 
-Description:
-All product images on catalog page are missing alt text attributes.
-This violates WCAG 2.1 Level A (1.1.1 Non-text Content).
-
-Impact:
-- Screen reader users cannot understand product images
-- Fails accessibility audit
-- Potential legal compliance issue (ADA, Section 508)
-- SEO impact (search engines can't index images)
-
-Evidence:
-<img src="product1.jpg">  ← Missing alt attribute
-
-Expected:
-<img src="product1.jpg" alt="Samsung Galaxy S23 - Black, 256GB">
-
-Standards Violated:
-- WCAG 2.1 Level A: 1.1.1 Non-text Content
+**Standards Violated:**
+- WCAG 2.1 Level A: Success Criterion 1.1.1 (Non-text Content)
 - Section 508: § 1194.22(a)
+- EN 301 549: 9.1.1.1
 
-Recommendation:
-Add descriptive alt text to all product images. Format:
-"[Product Name] - [Key Features/Color]"
+**Recommendation:**
+Add descriptive alt text to all product images following format: "[Brand] [Model] - [Key Visual Features]"
+
+---
+
+### Example 3: Performance Degradation
+
+**Title:** [Dashboard] Page Load Time Exceeds Performance Budget
+
+**Severity:** MEDIUM | **Priority:** P2
+
+**Problem Statement:**
+Dashboard page load time averages 8.2 seconds, significantly exceeding the 3-second performance budget and impacting user experience.
+
+**Test Data:**
+```
+Metric                  Current    Target    Status
+----------------------------------------
+Page Load Time         8.2s       3.0s      FAIL
+First Contentful Paint 3.1s       1.8s      FAIL
+Time to Interactive    9.5s       5.0s      FAIL
+Total Page Size        4.2MB      2.0MB     FAIL
 ```
 
----
+**Root Cause Hypothesis:**
+- Unoptimized images (1.8MB total)
+- Synchronous script loading blocking render
+- No caching headers configured
+- Multiple redundant API calls
 
-## 🌟 **Best Practices**
+**Impact:**
+- 53% bounce rate increase (analytics data)
+- Negative Core Web Vitals scores
+- SEO ranking impact
+- User frustration
 
-### **DO:**
-
-✅ **Test beyond the happy path** - Users won't always follow instructions
-✅ **Document everything** - Screenshots, videos, logs
-✅ **Ask questions** - If something seems odd, investigate
-✅ **Think like a hacker** - Try to break things intentionally
-✅ **Consider accessibility** - Not everyone uses mouse & screen
-✅ **Check mobile** - Most users are on mobile devices
-✅ **Verify data integrity** - Ensure data saves/loads correctly
-✅ **Test edge cases** - Maximum input, special characters, etc.
-✅ **Report design issues** - Bad UX is a bug too
-✅ **Follow up** - Verify fixes actually work
-
-### **DON'T:**
-
-❌ **Assume it's "supposed to work that way"** - Ask
-❌ **Skip reporting because "it's minor"** - Let management prioritize
-❌ **Test only what's in the test case** - Explore and discover
-❌ **Ignore your intuition** - If it feels wrong, investigate
-❌ **Accept "works on my machine"** - Reproduce in target environment
-❌ **Report without evidence** - Always include proof
-❌ **Be vague** - Specific steps to reproduce are critical
-❌ **Test in isolation** - Consider integration with other features
-
-### **Communication:**
-
-- **Be clear and concise** - Developers are busy
-- **Be professional** - "The login is broken" not "The login sucks"
-- **Be helpful** - Suggest potential causes/solutions
-- **Be persistent** - Follow up on unresolved issues
-- **Be collaborative** - Work with dev team, not against them
+**Recommendation:**
+1. Implement lazy loading for below-fold content
+2. Optimize and compress images (WebP format)
+3. Enable browser caching headers
+4. Consolidate API calls into single batch request
+5. Defer non-critical JavaScript
 
 ---
 
-## 🎓 **Remember:**
+## Quality Standards Compliance
 
-> **"Quality is not an act, it is a habit."** - Aristotle
+### Accessibility Standards (WCAG 2.1)
 
-Your job is not just to find bugs. Your job is to ensure the product is:
-- ✅ Functional (works as intended)
-- ✅ Usable (users can accomplish tasks)
-- ✅ Accessible (everyone can use it)
-- ✅ Secure (protects user data)
-- ✅ Performant (fast and responsive)
-- ✅ Standards-compliant (meets regulations)
+**Level A (Minimum):**
+- All required for compliance
+- Must be met for all content
 
-**When in doubt, report it.** It's better to over-communicate than to miss critical issues.
+**Level AA (Target):**
+- Industry standard
+- Required for government/enterprise
+- Recommended for all applications
+
+**Level AAA (Enhanced):**
+- Highest level
+- May not be achievable for all content
+- Implement where feasible
+
+### Security Standards
+
+**OWASP Application Security Verification Standard (ASVS):**
+- Level 1: Basic security
+- Level 2: Standard security (recommended)
+- Level 3: High security (sensitive applications)
+
+**CWE/SANS Top 25:**
+Verify protection against most dangerous software weaknesses
+
+### Performance Standards
+
+**Google Core Web Vitals:**
+- Largest Contentful Paint (LCP): < 2.5s
+- First Input Delay (FID): < 100ms
+- Cumulative Layout Shift (CLS): < 0.1
+
+**HTTP Archive Benchmarks:**
+- Compare against industry 50th/90th percentiles
 
 ---
 
-## 📞 **Questions?**
+## Best Practices
 
-If you're unsure whether something should be reported:
-1. Ask yourself: "Would this confuse/frustrate a user?"
-2. If YES → Report it
-3. If MAYBE → Report it with question tag
-4. If NO → Still document it in notes
+### Documentation Standards
 
-**Golden Rule:** If management asks "Why didn't you catch this?" you should be able to show you did your due diligence.
+**DO:**
+- Use precise technical language
+- Include all environment details
+- Provide exact reproduction steps
+- Attach comprehensive evidence
+- Reference applicable standards
+- State objective observations
+- Separate facts from hypotheses
+
+**AVOID:**
+- Vague descriptions ("doesn't work")
+- Missing environment information
+- Incomplete reproduction steps
+- Subjective language ("looks bad")
+- Assumptions about root cause
+- Combining multiple issues in one report
+
+### Investigation Principles
+
+**Systematic Approach:**
+1. Verify against requirements
+2. Test documented scenarios
+3. Explore adjacent functionality
+4. Investigate edge cases
+5. Validate standards compliance
+6. Document all findings
+
+**Critical Thinking:**
+- Question unexpected behavior
+- Investigate UI/UX inconsistencies
+- Verify data integrity
+- Check cross-browser/device compatibility
+- Validate accessibility
+- Assess security implications
+
+### Communication Guidelines
+
+**Professional Communication:**
+- Be objective and factual
+- Focus on technical details
+- Provide actionable information
+- Collaborate with development team
+- Follow up on issue resolution
+- Verify fixes thoroughly
+
+**Escalation Criteria:**
+- Security vulnerabilities
+- Data loss risks
+- Compliance violations
+- Release blockers
+- Recurring issues
 
 ---
 
+## References and Standards
+
+- **ISTQB:** International Software Testing Qualifications Board
+- **IEEE 829:** Software Test Documentation Standard
+- **ISO/IEC 25010:** Software Quality Model
+- **WCAG 2.1:** Web Content Accessibility Guidelines
+- **OWASP:** Open Web Application Security Project
+- **CWE:** Common Weakness Enumeration
+
+---
+
+*Document Version: 2.0*
 *Last Updated: 2024-12-09*
-*Version: 1.0*
+*Compliance: ISTQB Foundation Level, IEEE 829, ISO/IEC 25010*

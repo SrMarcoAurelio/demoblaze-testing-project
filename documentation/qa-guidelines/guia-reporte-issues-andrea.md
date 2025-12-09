@@ -1,502 +1,792 @@
-# 📋 Guía de Reporte de Issues - ANDREA
+# Guía de Reporte de Issues - Estándares de QA
+**Documento para: Andrea - Quality Assurance Analyst**
 
-## ⚠️ **IMPORTANTE - LEE ESTO PRIMERO**
-
-Andrea, esta guía es **específica para ti**. Te explica exactamente cómo debes reportar issues y qué mentalidad debes tener como QA.
-
-**Regla de Oro:** Tu trabajo NO es solo encontrar el bug específico que te asignan. Tu trabajo es **asegurar que TODO funcione correctamente**.
-
----
-
-## 🎯 **Tu Rol Como QA**
-
-### **¿Qué Significa Ser QA?**
-
-Eres la **última línea de defensa** antes de que el software llegue a los usuarios. Si algo pasa desapercibido y llega a producción:
-
-1. 👎 Los usuarios tendrán una mala experiencia
-2. 👎 La empresa pierde credibilidad
-3. 👎 Los managers preguntarán: **"¿Por qué QA no detectó esto?"**
-4. 👎 **TÚ tendrás que explicar por qué no lo viste**
-
-**Por eso:** Si algo te parece raro, no tiene sentido, o simplemente "se ve mal" → **REPÓRTALO**.
-
-### **Mentalidad Correcta:**
-
-❌ **MAL:** "Mi tarea dice 'testear login', así que solo voy a probar si el login funciona"
-
-✅ **BIEN:** "Voy a testear login, pero también voy a revisar:
-- ¿Los mensajes de error son claros?
-- ¿Qué pasa si intento SQL injection?
-- ¿Funciona en móvil?
-- ¿Es accesible para personas con discapacidades?
-- ¿Este botón tiene sentido?
-- ¿Los colores cumplen con estándares?"
+## Tabla de Contenidos
+1. [Introducción](#introducción)
+2. [Responsabilidades del Analista de QA](#responsabilidades-del-analista-de-qa)
+3. [Metodología de Testing](#metodología-de-testing)
+4. [Estructura del Reporte de Defectos](#estructura-del-reporte-de-defectos)
+5. [Criterios de Cobertura de Testing](#criterios-de-cobertura-de-testing)
+6. [Clasificación de Severidad y Prioridad](#clasificación-de-severidad-y-prioridad)
+7. [Ejemplos de Casos Reales](#ejemplos-de-casos-reales)
+8. [Referencias y Estándares](#referencias-y-estándares)
 
 ---
 
-## 🔍 **Metodología de Testing**
+## Introducción
 
-### **Problema Planteado:**
+Este documento establece los estándares profesionales para la identificación, documentación y reporte de defectos de software según las mejores prácticas de la industria (ISTQB, IEEE 829, ISO/IEC 25010).
 
-Cuando te asignan una tarea tipo: "Testear funcionalidad de login"
+### Alcance Profesional
 
-### **Tu Proceso:**
+El rol de Analista de Quality Assurance requiere:
+- Verificación sistemática de requisitos funcionales
+- Investigación exploratoria más allá de casos de prueba predefinidos
+- Validación de cumplimiento de estándares (accesibilidad, seguridad, rendimiento)
+- Documentación técnica precisa de todos los hallazgos
 
-#### **1. Entender el Problema**
+### Responsabilidad Profesional
 
-```
-¿Qué estoy testeando?: Login
-¿Qué debería pasar?: Usuarios deberían poder entrar con credenciales válidas
-¿Qué NO debería pasar?: Usuarios no deberían entrar con credenciales inválidas
-```
-
-#### **2. Criterios de Prueba**
-
-No solo pruebes el "happy path" (el caso ideal). Prueba:
-
-**Funcionalidad Básica:**
-- ✅ Login con credenciales válidas → Funciona
-- ✅ Login con credenciales inválidas → Muestra error claro
-- ✅ Login con campos vacíos → Validación apropiada
-- ✅ Login con usuario que no existe → Error apropiado
-- ✅ Login con contraseña incorrecta → Error apropiado
-
-**Seguridad:**
-- ✅ Intento de SQL injection → ¿Está protegido?
-- ✅ Contraseña visible → ¿Se muestra como puntos?
-- ✅ Error específico → ¿Revela si el usuario existe? (problema de seguridad)
-
-**Usabilidad:**
-- ✅ Mensaje de error → ¿Es claro para el usuario?
-- ✅ Botón "Olvidé contraseña" → ¿Funciona?
-- ✅ Checkbox "Recordarme" → ¿Persiste la sesión?
-- ✅ Logout → ¿Limpia la sesión correctamente?
-
-**Accesibilidad:**
-- ✅ Navegación con teclado → ¿Funciona Tab + Enter?
-- ✅ Lector de pantalla → ¿Anuncia los elementos?
-- ✅ Contraste de colores → ¿Es suficiente?
-
-**Performance:**
-- ✅ Tiempo de respuesta → ¿Es rápido?
-- ✅ Múltiples intentos → ¿Se maneja bien?
-
-#### **3. Descubrir Nuevos Issues**
-
-**Ejemplo Real:**
-
-```
-Te asignan: "Bug #123 - Botón login no responde"
-
-TU TESTING:
-1. ✅ Verificas que el botón ahora funciona (bug arreglado)
-2. 🔍 PERO NOTAS: La contraseña se muestra en texto plano (CRÍTICO!)
-3. 🔍 TAMBIÉN NOTAS: No hay validación de campo vacío
-4. 🔍 ADEMÁS NOTAS: El link "Olvidé contraseña" está roto
-5. 🔍 Y ENCUENTRAS: El mensaje de error revela si el usuario existe (seguridad)
-
-RESULTADO:
-- Bug asignado: ✅ Corregido
-- Nuevos issues críticos: 🐛🐛🐛🐛 Encontraste 4 más!
-```
-
-**¿Ves la diferencia?** No solo verificaste que el bug fue arreglado. **Exploraste y encontraste más problemas.**
+La calidad del software depende directamente de la rigurosidad en la detección y documentación de defectos. La documentación completa sirve como evidencia de due diligence profesional y protege tanto al proyecto como al analista de QA.
 
 ---
 
-## 📝 **Cómo Reportar Issues**
+## Responsabilidades del Analista de QA
 
-### **Estructura del Reporte:**
+### 1. Verificación de Requisitos
+
+**Validación Funcional:**
+- Verificar que la funcionalidad cumple con especificaciones documentadas
+- Identificar discrepancias entre requisitos y implementación
+- Validar criterios de aceptación definidos
+- Documentar ambigüedades en requisitos
+
+**Testing Exploratorio:**
+El testing exploratorio es una responsabilidad crítica que va más allá de la ejecución de test cases predefinidos. Incluye:
+- Investigación de casos límite y condiciones de borde
+- Identificación de problemas de integración entre componentes
+- Descubrimiento de defectos no anticipados
+- Análisis de comportamientos inesperados
+
+### 2. Validación de Cumplimiento de Estándares
+
+**Estándares de Accesibilidad (WCAG 2.1):**
+- Nivel A: Requisitos mínimos obligatorios
+- Nivel AA: Estándar de industria (objetivo)
+- Nivel AAA: Nivel mejorado (implementar donde sea posible)
+
+Criterios específicos a verificar:
+- Alternativas textuales para contenido no textual (1.1.1)
+- Relación de contraste suficiente (1.4.3)
+- Navegación por teclado completa (2.1.1)
+- Identificación de errores clara (3.3.1)
+
+**Estándares de Seguridad (OWASP Top 10):**
+- Inyección (SQL, XSS, Command)
+- Autenticación rota
+- Exposición de datos sensibles
+- Control de acceso roto
+- Configuración incorrecta de seguridad
+
+**Estándares de Rendimiento:**
+- Core Web Vitals de Google
+- Tiempos de carga según SLA/SLO definidos
+- Respuesta de API dentro de umbrales establecidos
+
+### 3. Análisis de Riesgo e Impacto
+
+Al identificar un defecto, evaluar:
+
+**Impacto Técnico:**
+- Estabilidad del sistema
+- Integridad de datos
+- Exposición de seguridad
+- Degradación de rendimiento
+
+**Impacto de Negocio:**
+- Número de usuarios afectados
+- Funcionalidad de negocio impactada
+- Riesgo de compliance regulatorio
+- Impacto en revenue (si es cuantificable)
+
+### 4. Documentación y Evidencia
+
+**Principio Fundamental:**
+Todo hallazgo debe estar documentado con evidencia objetiva y reproducible. La documentación sirve múltiples propósitos:
+- Facilita la resolución eficiente del defecto
+- Proporciona evidencia para auditorías
+- Protege profesionalmente al analista de QA
+- Permite análisis de tendencias y métricas de calidad
+
+---
+
+## Metodología de Testing
+
+### Testing Más Allá del Happy Path
+
+**Definición de Happy Path:**
+El happy path es el escenario ideal donde el usuario proporciona entradas válidas y el sistema responde correctamente. Este es solo el punto de partida del testing.
+
+**Testing Comprehensivo Requiere:**
+
+**1. Testing Positivo (Happy Path)**
+- Validar entradas correctas
+- Verificar salidas esperadas
+- Confirmar transiciones de estado
+- Validar persistencia de datos
+
+**2. Testing Negativo**
+- Probar entradas inválidas
+- Verificar manejo de errores
+- Validar mensajes de error
+- Confirmar que el sistema rechaza entradas incorrectas apropiadamente
+
+**3. Testing de Casos Límite (Boundary Testing)**
+- Valores mínimos y máximos
+- Campos vacíos
+- Caracteres especiales
+- Límites de longitud de strings
+- Valores fuera de rango
+
+**4. Testing de Integración**
+- Interacciones entre componentes
+- Flujos de datos entre módulos
+- Manejo de estados compartidos
+- Sincronización de operaciones
+
+### Ejemplo Práctico: Testing de Login
+
+**Test Case Asignado:** "Verificar funcionalidad de login"
+
+**Approach Inadecuado:**
+```
+1. Ingresar credenciales válidas
+2. Verificar que login funciona
+3. Marcar como PASSED
+```
+
+**Approach Profesional:**
+
+**Testing Funcional:**
+```
+1. Login con credenciales válidas → Verificar acceso exitoso
+2. Login con usuario inexistente → Verificar mensaje de error apropiado
+3. Login con contraseña incorrecta → Verificar mensaje de error genérico
+4. Login con campos vacíos → Verificar validación de campos requeridos
+5. Login con usuario válido pero deshabilitado → Verificar acceso denegado
+6. Logout → Verificar limpieza de sesión
+7. Navegación con botón back después de logout → Verificar sesión cerrada
+```
+
+**Testing de Seguridad:**
+```
+8. Inyección SQL: username = "admin' OR '1'='1' --" → Verificar protección
+9. XSS: username = "<script>alert('XSS')</script>" → Verificar sanitización
+10. Contraseña visible → Verificar campo type="password"
+11. Intentos de login fallidos → Verificar límite de reintentos
+12. Fuerza bruta → Verificar implementación de rate limiting
+```
+
+**Testing de Usabilidad:**
+```
+13. Mensaje de error → Verificar claridad sin revelar información sensible
+14. Link "Forgot Password" → Verificar funcionalidad
+15. Checkbox "Remember Me" → Verificar persistencia de sesión
+16. Enter key en form → Verificar submit con teclado
+17. Tab navigation → Verificar orden lógico de focus
+```
+
+**Testing de Accesibilidad:**
+```
+18. Screen reader → Verificar anuncios de ARIA labels
+19. Contraste de texto → Verificar ratio mínimo 4.5:1
+20. Navegación por teclado completa → Verificar sin requerir mouse
+21. Identificación de errores → Verificar mensajes accesibles
+```
+
+**Testing de Performance:**
+```
+22. Tiempo de respuesta → Verificar < 200ms para validación
+23. Comportamiento con red lenta → Verificar feedback visual
+24. Múltiples sesiones simultáneas → Verificar manejo de carga
+```
+
+**Resultado del Testing Comprehensivo:**
+- Test case original: 1 verificación
+- Testing profesional: 24+ verificaciones
+- Defectos potencialmente descubiertos: Múltiples vulnerabilidades, problemas de usabilidad, violaciones de accesibilidad
+
+Este es el nivel de rigor esperado en testing profesional de QA.
+
+---
+
+## Estructura del Reporte de Defectos
+
+### Template Estándar
 
 ```markdown
-## 🐛 [Componente] Título Claro y Específico
+## [COMPONENTE] Título Técnico del Defecto
 
-**Prioridad:** CRÍTICA / ALTA / MEDIA / BAJA
-**Tipo:** Bug / Mejora / Pregunta / Violación de Estándares
+**Issue ID:** [ID del sistema de tracking]
+**Reporter:** Andrea [Apellido]
+**Fecha de Reporte:** [YYYY-MM-DD HH:MM UTC]
+**Severidad:** Critical | High | Medium | Low
+**Prioridad:** P0 | P1 | P2 | P3
+**Tipo:** Defecto Funcional | Performance | Seguridad | Accesibilidad | UI/UX
+
+---
+
+### Detalles del Ambiente
+
+- **Versión de Aplicación:** [build number o commit hash]
+- **Navegador:** [nombre versión completa]
+  Ejemplo: Chrome 120.0.6099.109
+- **Sistema Operativo:** [OS y versión]
+  Ejemplo: Windows 11 22H2 Build 22621.2715
+- **Resolución de Pantalla:** [ancho x alto]
+- **Tipo de Dispositivo:** Desktop | Tablet | Mobile
+- **Rol de Usuario:** [Admin | Usuario Estándar | Invitado]
+- **Ambiente de Testing:** [Dev | Staging | Pre-Producción]
+
+---
 
 ### Descripción del Problema
-[Explica QUÉ está mal, sin tecnicismos innecesarios pero siendo específica]
 
-### Ambiente de Prueba
-- Navegador: Chrome 120 / Firefox 115 / Safari 17
-- Sistema Operativo: Windows 11 / macOS Sonoma / Ubuntu 22.04
-- Resolución: 1920x1080 / 1366x768 / 375x667 (móvil)
-- Rol de Usuario: Admin / Usuario Normal / Invitado
+**Comportamiento Esperado:**
+[Qué debería ocurrir según documentación de requisitos]
 
-### Comportamiento Esperado
-[Qué DEBERÍA pasar según los requisitos o el sentido común]
+**Comportamiento Actual:**
+[Qué ocurre realmente - descripción objetiva sin interpretaciones]
 
-### Comportamiento Actual
-[Qué REALMENTE pasa - sé específica]
+**Desviación:**
+[Diferencia específica entre esperado y actual]
+
+---
 
 ### Pasos para Reproducir
-1. Ir a página de login
-2. Ingresar usuario: "test@test.com"
-3. Ingresar contraseña: "123456"
-4. Hacer clic en "Iniciar Sesión"
-5. Observar: [lo que pasa]
+
+**Precondiciones:**
+- [Estado inicial requerido]
+- [Datos de prueba necesarios]
+- [Configuración específica]
+
+**Pasos:**
+1. [Acción precisa con valores específicos]
+2. [Incluir datos ingresados exactamente]
+3. [Botones clickeados, opciones seleccionadas]
+4. [Resultado observado]
+
+**Reproducibilidad:**
+- CONSISTENTE: Ocurre 100% de las veces
+- INTERMITENTE: Ocurre de manera irregular
+- ESPECÍFICO AL AMBIENTE: Solo en ciertas configuraciones
+
+**Resultado Actual:**
+[Lo que sucede al seguir los pasos]
+
+**Resultado Esperado:**
+[Lo que debería suceder]
+
+---
 
 ### Evidencia
-- 📸 Screenshot: [adjuntar]
-- 🎥 Video: [si es complejo, grabar pantalla]
-- 🔍 Console Error: [abrir DevTools F12, copiar errores]
-- 📊 Network: [si hay error de API]
 
-### Impacto
-[¿Cómo afecta esto a los usuarios? ¿Cuántos usuarios afecta?]
+**Capturas de Pantalla:**
+- Nombrar archivos: `[COMPONENTE]_[DEFECTO]_[FECHA].png`
+- Anotar áreas relevantes
+- Incluir contexto suficiente
+
+**Logs de Consola:**
+```
+[Pegar output relevante de la consola del navegador]
+[Incluir timestamp si está disponible]
+```
+
+**Actividad de Red:**
+- Adjuntar archivo HAR si es relevante
+- Documentar requests fallidos
+- Notar timeouts o errores de respuesta
+
+**Evidencia de Base de Datos:** (si aplica y está autorizado)
+```sql
+-- Query que muestra el estado incorrecto
+SELECT * FROM tabla WHERE condicion;
+```
+
+---
+
+### Análisis de Impacto
+
+**Impacto a Usuarios:**
+- Usuarios Afectados: [porcentaje o cantidad]
+- Frecuencia: [siempre | frecuente | intermitente | raro]
+- Función de Negocio: [qué proceso está bloqueado/afectado]
+- Riesgo a Datos: [ninguno | bajo | medio | alto]
+
+**Impacto a Negocio:**
+- Impacto en Revenue: [si es cuantificable]
+- Riesgo de Compliance: [implicaciones regulatorias/legales]
+- Riesgo Reputacional: [impacto visible al usuario]
+
+**Impacto Técnico:**
+- Estabilidad del Sistema: [causa crashes/cuelgues]
+- Performance: [métricas de degradación]
+- Seguridad: [tipo de vulnerabilidad si aplica]
+
+---
+
+### Cumplimiento de Estándares
+
+**Estándares Violados:** (si aplica)
+- WCAG 2.1: [criterio específico]
+  Ejemplo: 1.1.1 Non-text Content
+- OWASP: [vulnerabilidad específica]
+  Ejemplo: A03:2021 Injection
+- Performance: [métrica específica]
+  Ejemplo: Page Load Time > 3s (actual: 8.2s)
+- Design System: [guideline específico]
+
+**Impacto Regulatorio:** (si aplica)
+- ADA Section 508
+- GDPR
+- HIPAA
+- PCI-DSS
+
+---
+
+### Workaround
+
+**Disponible:** Sí | No
+
+[Si existe, documentar procedimiento detallado del workaround]
+
+---
 
 ### Contexto Adicional
-- ¿Cuándo lo notaste?: 09/12/2024 10:30
-- ¿Está relacionado con un deploy reciente?: Sí/No
-- ¿Hay workaround?: Sí/No - [explicar si hay]
-- ¿Qué estándares viola?: WCAG 2.1 / Diseño / Seguridad
 
-### Preguntas para IT (si aplica)
-1. ¿Este botón debería hacer algo?
-2. ¿Este comportamiento es intencional?
-3. ¿Por qué está este elemento aquí?
+- Primera Observación: [fecha/build]
+- Issues Relacionados: [IDs de defectos relacionados]
+- Regresión: [sí/no - si funcionaba en versión previa]
+- Cambios Recientes: [deployments/updates relacionados]
+
+---
+
+### Adjuntos
+
+- [ ] Capturas de pantalla
+- [ ] Grabación de pantalla
+- [ ] Logs de consola
+- [ ] Trace de red (archivo HAR)
+- [ ] Logs de aplicación
+- [ ] Archivo de datos de prueba
 ```
 
 ---
 
-## 💡 **Ejemplos de Situaciones Reales**
+## Criterios de Cobertura de Testing
 
-### **Ejemplo 1: Botón Sin Función**
+### Matriz de Cobertura para Cada Feature
 
-**Situación:** Estás testeando el carrito de compras y ves un botón que dice "Guardar para después"
+| Categoría | Criterios de Verificación | Estándar de Industria |
+|-----------|--------------------------|----------------------|
+| **Funcional** | Happy path, casos negativos, edge cases, integración | ISTQB Foundation |
+| **Seguridad** | OWASP Top 10, input validation, autenticación, autorización | OWASP ASVS Level 2 |
+| **Accesibilidad** | WCAG 2.1 Level AA completo, keyboard navigation, screen readers | WCAG 2.1, Section 508 |
+| **Performance** | Page load < 3s, TTI < 5s, API response < 200ms | Core Web Vitals |
+| **Usabilidad** | Intuitividad, consistencia, claridad de mensajes | Nielsen Heuristics |
+| **Responsive** | Desktop, tablet, mobile, orientaciones | Mobile-first design |
 
-**Lo que haces:**
-1. Haces clic en el botón
-2. No pasa nada
-3. No hay feedback visual
-4. No se guarda nada
+### Checklist Técnico por Feature
 
-**Reportes:**
+**Funcionalidad:**
+- [ ] Caso ideal funciona correctamente
+- [ ] Datos inválidos son rechazados apropiadamente
+- [ ] Campos vacíos son validados
+- [ ] Caracteres especiales son manejados
+- [ ] Límites de longitud son respetados
+- [ ] Mensajes de error son claros y específicos
+- [ ] Estado de datos es persistido correctamente
 
-```markdown
-## 🐛 [Carrito] Botón "Guardar para después" no tiene funcionalidad
+**Seguridad:**
+- [ ] Input está sanitizado (no acepta SQL injection)
+- [ ] Output está encoded (no permite XSS)
+- [ ] Autenticación es robusta
+- [ ] Autorización es validada
+- [ ] Contraseñas están hasheadas
+- [ ] Sesiones tienen timeout
+- [ ] Rate limiting está implementado
+- [ ] HTTPS es forzado
 
-**Prioridad:** MEDIA
-**Tipo:** Pregunta / Potencial Bug
+**Accesibilidad:**
+- [ ] Navegación completa por teclado (Tab, Enter, Escape)
+- [ ] Contraste de color cumple ratio mínimo 4.5:1
+- [ ] Imágenes tienen alt text descriptivo
+- [ ] Formularios tienen labels asociados
+- [ ] Errores son anunciados por screen readers
+- [ ] Focus indicators son visibles
+- [ ] Orden de tab es lógico
+- [ ] ARIA labels están implementados correctamente
 
-### Descripción
-El botón "Guardar para después" en la página del carrito no hace nada
-cuando se hace clic. No hay feedback visual, no se guardan items, no hay error.
+**Performance:**
+- [ ] Page load time < 3 segundos
+- [ ] First Contentful Paint < 1.8 segundos
+- [ ] Time to Interactive < 5 segundos
+- [ ] API response time < 200ms (P95)
+- [ ] No memory leaks observados
+- [ ] Network requests están optimizados
 
-### Preguntas para IT:
-1. ¿Este botón debería tener funcionalidad?
-2. Si SÍ → Es un bug que hay que arreglar
-3. Si NO → Debería removerse (confunde a usuarios)
-4. Si es para implementación futura → Debería estar deshabilitado con tooltip
+**Usabilidad:**
+- [ ] Flujo es intuitivo
+- [ ] Labels son claros y descriptivos
+- [ ] Feedback visual es inmediato
+- [ ] Consistencia de diseño se mantiene
+- [ ] Mensajes son en lenguaje del usuario
+- [ ] Ayuda contextual disponible donde se necesita
 
-### Comportamiento Actual
-- Click en botón → Nada pasa
-- Sin feedback visual
-- Sin mensaje de error
-- Sin funcionalidad aparente
+---
 
-### Impacto
-- Usuarios hacen clic esperando funcionalidad
-- Se confunden cuando no pasa nada
-- Mala experiencia de usuario
+## Clasificación de Severidad y Prioridad
 
-### Recomendación
-Opción A: Implementar funcionalidad
-Opción B: Remover botón hasta que esté listo
-Opción C: Deshabilitar con mensaje "Próximamente"
+### Severidad (Technical Impact)
+
+**CRITICAL:**
+- Crash de aplicación
+- Pérdida de datos
+- Breach de seguridad
+- Funcionalidad core completamente rota
+- Violación de compliance legal
+
+*Ejemplo:* SQL Injection permitiendo acceso no autorizado a datos
+
+**HIGH:**
+- Feature major no funcional
+- Impacto significativo a usuarios
+- Workaround difícil o no práctico
+- Degradación de performance > 50%
+- Violación de estándares importantes
+
+*Ejemplo:* Checkout process roto sin alternativa
+
+**MEDIUM:**
+- Feature parcialmente funcional
+- Impacto moderado
+- Workaround razonable existe
+- Violación de estándares no crítica
+
+*Ejemplo:* Filtros de búsqueda no funcionan correctamente
+
+**LOW:**
+- Issues cosméticos
+- Inconveniente menor
+- Workaround fácil
+- Mejoras sugeridas
+
+*Ejemplo:* Typo en texto de UI
+
+### Prioridad (Business Impact)
+
+**P0 (Inmediato):**
+- Bloquea release
+- Impacto crítico al negocio
+- Debe corregirse antes de deploy
+
+**P1 (Alto):**
+- Debe corregirse en sprint actual
+- Impacto significativo a usuarios
+- Afecta workflows clave
+
+**P2 (Medio):**
+- Corregir en 1-2 sprints
+- Afecta features secundarios
+- Workaround está documentado
+
+**P3 (Bajo):**
+- Corregir cuando sea conveniente
+- Impacto mínimo
+- Enhancement/mejora
+
+---
+
+## Ejemplos de Casos Reales
+
+### Caso 1: Vulnerabilidad de Seguridad - Inyección SQL
+
+**Contexto de Descubrimiento:**
+Durante testing de la funcionalidad de login, además de verificar el happy path, se realizaron pruebas de seguridad con payloads maliciosos según OWASP Testing Guide.
+
+**Título:** [Autenticación] Inyección SQL en Formulario de Login Permite Bypass de Autenticación
+
+**Severidad:** CRITICAL | **Prioridad:** P0
+
+**Descripción del Problema:**
+El formulario de login no sanitiza correctamente el input del campo username, permitiendo la ejecución de comandos SQL arbitrarios que resultan en bypass completo de autenticación.
+
+**Pasos para Reproducir:**
+```
+Precondiciones: Ninguna
+
+Pasos:
+1. Navegar a /login
+2. En campo username ingresar: admin' OR '1'='1' --
+3. En campo password ingresar: cualquiervalor
+4. Click en botón "Iniciar Sesión"
+
+Resultado Actual:
+- Usuario autenticado exitosamente
+- Redirigido a /dashboard
+- Session cookie generado: session_id=abc123...
+- Acceso completo sin credenciales válidas
+
+Resultado Esperado:
+- Login rechazado
+- Mensaje de error: "Credenciales inválidas"
+- Sin generación de session
+- Input sanitizado o parametrizado
 ```
 
-**¿Por qué reportarlo?** Porque si un jefe pregunta "¿Por qué tenemos un botón que no hace nada?" y TÚ lo testeaste, necesitas demostrar que sí lo notaste y reportaste.
+**Evidencia Técnica:**
+```
+Request:
+POST /api/login
+username=admin' OR '1'='1' --&password=cualquiervalor
 
-### **Ejemplo 2: Validación de Campo**
-
-**Situación:** Testeas formulario de registro
-
-**Observación:** El campo "Email" acepta "abc123" sin @
-
-**Reporte:**
-
-```markdown
-## 🐛 [Registro] Campo Email acepta formato inválido
-
-**Prioridad:** ALTA
-**Tipo:** Bug - Validación
-
-### Descripción
-El campo "Email" en formulario de registro acepta entradas que no son
-emails válidos (ej: "abc123", "test", "email.com").
-
-### Comportamiento Esperado
-- Solo aceptar emails válidos: usuario@dominio.com
-- Mostrar error si formato es inválido
-- Validar antes de permitir submit
-
-### Comportamiento Actual
-- Acepta cualquier texto
-- No valida formato
-- Permite registro con email inválido
-- Backend probablemente rechaza, pero frontend debería validar primero
-
-### Pasos para Reproducir
-1. Ir a página de registro
-2. En campo "Email" ingresar: "abc123"
-3. Hacer clic en "Registrarse"
-4. Observar: Se acepta sin error
-
-### Impacto
-- Usuarios registran emails inválidos
-- No pueden recuperar contraseña
-- Datos sucios en base de datos
-- Mala experiencia de usuario
-
-### Evidencia
-[Screenshot del campo aceptando "abc123"]
-
-### Estándares Violados
-- HTML5: Input type="email" debería validar automáticamente
-- UX: Validación debe ser inmediata (no esperar submit)
-
-### Sugerencia
-Agregar:
-- Validación regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-- Mensaje de error claro: "Por favor ingresa un email válido"
-- Validación en tiempo real (mientras escribe)
+Response:
+HTTP/1.1 302 Found
+Location: /dashboard
+Set-Cookie: session_id=abc123def456...
 ```
 
-### **Ejemplo 3: Violación de Accesibilidad**
+**Análisis de Impacto:**
+- **Usuarios Afectados:** 100% (todos los usuarios del sistema)
+- **Impacto de Seguridad:** CRÍTICO - Bypass completo de autenticación
+- **Acceso No Autorizado:** Total acceso a datos y funcionalidad
+- **Compliance:** Violación de OWASP, PCI-DSS si aplica
+- **Riesgo Legal:** Alto - breach de seguridad reportable
 
-**Situación:** Testeas catálogo de productos
+**Estándares Violados:**
+- OWASP Top 10 2021: A03 Injection
+- CWE-89: SQL Injection
+- OWASP ASVS: V5.3.4 SQL Injection Prevention
 
-**Observación:** Las imágenes no tienen texto alternativo
+**Recomendación Técnica:**
+```python
+# Implementación Incorrecta (Actual):
+query = f"SELECT * FROM users WHERE username='{username}' AND password='{password}'"
 
-**Reporte:**
+# Implementación Correcta (Recomendada):
+query = "SELECT * FROM users WHERE username=? AND password=?"
+cursor.execute(query, (username, hashed_password))
+```
 
-```markdown
-## ♿ [Accesibilidad] Imágenes de productos sin texto alternativo - WCAG 2.1
+Utilizar prepared statements o un ORM que maneje sanitización automáticamente. Nunca concatenar input de usuario directamente en queries SQL.
 
-**Prioridad:** ALTA (Problema legal de compliance)
-**Tipo:** Violación de Estándares
+---
 
-### Descripción
-Todas las imágenes de productos en el catálogo no tienen atributo 'alt'.
-Esto viola WCAG 2.1 Level A (1.1.1 Non-text Content).
+### Caso 2: Violación de Accesibilidad WCAG 2.1
 
-### Impacto
-- Usuarios con lectores de pantalla no pueden entender qué productos son
-- Viola leyes de accesibilidad (ADA, Section 508)
-- Potencial demanda legal
-- Mala experiencia para usuarios con discapacidades visuales
-- Impacto SEO negativo
+**Contexto de Descubrimiento:**
+Durante testing de accesibilidad con screen reader (NVDA), se identificó que las imágenes de productos no proporcionan información textual alternativa.
 
-### Código Actual (Incorrecto)
+**Título:** [Catálogo de Productos] Imágenes sin Texto Alternativo - Violación WCAG 2.1 Level A
+
+**Severidad:** HIGH | **Prioridad:** P1
+
+**Descripción del Problema:**
+Todas las imágenes de productos en el catálogo carecen del atributo alt, impidiendo que usuarios de screen readers comprendan el contenido visual y violando WCAG 2.1 Success Criterion 1.1.1.
+
+**Pasos para Reproducir:**
+```
+Precondiciones: Screen reader activo (NVDA, JAWS, o similar)
+
+Pasos:
+1. Navegar a /products
+2. Activar screen reader
+3. Navegar a través de productos usando teclas de flecha
+4. Observar anuncios del screen reader
+
+Resultado Actual:
+- Screen reader anuncia: "Gráfico" o "Imagen" sin contexto
+- Sin información sobre qué producto es
+- Usuario no puede identificar productos visualmente
+
+Resultado Esperado:
+- Screen reader anuncia: "Samsung Galaxy S23 smartphone en Negro Fantasma, 256GB"
+- Usuario comprende qué producto está viendo
+```
+
+**Evidencia Técnica:**
 ```html
-<img src="samsung-galaxy-s23.jpg">
+<!-- Estado Actual (Incorrecto): -->
+<img src="/images/samsung-galaxy-s23.jpg"
+     class="product-image">
+
+<!-- Estado Esperado (Correcto): -->
+<img src="/images/samsung-galaxy-s23.jpg"
+     alt="Samsung Galaxy S23 smartphone en Negro Fantasma, 256GB, pantalla 6.1 pulgadas"
+     class="product-image">
 ```
 
-### Código Esperado (Correcto)
-```html
-<img src="samsung-galaxy-s23.jpg"
-     alt="Samsung Galaxy S23 - Negro, 256GB, Pantalla 6.1 pulgadas">
-```
+**Análisis de Impacto:**
+- **Usuarios Afectados:** 8-10% de usuarios (estimado de usuarios con discapacidad visual)
+- **Compliance:** Violación de ADA, Section 508
+- **Riesgo Legal:** Alto - demandas por accesibilidad son comunes
+- **SEO:** Impacto negativo - motores de búsqueda no pueden indexar imágenes
+- **Business:** Exclusión de segmento significativo de usuarios
 
-### Estándares Violados
-- WCAG 2.1 Level A: 1.1.1 Non-text Content
+**Estándares Violados:**
+- WCAG 2.1 Level A: Success Criterion 1.1.1 (Non-text Content)
 - Section 508: § 1194.22(a)
 - EN 301 549: 9.1.1.1
+- Americans with Disabilities Act (ADA)
 
-### Evidencia
-- Inspeccionar elemento muestra <img> sin atributo alt
-- Lector de pantalla solo dice "Imagen" sin contexto
+**Alcance del Defecto:**
+- 47 imágenes de productos en catálogo
+- 12 imágenes de categorías
+- 8 imágenes en página de inicio
+- **Total:** 67 imágenes requieren remediación
 
-### Recomendación
-Agregar texto alternativo descriptivo a TODAS las imágenes:
-Format: "[Marca] [Modelo] - [Características clave]"
+**Recomendación Técnica:**
+Implementar alt text descriptivo siguiendo formato:
+```
+[Marca] [Modelo] [Característica Visual Clave], [Especificación Relevante]
 
-Ejemplo: "iPhone 15 Pro Max - Titanio Azul, 512GB, Cámara 48MP"
+Ejemplos:
+- "iPhone 15 Pro Max en Titanio Azul, 512GB, sistema de cámara triple"
+- "MacBook Pro 16 pulgadas en Gris Espacial, chip M3 Max"
+- "Samsung QLED TV 65 pulgadas, 4K, marco ultra delgado"
 ```
 
 ---
 
-## ⚠️ **Casos Donde DEBES Reportar (Aunque no esté en tu tarea)**
+### Caso 3: Componente Sin Funcionalidad
 
-### **1. Elementos Sin Sentido**
+**Contexto de Descubrimiento:**
+Durante testing exploratorio del carrito de compras, se identificó un botón que no tiene funcionalidad implementada.
 
-Si ves:
-- Un botón que no hace nada
-- Un campo que parece innecesario
-- Un mensaje confuso
-- Un elemento fuera de lugar
+**Título:** [Carrito] Botón "Guardar para Después" No Tiene Funcionalidad Implementada
 
-**→ REPÓRTALO** con pregunta: "¿Esto debería estar aquí?"
+**Severidad:** MEDIUM | **Prioridad:** P2
 
-### **2. Violaciones de Estándares**
+**Descripción del Problema:**
+El botón "Guardar para Después" en la página del carrito aparenta ser funcional pero no ejecuta ninguna acción al ser clickeado. Sin feedback visual, sin funcionalidad backend, sin mensaje de error.
 
-Si ves:
-- Contraste de color pobre (texto gris sobre fondo gris claro)
-- Botones demasiado pequeños en móvil
-- Textos que no se leen bien
-- Imágenes sin alt text
-- Navegación que no funciona con teclado
+**Pasos para Reproducir:**
+```
+Precondiciones:
+- Usuario autenticado
+- Al menos un producto en el carrito
 
-**→ REPÓRTALO** como violación de WCAG 2.1
+Pasos:
+1. Agregar producto al carrito
+2. Navegar a /cart
+3. Localizar botón "Guardar para Después" bajo cada producto
+4. Click en botón "Guardar para Después"
+5. Observar resultado
 
-### **3. Mala Experiencia de Usuario**
+Resultado Actual:
+- No hay feedback visual (sin loading state)
+- Producto permanece en carrito
+- No hay mensaje de éxito o error
+- Inspección de Network tab: sin request HTTP
+- Sin cambio en estado de UI
 
-Si ves:
-- Mensajes de error confusos
-- Proceso complicado innecesariamente
-- Diseño inconsistente
-- Navegación poco clara
+Resultado Esperado:
+Opción A (Si está implementado): Producto movido a lista "Guardados"
+Opción B (Si no está implementado): Botón deshabilitado con tooltip
+Opción C: Botón no debería existir hasta implementación
+```
 
-**→ REPÓRTALO** como mejora de UX
+**Evidencia Técnica:**
+```html
+<button class="btn-save-later" onclick="saveLater(123)">
+  Guardar para Después
+</button>
 
-### **4. Potenciales Problemas de Seguridad**
+<!-- JavaScript (función vacía): -->
+<script>
+function saveLater(productId) {
+  // TODO: Implementar funcionalidad
+}
+</script>
+```
 
-Si ves:
-- Contraseñas visibles
-- URLs con información sensible
-- Errores que revelan información del sistema
-- Posibilidad de inyección (SQL, XSS)
+**Análisis de Impacto:**
+- **Usuarios Afectados:** 100% de usuarios que usan carrito
+- **Impacto UX:** Confusión - usuarios esperan funcionalidad
+- **Credibilidad:** Percepción de software incompleto o roto
+- **Support:** Potencial incremento en tickets de soporte
 
-**→ REPÓRTALO INMEDIATAMENTE** como CRÍTICO
+**Preguntas para Equipo de Desarrollo:**
+1. ¿Esta funcionalidad está planificada para implementación futura?
+2. ¿Debería el botón estar deshabilitado hasta implementación?
+3. ¿Debería removerse el botón completamente?
+4. ¿Existe endpoint backend para esta funcionalidad?
 
----
+**Recomendaciones:**
+```
+Opción 1 (Preferida): Implementar funcionalidad completa
+Opción 2: Deshabilitar botón con tooltip explicativo
+  <button disabled title="Próximamente">Guardar para Después</button>
+Opción 3: Remover botón hasta implementación completa
+```
 
-## ✅ **Checklist para Cada Feature**
-
-Cuando testes CUALQUIER feature, usa este checklist:
-
-### **Funcionalidad:**
-- [ ] ¿Funciona el happy path? (caso ideal)
-- [ ] ¿Funciona con datos inválidos?
-- [ ] ¿Funciona con campos vacíos?
-- [ ] ¿Funciona con caracteres especiales?
-- [ ] ¿Los mensajes de error son claros?
-
-### **Seguridad:**
-- [ ] ¿Hay validación de input?
-- [ ] ¿Está protegido contra SQL injection?
-- [ ] ¿Está protegido contra XSS?
-- [ ] ¿Las contraseñas están ocultas?
-- [ ] ¿Los errores no revelan información sensible?
-
-### **Accesibilidad:**
-- [ ] ¿Funciona con teclado (Tab, Enter, Esc)?
-- [ ] ¿Hay suficiente contraste de color?
-- [ ] ¿Los botones son suficientemente grandes?
-- [ ] ¿Las imágenes tienen alt text?
-- [ ] ¿Los lectores de pantalla lo leen correctamente?
-
-### **Usabilidad:**
-- [ ] ¿Es intuitivo para el usuario?
-- [ ] ¿Los labels son claros?
-- [ ] ¿El flujo tiene sentido?
-- [ ] ¿Los botones están bien ubicados?
-- [ ] ¿El diseño es consistente?
-
-### **Performance:**
-- [ ] ¿Carga rápido? (< 3 segundos)
-- [ ] ¿Responde rápido a acciones?
-- [ ] ¿Maneja bien múltiples acciones?
-
-### **Responsive:**
-- [ ] ¿Se ve bien en desktop?
-- [ ] ¿Se ve bien en tablet?
-- [ ] ¿Se ve bien en móvil?
-- [ ] ¿Los botones son clickeables en pantalla pequeña?
+**Justificación del Reporte:**
+Aunque este no es un "bug" en sentido técnico, es un problema de calidad que afecta UX. Como analista de QA, es responsabilidad documentar inconsistencias entre UI y funcionalidad, especialmente cuando pueden confundir usuarios o generar tickets de soporte.
 
 ---
 
-## 🎯 **Recordatorios Importantes**
+## Referencias y Estándares
 
-### **Cuando Estés Testeando:**
+### Estándares de Testing
+- **ISTQB Foundation Level:** International Software Testing Qualifications Board
+- **IEEE 829-2008:** Standard for Software Test Documentation
+- **ISO/IEC 25010:** Systems and software Quality Requirements and Evaluation (SQuaRE)
 
-✅ **SIEMPRE PIENSA:** "Si yo fuera el usuario, ¿esto tendría sentido?"
+### Estándares de Accesibilidad
+- **WCAG 2.1:** Web Content Accessibility Guidelines (W3C)
+- **Section 508:** Rehabilitation Act (US Federal)
+- **EN 301 549:** Accessibility requirements (European)
+- **ADA:** Americans with Disabilities Act
 
-✅ **SIEMPRE PREGUNTA:** "¿Qué más podría romperseaquí?"
+### Estándares de Seguridad
+- **OWASP Top 10:** Top 10 Web Application Security Risks
+- **OWASP ASVS:** Application Security Verification Standard
+- **CWE Top 25:** Common Weakness Enumeration
+- **SANS Top 25:** Most Dangerous Software Errors
 
-✅ **SIEMPRE DOCUMENTA:** Screenshots, pasos, evidencia
+### Estándares de Performance
+- **Core Web Vitals:** Google's web performance metrics
+- **Web Performance Working Group:** W3C standards
+- **HTTP Archive:** Web performance benchmarks
 
-✅ **SIEMPRE REPORTA:** Mejor reportar de más que de menos
-
-### **Lo Que NO Debes Hacer:**
-
-❌ **"No está en mi test case, no lo reporto"** → MAL
-✅ **"No está en mi test case, pero es un problema, lo reporto"** → BIEN
-
-❌ **"Es solo cosmético, no importa"** → MAL
-✅ **"Es cosmético pero confunde usuarios, lo reporto como LOW"** → BIEN
-
-❌ **"No entiendo para qué sirve esto, lo ignoro"** → MAL
-✅ **"No entiendo para qué sirve esto, pregunto a IT"** → BIEN
-
-❌ **"Funciona en mi máquina, está bien"** → MAL
-✅ **"Funciona en mi máquina, pero lo pruebo en otros navegadores/dispositivos"** → BIEN
-
----
-
-## 🚨 **Regla de Oro**
-
-> **"Si un jefe pregunta '¿Cómo pasó esto desapercibido?',
-> debes poder demostrar que TÚ SÍ lo notaste y reportaste."**
-
-### **Protégete a Ti Misma:**
-
-1. **Documenta TODO** → Screenshots, reportes, emails
-2. **Pregunta cuando tengas dudas** → "¿Esto debería estar así?"
-3. **Reporta todo lo sospechoso** → Mejor preguntar que asumir
-4. **Guarda evidencia** → Tus reportes son tu respaldo
-
-### **Protege al Producto:**
-
-1. **Piensa como usuario** → ¿Esto confundiría a alguien?
-2. **Piensa como hacker** → ¿Cómo podría romper esto?
-3. **Piensa como diseñador** → ¿Esto se ve bien? ¿Es usable?
-4. **Piensa como abogado** → ¿Cumple con estándares legales?
+### Recursos Adicionales
+- ISTQB Glossary: https://glossary.istqb.org/
+- WCAG Quick Reference: https://www.w3.org/WAI/WCAG21/quickref/
+- OWASP Testing Guide: https://owasp.org/www-project-web-security-testing-guide/
 
 ---
 
-## 📞 **¿Dudas?**
+## Notas Importantes sobre Responsabilidad Profesional
 
-### **¿Debo reportar esto?**
+### Due Diligence Profesional
 
-**Pregúntate:**
-1. ¿Confundiría a un usuario? → SÍ: Repórtalo
-2. ¿Podría causar problemas? → SÍ: Repórtalo
-3. ¿No cumple estándares? → SÍ: Repórtalo
-4. ¿No estoy segura? → Repórtalo con tag de pregunta
+La documentación exhaustiva de defectos no es solo una best practice, es una responsabilidad profesional que:
 
-### **¿Cómo priorizo?**
+1. **Facilita Resolución Eficiente**
+   - Desarrolladores pueden reproducir y corregir issues rápidamente
+   - Se minimiza comunicación back-and-forth
+   - Se reduce time-to-resolution
 
-- **CRÍTICO**: No funciona, pérdida de datos, seguridad comprometida
-- **ALTO**: Feature importante rota, difícil workaround
-- **MEDIO**: Funciona pero con problemas, hay workaround
-- **BAJO**: Cosmético, menor, fácil workaround
+2. **Proporciona Evidencia**
+   - Protege profesionalmente al analista de QA
+   - Demuestra cobertura de testing comprehensiva
+   - Sirve como evidencia en auditorías
 
-**Si dudas entre dos prioridades, elige la MÁS ALTA.** Los managers pueden bajarla, pero es mejor ser precavido.
+3. **Mejora Calidad del Producto**
+   - Issues bien documentados se corrigen correctamente
+   - Se previenen regresiones
+   - Se mantiene knowledge base de defectos
+
+4. **Protege al Negocio**
+   - Se identifican riesgos de compliance antes de producción
+   - Se previenen problemas legales (accesibilidad, seguridad)
+   - Se mantiene reputación del producto
+
+### Accountability Profesional
+
+Como analista de QA, su accountability incluye:
+- Cobertura thoroughness de testing
+- Precisión en documentación
+- Oportunidad en reporte
+- Verificación de resolución
+
+La pregunta clave no es "¿Este issue está en mi test case?" sino "¿Este issue afecta la calidad del software y la experiencia del usuario?"
+
+Si la respuesta es afirmativa, debe ser reportado.
 
 ---
 
-## 🎓 **Resumen para Andrea**
-
-1. **Tu trabajo es asegurar calidad, no solo encontrar bugs específicos**
-2. **Explora, descubre, cuestiona todo**
-3. **Documenta TODO con evidencia**
-4. **Reporta TODO lo sospechoso**
-5. **Mejor reportar de más que de menos**
-6. **Protégete con documentación**
-7. **Piensa siempre en el usuario final**
-
-**Pregunta Clave:** ¿Si tu nombre está asociado con este release y algo sale mal, podrás demostrar que hiciste tu trabajo correctamente?
-
-**Si la respuesta es SÍ → Estás haciendo bien tu trabajo.**
-**Si la respuesta es NO → Documenta más, reporta más, pregunta más.**
-
----
-
+*Versión del Documento: 2.0*
 *Última Actualización: 09/12/2024*
-*Versión: 1.0 - Andrea*
-*Creado específicamente para: Andrea - QA Team*
-
-**¿Preguntas? No dudes en preguntar al equipo de desarrollo o QA Lead.**
+*Compliance: ISTQB Foundation Level, IEEE 829, ISO/IEC 25010*
+*Preparado específicamente para: Andrea - QA Analyst*
