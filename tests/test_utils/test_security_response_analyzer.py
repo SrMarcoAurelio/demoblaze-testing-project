@@ -158,7 +158,10 @@ class TestAnalyzeCommandInjection:
     def test_analyze_command_injection_passwd_SEC_RA_008(self):
         """Test detecting command injection via /etc/passwd output"""
         analyzer = ResponseAnalyzer()
-        response_body = "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin"
+        response_body = (
+            "root:x:0:0:root:/root:/bin/bash\n"
+            "daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin"
+        )
         vuln = analyzer.analyze_command_injection(
             response_body=response_body,
             status_code=200,

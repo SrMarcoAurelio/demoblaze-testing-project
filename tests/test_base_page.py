@@ -17,7 +17,6 @@ import os
 import tempfile
 import time
 from pathlib import Path
-from unittest.mock import Mock, patch
 
 import pytest
 from selenium.common.exceptions import TimeoutException
