@@ -86,9 +86,9 @@ jobs:
 
       - name: Run unit tests
         run: |
-          # Parallel execution enabled via pytest.ini (-n auto)
-          # pytest-xdist will use all available CPU cores automatically
-          pytest tests/test_utils/ -v --maxfail=5 --tb=short
+          # Run only tests marked with @pytest.mark.unit
+          # These tests don't require browser/WebDriver
+          pytest -m unit -v --maxfail=5 --tb=short
         continue-on-error: false
 
   # Job 3: Functional Tests (Chrome)
