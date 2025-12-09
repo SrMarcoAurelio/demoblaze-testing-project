@@ -27,7 +27,6 @@ from selenium.webdriver.common.keys import Keys
 from pages.base_page import BasePage
 
 
-@pytest.mark.unit
 class TestBasePageInitialization:
     """Test BasePage initialization"""
 
@@ -51,7 +50,6 @@ class TestBasePageInitialization:
         assert page.base_url == custom_url
 
 
-@pytest.mark.unit
 class TestElementFinding:
     """Test element finding methods"""
 
@@ -86,7 +84,6 @@ class TestElementFinding:
         assert elements == []
 
 
-@pytest.mark.unit
 class TestElementWaiting:
     """Test element waiting methods"""
 
@@ -115,7 +112,6 @@ class TestElementWaiting:
             page.wait_for_element_invisible((By.ID, "narvbar"), timeout=1)
 
 
-@pytest.mark.unit
 class TestElementInteraction:
     """Test element interaction methods"""
 
@@ -148,7 +144,6 @@ class TestElementInteraction:
         assert "testuser" in value
 
 
-@pytest.mark.unit
 class TestGetMethods:
     """Test get methods for retrieving element data"""
 
@@ -195,7 +190,6 @@ class TestGetMethods:
         )
 
 
-@pytest.mark.unit
 class TestAlertHandling:
     """Test alert handling methods"""
 
@@ -214,7 +208,6 @@ class TestAlertHandling:
         assert text is None
 
 
-@pytest.mark.unit
 class TestNavigationMethods:
     """Test navigation methods"""
 
@@ -248,7 +241,6 @@ class TestNavigationMethods:
         assert page.get_current_url() == initial_url
 
 
-@pytest.mark.unit
 class TestJavaScriptMethods:
     """Test JavaScript execution methods"""
 
@@ -278,7 +270,6 @@ class TestJavaScriptMethods:
         assert scroll_position > 0
 
 
-@pytest.mark.unit
 class TestKeyboardMethods:
     """Test keyboard interaction methods"""
 
@@ -305,7 +296,6 @@ class TestKeyboardMethods:
         )
 
 
-@pytest.mark.unit
 class TestModalOperations:
     """Test modal operation methods"""
 
@@ -333,7 +323,6 @@ class TestModalOperations:
         assert page.is_modal_visible((By.ID, "logInModal"), timeout=1) is False
 
 
-@pytest.mark.unit
 class TestUtilityMethods:
     """Test utility methods"""
 

@@ -201,7 +201,6 @@ class TestWaitWithTimeout:
         assert result == 42, "Should return correct value"
 
 
-@pytest.mark.unit
 @pytest.mark.test_utils
 class TestWaitForPageReady:
     """Test wait_for_page_ready function"""
