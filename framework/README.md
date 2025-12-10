@@ -6,202 +6,83 @@
 
 ## Overview
 
-This is a **truly universal** test automation framework that can be adapted to **any web application** with minimal effort.
+Professional test automation framework designed to work with **ANY web application**.
 
-The framework separates universal testing logic from application-specific details through the **Adapter Pattern**, enabling:
+This framework provides universal testing components that adapt to your application through the **Adapter Pattern**, enabling professional-quality test automation regardless of your technology stack.
+
+### Key Features
 
 - ✅ **True Universality** - Core framework works with ANY web application
 - ✅ **Discovery-Based Testing** - Tests discover functionality instead of assuming it
 - ✅ **Clean Architecture** - Separation of concerns, no God Classes
-- ✅ **Easy Adaptation** - Add new applications via adapters
+- ✅ **Easy Adaptation** - Adapt to your application via simple adapter
 - ✅ **No Hardcoded Values** - All configuration via adapters and environment variables
-- ✅ **Professional Quality** - Follows industry best practices
+- ✅ **Professional Quality** - Follows industry best practices (Django, Flask, Pytest style)
 
 ## Architecture
 
 ```
 framework/
-├── core/                     # Universal framework core (no app-specific code)
+├── core/                     # Universal framework core
 │   ├── element_finder.py     # Element discovery strategies
-│   ├── element_interactor.py # Element interactions (click, type, etc.)
-│   ├── wait_handler.py       # Wait strategies (NO sleep calls!)
+│   ├── element_interactor.py # Element interactions
+│   ├── wait_handler.py       # Intelligent wait strategies
 │   └── discovery_engine.py   # Automatic page structure discovery
 │
 ├── adapters/                 # Application-specific adapters
 │   ├── base_adapter.py       # Abstract adapter interface
-│   ├── demoblaze_adapter.py  # Demoblaze application adapter
-│   └── your_app_adapter.py   # Your application adapter
+│   └── adapter_template.py   # Template for your adapter
 │
-├── generators/               # Code generators
+├── generators/               # Code generators (future)
 │   ├── page_generator.py     # Generate page objects
 │   ├── test_generator.py     # Generate test skeletons
 │   └── locator_generator.py  # Generate locator files
 │
-└── cli/                      # Command-line tools
-    └── setup_wizard.py       # Interactive setup for new applications
+└── cli/                      # Command-line tools (future)
+    └── setup_wizard.py       # Interactive setup
 ```
 
-## Key Concepts
+## Philosophy
 
-### 1. Adapter Pattern
+### Universal Framework Principles
 
-**ALL application-specific details are isolated in adapters.**
+1. **DISCOVER, not ASSUME**
+   - Tests discover page structure automatically
+   - No assumptions about implementation details
+   - Find elements by what users see, not by internal IDs
 
-```python
-# framework/adapters/your_app_adapter.py
-from framework.adapters.base_adapter import ApplicationAdapter, AuthenticationMethod
+2. **SEPARATE, not COMBINE**
+   - Each class has one responsibility (SOLID principles)
+   - No God Classes with 50+ methods
+   - Clean interfaces between components
 
-class YourAppAdapter(ApplicationAdapter):
-    def get_base_url(self) -> str:
-        return "https://your-app.com"
+3. **CONFIGURE, not HARDCODE**
+   - All app-specific details in adapters
+   - Credentials in environment variables
+   - URLs and patterns in configuration
 
-    def get_authentication_method(self) -> AuthenticationMethod:
-        return AuthenticationMethod.PAGE  # or MODAL, OAUTH, etc.
+4. **WAIT INTELLIGENTLY, not BLINDLY**
+   - No `time.sleep()` calls anywhere
+   - Wait for actual conditions
+   - Poll for element states
 
-    def get_url_patterns(self) -> Dict[str, str]:
-        return {
-            "product": "/products/{id}",
-            "user": "/users/{username}",
-            "search": "/search?q={query}"
-        }
-
-    # ... implement other methods
-```
-
-### 2. Discovery Engine
-
-**Tests DISCOVER page structure instead of ASSUMING it.**
-
-```python
-from framework.core.discovery_engine import DiscoveryEngine
-
-# Discover all forms on the page
-discovery = DiscoveryEngine(driver)
-forms = discovery.discover_forms()
-
-for form in forms:
-    print(f"Found form with {len(form['inputs'])} inputs")
-    for input_field in form['inputs']:
-        print(f"  - {input_field['name']}: {input_field['type']}")
-```
-
-### 3. Separation of Concerns
-
-**No more God Classes! Each component has a single responsibility.**
-
-```python
-from framework.core.element_finder import ElementFinder
-from framework.core.element_interactor import ElementInteractor
-from framework.core.wait_handler import WaitHandler
-
-# Each component does ONE thing well
-finder = ElementFinder(driver)
-interactor = ElementInteractor(driver)
-waiter = WaitHandler(driver)
-
-# Find element
-element = finder.find_element(By.ID, "username")
-
-# Wait for it to be clickable
-waiter.wait_for_element_clickable(By.ID, "username")
-
-# Interact with it
-interactor.type(element, "testuser")
-```
-
-## Getting Started
-
-### 1. For Existing Applications (Demoblaze Example)
-
-```python
-# Use the Demoblaze adapter
-from framework.adapters.demoblaze_adapter import DemoblazeAdapter
-
-adapter = DemoblazeAdapter()
-print(adapter.get_base_url())  # https://www.demoblaze.com
-print(adapter.get_authentication_method())  # MODAL
-```
-
-### 2. For New Applications
-
-#### Option A: Use the Setup Wizard (Recommended)
-
-```bash
-python -m framework.cli.setup_wizard
-```
-
-The wizard will:
-1. Ask about your application
-2. Discover page structure automatically
-3. Generate adapter code
-4. Create page object templates
-5. Generate test skeletons
-
-#### Option B: Create Adapter Manually
-
-```python
-# framework/adapters/myapp_adapter.py
-from framework.adapters.base_adapter import ApplicationAdapter, AuthenticationMethod
-import os
-
-class MyAppAdapter(ApplicationAdapter):
-    def get_base_url(self) -> str:
-        return os.getenv("BASE_URL", "https://myapp.com")
-
-    def get_authentication_method(self) -> AuthenticationMethod:
-        return AuthenticationMethod.PAGE
-
-    def get_url_patterns(self) -> Dict[str, str]:
-        return {
-            "home": "/",
-            "login": "/login",
-            "dashboard": "/dashboard"
-        }
-
-    def discover_page_structure(self, page_type: str) -> Dict[str, Any]:
-        # Use DiscoveryEngine to automatically discover structure
-        from framework.core.discovery_engine import DiscoveryEngine
-        # ... implement discovery logic
-
-    def get_test_users(self) -> Dict[str, Dict[str, str]]:
-        return {
-            "valid": {
-                "username": os.getenv("TEST_USERNAME", ""),
-                "password": os.getenv("TEST_PASSWORD", "")
-            }
-        }
-```
-
-### 3. Configure Environment Variables
-
-```bash
-# Copy example file
-cp .env.example .env
-
-# Edit .env with your values
-nano .env
-```
-
-Required variables:
-```bash
-TEST_USERNAME=your_test_user
-TEST_PASSWORD=your_test_password
-BASE_URL=https://your-app.com
-```
+5. **ADAPT, not REWRITE**
+   - New applications via adapters
+   - Core framework unchanged
+   - Professional separation of concerns
 
 ## Core Components
 
-### ElementFinder
+### 1. ElementFinder
 
 Discovers elements using multiple strategies:
 
 ```python
+from framework.core.element_finder import ElementFinder
+
 finder = ElementFinder(driver)
 
-# Basic finding
-element = finder.find_element(By.ID, "login-button")
-
-# Find with fallback strategies (KEY to discovery-based testing!)
+# Find with fallback strategies (discovery-based!)
 element = finder.find_element_with_fallback([
     (By.ID, "submit-btn"),
     (By.NAME, "submit"),
@@ -209,39 +90,39 @@ element = finder.find_element_with_fallback([
     (By.CSS_SELECTOR, "button[type='submit']")
 ])
 
-# Find by visible text (what users see!)
+# Find by visible text (what users see)
 button = finder.find_by_text("Login", tag="button")
 
 # Discover all clickable elements
 clickable = finder.find_clickable_elements()
 ```
 
-### ElementInteractor
+### 2. ElementInteractor
 
 Handles all interactions reliably:
 
 ```python
+from framework.core.element_interactor import ElementInteractor
+
 interactor = ElementInteractor(driver)
 
-# Click with automatic retry
-interactor.click(button, force=True)  # Falls back to JS click if needed
+# Click with automatic retry and JS fallback
+interactor.click(button, force=True)
 
 # Type with smart clearing
 interactor.type(input_field, "text", clear_first=True)
 
-# Type slowly for fields with JS validation
-interactor.type_slowly(search_field, "query", delay=0.1)
-
 # Get dropdown options (discovery!)
 options = interactor.get_select_options(dropdown)
-print(f"Available options: {options}")
 ```
 
-### WaitHandler
+### 3. WaitHandler
 
-Intelligent waits, NO SLEEP CALLS:
+Intelligent waits, NO sleep calls:
 
 ```python
+from framework.core.wait_handler import WaitHandler
+
 waiter = WaitHandler(driver, default_timeout=10)
 
 # Wait for element to be visible
@@ -250,38 +131,30 @@ element = waiter.wait_for_element_visible(By.ID, "modal")
 # Wait for element to be clickable
 button = waiter.wait_for_element_clickable(By.ID, "submit")
 
-# Wait for element to disappear
-waiter.wait_for_element_invisible(By.ID, "loading")
-
-# Wait for text to appear
-waiter.wait_for_text_present(By.ID, "status", "Success")
-
 # Wait for custom condition
-def cart_not_empty(driver):
-    count = driver.find_element(By.ID, "cart-count")
-    return int(count.text) > 0
+def custom_condition(driver):
+    return some_check(driver)
 
-waiter.wait_for_condition(cart_not_empty, timeout=15)
+waiter.wait_for_condition(custom_condition, timeout=15)
 ```
 
-### DiscoveryEngine
+### 4. DiscoveryEngine
 
 Automatically discovers page structure:
 
 ```python
+from framework.core.discovery_engine import DiscoveryEngine
+
 discovery = DiscoveryEngine(driver)
 
 # Discover all forms
 forms = discovery.discover_forms()
 for form in forms:
-    print(f"Form: {form['id']}")
-    print(f"  Inputs: {len(form['inputs'])}")
-    print(f"  Buttons: {len(form['buttons'])}")
+    print(f"Form: {form['id']}, Inputs: {len(form['inputs'])}")
 
 # Discover navigation
 nav = discovery.discover_navigation()
 print(f"Header links: {len(nav['header'])}")
-print(f"Footer links: {len(nav['footer'])}")
 
 # Discover all interactive elements
 interactive = discovery.discover_interactive_elements()
@@ -290,116 +163,88 @@ print(f"Total interactive elements: {total}")
 
 # Generate complete page report
 report = discovery.generate_page_report()
-print(f"Page: {report['metadata']['title']}")
-print(f"Forms: {report['summary']['total_forms']}")
-print(f"Interactive: {report['summary']['total_interactive']}")
 ```
 
-## Writing Tests
+## Getting Started
 
-### Discovery-Based Tests (Recommended)
+### 1. Create Your Application Adapter
 
-Tests that DISCOVER instead of ASSUME:
+Copy the template and implement for YOUR application:
+
+```bash
+cp framework/adapters/adapter_template.py framework/adapters/my_app_adapter.py
+```
+
+Edit `my_app_adapter.py` and implement all methods for your application.
+
+### 2. Configure Environment Variables
+
+Create `.env` file:
+
+```bash
+cp .env.example .env
+```
+
+Set your values:
+```bash
+# Your application
+BASE_URL=https://your-app.com
+
+# Your credentials
+TEST_USERNAME=your_test_user
+TEST_PASSWORD=your_test_password
+
+# Browser config
+BROWSER=chrome
+HEADLESS=false
+```
+
+### 3. Use in Tests
 
 ```python
-def test_login_form_exists_and_works(browser, adapter):
-    """
-    DISCOVERY-BASED: Discovers login form automatically.
-    Works with ANY application that has a login form!
-    """
-    browser.get(adapter.get_base_url())
+import pytest
+from framework.core import DiscoveryEngine, ElementInteractor, WaitHandler
+from framework.adapters.my_app_adapter import MyAppAdapter
 
+@pytest.fixture
+def app_adapter():
+    return MyAppAdapter()
+
+def test_your_functionality(browser, app_adapter):
+    # Get URL from adapter
+    browser.get(app_adapter.get_base_url())
+
+    # Use universal components
     discovery = DiscoveryEngine(browser)
+    interactor = ElementInteractor(browser)
+    waiter = WaitHandler(browser)
+
+    # Discover page structure
     forms = discovery.discover_forms()
 
-    # Find form with username and password fields
-    login_form = None
-    for form in forms:
-        input_names = [inp['name'] for inp in form['inputs']]
-        if any('user' in name.lower() for name in input_names) and \
-           any('pass' in name.lower() for name in input_names):
-            login_form = form
-            break
-
-    assert login_form is not None, "No login form found"
-
-    # Fill discovered form
-    username_input = next(
-        inp for inp in login_form['inputs']
-        if 'user' in inp['name'].lower()
-    )
-    password_input = next(
-        inp for inp in login_form['inputs']
-        if 'pass' in inp['name'].lower()
-    )
-
-    interactor = ElementInteractor(browser)
-    interactor.type(username_input['element'], "testuser")
-    interactor.type(password_input['element'], "testpass")
-
-    # Find and click submit button
-    submit_button = next(
-        btn for btn in login_form['buttons']
-        if 'submit' in btn['type'].lower()
-    )
-    interactor.click(submit_button['element'])
+    # Interact with elements
+    # ... your test logic here
 ```
 
-### Adapter-Based Tests (Application-Specific)
+## Adapter Pattern
 
-Tests that use adapter configuration:
+The adapter pattern isolates ALL application-specific details:
 
-```python
-def test_login_with_adapter(browser, adapter):
-    """
-    ADAPTER-BASED: Uses adapter configuration.
-    Application-specific but still clean and maintainable.
-    """
-    browser.get(adapter.get_base_url())
+**What Goes in Your Adapter:**
+- Base URL
+- URL patterns
+- Authentication method
+- Navigation structure
+- Page structures
+- Test credentials (from env vars)
+- Special behaviors
 
-    # Get login page structure from adapter
-    login_structure = adapter.discover_page_structure('login')
-
-    # Get test credentials from adapter (reads from env vars)
-    test_users = adapter.get_test_users()
-    valid_user = test_users['valid']
-
-    assert valid_user['username'], "TEST_USERNAME not configured"
-
-    # Use adapter-provided structure
-    username_field = browser.find_element(By.ID, login_structure['form_fields']['username']['id'])
-    password_field = browser.find_element(By.ID, login_structure['form_fields']['password']['id'])
-
-    interactor = ElementInteractor(browser)
-    interactor.type(username_field, valid_user['username'])
-    interactor.type(password_field, valid_user['password'])
-
-    # Click submit
-    submit_button = browser.find_element(By.CSS_SELECTOR, login_structure['buttons']['submit']['selector'])
-    interactor.click(submit_button)
-```
-
-## Adapting to New Applications
-
-### Time Estimates
-
-- **Simple application** (e-commerce, blog): 2-4 hours
-  - Create adapter: 1 hour
-  - Configure credentials: 15 minutes
-  - Create 2-3 page objects: 1-2 hours
-  - Write initial tests: 30-60 minutes
-
-- **Medium application** (SaaS, dashboard): 4-8 hours
-  - Create adapter: 2 hours
-  - Handle authentication: 1 hour
-  - Create 5-10 page objects: 2-4 hours
-  - Write test suite: 1-2 hours
-
-- **Complex application** (enterprise): 8-16 hours
-  - Create adapter: 3-4 hours
-  - Complex auth (SSO, OAuth): 2-3 hours
-  - Create 15+ page objects: 4-6 hours
-  - Comprehensive tests: 3-5 hours
+**What Stays Universal:**
+- ElementFinder
+- ElementInteractor
+- WaitHandler
+- DiscoveryEngine
+- All core components
 
 ## Best Practices
 
@@ -407,21 +252,15 @@ def test_login_with_adapter(browser, adapter):
 
 ❌ **BAD:**
 ```python
-def test_login(browser):
-    browser.get("https://myapp.com")
-    username_field = browser.find_element(By.ID, "username")
-    username_field.send_keys("testuser")  # HARDCODED!
+browser.get("https://myapp.com")
+username_field.send_keys("testuser")  # HARDCODED!
 ```
 
 ✅ **GOOD:**
 ```python
-def test_login(browser, adapter):
-    browser.get(adapter.get_base_url())  # From adapter
-    test_users = adapter.get_test_users()  # From env vars
-    valid_user = test_users['valid']
-
-    username_field = browser.find_element(By.ID, "username")
-    username_field.send_keys(valid_user['username'])
+browser.get(adapter.get_base_url())  # From adapter
+test_users = adapter.get_test_users()  # From env vars
+username_field.send_keys(test_users['valid']['username'])
 ```
 
 ### 2. Use Discovery When Possible
@@ -471,8 +310,6 @@ class BasePage:
     def find_element(self, ...): ...
     def click(self, ...): ...
     def wait(self, ...): ...
-    def screenshot(self, ...): ...
-    def execute_js(self, ...): ...
     # 50+ methods in one class
 ```
 
@@ -484,48 +321,59 @@ waiter = WaitHandler(driver)        # Waiting
 discovery = DiscoveryEngine(driver)  # Discovering
 ```
 
-## Migration Guide
+## Professional Usage
 
-### Migrating from Hardcoded Tests
+This framework follows the same principles as professional frameworks:
 
-1. **Create Adapter:**
-   ```bash
-   python -m framework.cli.setup_wizard
-   ```
+- **Django** - Universal web framework, you adapt it to YOUR application
+- **Flask** - Universal microframework, you add YOUR routes
+- **Pytest** - Universal test framework, you write YOUR tests
+- **This Framework** - Universal test automation, you create YOUR adapter
 
-2. **Move Configuration:**
-   - Hardcoded URLs → `adapter.get_base_url()`
-   - Hardcoded credentials → `adapter.get_test_users()` + `.env`
-   - Hardcoded locators → `adapter.discover_page_structure()`
+**No examples of specific applications included** - that's YOUR job as the developer.
 
-3. **Refactor Tests:**
-   - Add `adapter` fixture
-   - Replace hardcoded values with adapter methods
-   - Use discovery methods where possible
+## Time Estimates for Adaptation
 
-4. **Update Environment:**
-   - Create `.env` file
-   - Set TEST_USERNAME and TEST_PASSWORD
-   - Remove hardcoded credentials from code
+Actual time to adapt this framework to your application:
 
-## Examples
+- **Simple web app:** 2-4 hours
+  - Create adapter: 1-2 hours
+  - Configure environment: 30 mins
+  - Write initial tests: 1-2 hours
 
-See `/tests/examples/` for complete examples:
-- `test_discovery_based.py` - Discovery-based tests
-- `test_adapter_based.py` - Adapter-based tests
-- `test_mixed_approach.py` - Combining both approaches
+- **Medium web app:** 4-8 hours
+  - Create adapter: 2-3 hours
+  - Handle auth complexity: 1-2 hours
+  - Write test suite: 2-3 hours
+
+- **Complex web app:** 8-16 hours
+  - Create adapter: 3-4 hours
+  - Complex auth (SSO, OAuth): 2-3 hours
+  - Comprehensive testing: 4-6 hours
+
+## Documentation
+
+- **Core Components:** See docstrings in each module
+- **Adapter Template:** `framework/adapters/adapter_template.py`
+- **Environment Config:** `.env.example`
+- **This README:** Complete usage guide
 
 ## Support
 
-For questions or issues:
-1. Check `/documentation/` for detailed guides
-2. See examples in `/tests/examples/`
-3. Review adapter implementations in `/framework/adapters/`
+This is a professional framework template. Implementation details are YOUR responsibility as a developer.
+
+Key files to understand:
+1. `framework/core/` - Universal components
+2. `framework/adapters/base_adapter.py` - Adapter interface
+3. `framework/adapters/adapter_template.py` - Your starting point
+4. `.env.example` - Configuration template
 
 ## License
 
-MIT License - See LICENSE file for details
+MIT License
 
 ---
 
-**Remember:** The goal is to DISCOVER, not ASSUME. Write tests that work with ANY application structure, not just one specific implementation.
+**Remember:** This is a UNIVERSAL framework. Like Django, Flask, or Pytest - it provides the tools, YOU provide the application-specific details through adapters.
+
+No hand-holding, no specific examples - professional frameworks trust developers to do their job.

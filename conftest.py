@@ -721,6 +721,94 @@ def performance_report_cleanup(request):
         logger.warning(f"Could not generate performance report: {e}")
 
 
+# ============================================================================
+# UNIVERSAL FRAMEWORK FIXTURES - Discovery-Based Testing
+# ============================================================================
+
+
+@pytest.fixture(scope="function")
+def element_finder(browser):
+    """
+    Provide ElementFinder instance for element discovery.
+
+    Example:
+        def test_something(browser, element_finder):
+            button = element_finder.find_by_text("Login", tag="button")
+            button.click()
+    """
+    from framework.core import ElementFinder
+
+    return ElementFinder(browser)
+
+
+@pytest.fixture(scope="function")
+def element_interactor(browser):
+    """
+    Provide ElementInteractor instance for element interactions.
+
+    Example:
+        def test_something(browser, element_interactor):
+            element_interactor.click(button, force=True)
+            element_interactor.type(input_field, "text")
+    """
+    from framework.core import ElementInteractor
+
+    return ElementInteractor(browser)
+
+
+@pytest.fixture(scope="function")
+def wait_handler(browser):
+    """
+    Provide WaitHandler instance for intelligent waiting.
+
+    Example:
+        def test_something(browser, wait_handler):
+            element = wait_handler.wait_for_element_visible(By.ID, "modal")
+            wait_handler.wait_for_element_clickable(By.ID, "submit")
+    """
+    from framework.core import WaitHandler
+
+    return WaitHandler(browser, default_timeout=config.TIMEOUT_DEFAULT)
+
+
+@pytest.fixture(scope="function")
+def discovery_engine(browser):
+    """
+    Provide DiscoveryEngine instance for automatic page structure discovery.
+
+    Example:
+        def test_something(browser, discovery_engine):
+            forms = discovery_engine.discover_forms()
+            nav = discovery_engine.discover_navigation()
+            report = discovery_engine.generate_page_report()
+    """
+    from framework.core import DiscoveryEngine
+
+    return DiscoveryEngine(browser)
+
+
+@pytest.fixture(scope="function")
+def universal_page(browser, element_finder, element_interactor, wait_handler):
+    """
+    Provide all universal components together for convenience.
+
+    Returns a simple object with: finder, interactor, waiter
+
+    Example:
+        def test_something(browser, universal_page):
+            button = universal_page.finder.find_by_text("Login")
+            universal_page.interactor.click(button)
+            universal_page.waiter.wait_for_element_visible(By.ID, "success")
+    """
+    from types import SimpleNamespace
+
+    return SimpleNamespace(
+        finder=element_finder,
+        interactor=element_interactor,
+        waiter=wait_handler,
+    )
+
+
 @pytest.hookimpl(tryfirst=True)
 def pytest_sessionfinish(session, exitstatus):
     """Log session finish information."""
