@@ -1,11 +1,25 @@
 """
-Login Page Object Model
-Author: Marc Arévalo
-Version: 2.0
+Login Page Object Model - TEMPLATE
+Author: Marc Arevalo
+Version: 6.0
 
-This page object models Login/Authentication functionality.
-Contains all locators and actions related to login, logout, and signup.
-Universal and reusable across any web application with modal-based authentication.
+IMPORTANT: This is a TEMPLATE/EXAMPLE for login page object.
+The locators shown here are from a sample application and MUST be adapted
+to YOUR application's actual element IDs, classes, and structure.
+
+This template demonstrates:
+- Modal-based login pattern
+- Login/logout/signup workflows
+- Session management patterns
+
+ADAPTATION REQUIRED:
+1. Update ALL locators to match your application's elements
+2. Modify methods if your login flow differs
+3. Consider loading locators from config/locators.json
+4. Test thoroughly with YOUR application
+
+For applications with different login patterns (page-based, OAuth, SSO, etc.),
+use this as inspiration but create appropriate custom implementations.
 """
 
 from typing import Any, Dict, List, Optional
@@ -18,411 +32,321 @@ from pages.base_page import BasePage
 
 class LoginPage(BasePage):
     """
-    Page Object for Login & Authentication functionality.
+    TEMPLATE Page Object for Login & Authentication functionality.
+
+    This template demonstrates a MODAL-BASED login pattern.
+    Adapt all locators and logic to match YOUR application.
 
     Handles:
-    - Login modal interaction
+    - Login modal interaction (if your app uses modals)
     - User authentication
     - Logout
     - Session management
     - Signup modal (basic support)
+
+    IMPORTANT: All locators below are EXAMPLES and must be replaced
+    with your application's actual element locators.
     """
 
-    LOGIN_BUTTON_NAV = (By.ID, "login2")
-    SIGNUP_BUTTON_NAV = (By.ID, "signin2")
-    LOGOUT_BUTTON_NAV = (By.ID, "logout2")
-    HOME_NAV_LINK = (By.XPATH, "//a[contains(text(), 'Home')]")
+    # ========================================================================
+    # NAVIGATION LOCATORS - ADAPT TO YOUR APPLICATION
+    # ========================================================================
+    # These are EXAMPLE locators - replace with YOUR app's navigation elements
+    LOGIN_BUTTON_NAV = (By.ID, "login-trigger")  # EXAMPLE - adapt to your app
+    SIGNUP_BUTTON_NAV = (
+        By.ID,
+        "signup-trigger",
+    )  # EXAMPLE - adapt to your app
+    LOGOUT_BUTTON_NAV = (
+        By.ID,
+        "logout-trigger",
+    )  # EXAMPLE - adapt to your app
+    HOME_NAV_LINK = (By.LINK_TEXT, "Home")  # EXAMPLE - adapt to your app
 
-    LOGIN_MODAL = (By.ID, "logInModal")
+    # ========================================================================
+    # LOGIN MODAL LOCATORS - ADAPT TO YOUR APPLICATION
+    # ========================================================================
+    # If your app uses a modal-based login:
+    LOGIN_MODAL = (By.ID, "login-modal")  # EXAMPLE - adapt to your app
     LOGIN_MODAL_TITLE = (
-        By.XPATH,
-        "//div[@id='logInModal']//h5[@class='modal-title']",
-    )
-    LOGIN_USERNAME_FIELD = (By.ID, "loginusername")
-    LOGIN_PASSWORD_FIELD = (By.ID, "loginpassword")
-    LOGIN_SUBMIT_BUTTON = (By.XPATH, "//button[text()='Log in']")
-    LOGIN_CLOSE_BUTTON = (
-        By.XPATH,
-        "//div[@id='logInModal']//button[@class='close']",
-    )
-    LOGIN_CLOSE_FOOTER_BUTTON = (
-        By.XPATH,
-        "//div[@id='logInModal']//button[text()='Close']",
-    )
+        By.CSS_SELECTOR,
+        "#login-modal .modal-title",
+    )  # EXAMPLE
+    LOGIN_USERNAME_FIELD = (By.ID, "username")  # EXAMPLE - adapt to your app
+    LOGIN_PASSWORD_FIELD = (By.ID, "password")  # EXAMPLE - adapt to your app
+    LOGIN_SUBMIT_BUTTON = (By.CSS_SELECTOR, "button[type='submit']")  # EXAMPLE
+    LOGIN_CLOSE_BUTTON = (By.CSS_SELECTOR, "#login-modal .close")  # EXAMPLE
 
-    SIGNUP_MODAL = (By.ID, "signInModal")
+    # ========================================================================
+    # SIGNUP MODAL LOCATORS - ADAPT TO YOUR APPLICATION
+    # ========================================================================
+    # If your app has a signup modal:
+    SIGNUP_MODAL = (By.ID, "signup-modal")  # EXAMPLE - adapt to your app
     SIGNUP_MODAL_TITLE = (
-        By.XPATH,
-        "//div[@id='signInModal']//h5[@class='modal-title']",
-    )
-    SIGNUP_USERNAME_FIELD = (By.ID, "sign-username")
-    SIGNUP_PASSWORD_FIELD = (By.ID, "sign-password")
-    SIGNUP_SUBMIT_BUTTON = (By.XPATH, "//button[text()='Sign up']")
-    SIGNUP_CLOSE_BUTTON = (
-        By.XPATH,
-        "//div[@id='signInModal']//button[@class='close']",
-    )
+        By.CSS_SELECTOR,
+        "#signup-modal .modal-title",
+    )  # EXAMPLE
+    SIGNUP_USERNAME_FIELD = (By.ID, "signup-username")  # EXAMPLE
+    SIGNUP_PASSWORD_FIELD = (By.ID, "signup-password")  # EXAMPLE
+    SIGNUP_SUBMIT_BUTTON = (
+        By.CSS_SELECTOR,
+        "button[type='submit']",
+    )  # EXAMPLE
 
-    WELCOME_USER_TEXT = (By.ID, "nameofuser")
+    # ========================================================================
+    # SESSION STATE LOCATORS - ADAPT TO YOUR APPLICATION
+    # ========================================================================
+    # Element that indicates user is logged in (e.g., welcome message, user menu):
+    WELCOME_USER_TEXT = (By.ID, "user-welcome")  # EXAMPLE - adapt to your app
+
+    # ========================================================================
+    # LOGIN METHODS - Adapt logic to your application's workflow
+    # ========================================================================
 
     def open_login_modal(self) -> bool:
         """
         Open the login modal.
 
+        TEMPLATE METHOD - Adapt to your application's login trigger.
+        If your app uses a separate login page instead of a modal,
+        replace this with navigation to that page.
+
         Returns:
-            True if modal opened successfully
+            True if modal/page opened successfully
         """
         self.click(self.LOGIN_BUTTON_NAV)
-        self.wait_for_element_visible(self.LOGIN_MODAL)
-        self.wait_for_element_visible(self.LOGIN_USERNAME_FIELD)
-        self.logger.info("Login modal opened")
-        return True
+        modal_visible = self.wait_for_element_visible(self.LOGIN_MODAL)
+        if modal_visible:
+            self.wait_for_element_visible(self.LOGIN_USERNAME_FIELD)
+            self.logger.info("Login modal opened")
+            return True
+        return False
 
     def close_login_modal(self) -> None:
-        """Close the login modal using close button."""
-        self.click(self.LOGIN_CLOSE_BUTTON)
-        self.wait_for_element_invisible(self.LOGIN_MODAL)
-        self.logger.info("Login modal closed")
-
-    def close_login_modal_footer(self) -> None:
-        """Close the login modal using footer close button."""
-        self.click(self.LOGIN_CLOSE_FOOTER_BUTTON)
-        self.wait_for_element_invisible(self.LOGIN_MODAL)
-        self.logger.info("Login modal closed via footer button")
-
-    def close_login_modal_esc(self) -> None:
-        """Close the login modal using ESC key."""
-        self.press_key(Keys.ESCAPE)
-        self.wait_for_element_invisible(self.LOGIN_MODAL, timeout=3)
-        self.logger.info("Login modal closed via ESC key")
-
-    def is_login_modal_visible(self) -> bool:
         """
-        Check if login modal is visible.
+        Close the login modal.
+
+        TEMPLATE METHOD - Adapt to your application.
+        """
+        if self.is_modal_visible(self.LOGIN_MODAL):
+            self.click(self.LOGIN_CLOSE_BUTTON)
+            self.logger.info("Login modal closed")
+
+    def login(self, username: str, password: str) -> bool:
+        """
+        Perform login.
+
+        TEMPLATE METHOD - Adapt to your application's login flow.
+
+        Args:
+            username: Username or email
+            password: Password
 
         Returns:
-            True if modal is visible, False otherwise
-        """
-        return self.is_element_visible(self.LOGIN_MODAL, timeout=2)
+            True if login appears successful (modal closed and user element visible)
 
-    def fill_login_username(
-        self, username: str, clear_first: bool = True
-    ) -> None:
-        """
-        Fill the username field in login modal.
-
-        Args:
-            username: Username to enter
-            clear_first: Clear field before typing (default: True)
-        """
-        self.type(self.LOGIN_USERNAME_FIELD, username, clear_first=clear_first)
-        self.logger.info(f"Entered username: {username}")
-
-    def fill_login_password(
-        self, password: str, clear_first: bool = True
-    ) -> None:
-        """
-        Fill the password field in login modal.
-
-        Args:
-            password: Password to enter
-            clear_first: Clear field before typing (default: True)
-        """
-        self.type(self.LOGIN_PASSWORD_FIELD, password, clear_first=clear_first)
-        self.logger.info("Entered password")
-
-    def click_login_submit(self) -> None:
-        """Click the login submit button."""
-        self.click(self.LOGIN_SUBMIT_BUTTON)
-        self.logger.info("Clicked login submit button")
-
-    def submit_login_with_enter(self) -> None:
-        """Submit login form using ENTER key."""
-        self.send_keys(self.LOGIN_PASSWORD_FIELD, Keys.ENTER)
-        self.logger.info("Submitted login via ENTER key")
-
-    def login(
-        self, username: str, password: str, use_enter_key: bool = False
-    ) -> bool:
-        """
-        Complete login flow: open modal, fill fields, submit.
-
-        Args:
-            username: Username to login with
-            password: Password to login with
-            use_enter_key: Submit using ENTER instead of click (default: False)
-
-        Returns:
-            True if login action completed (does not verify success)
+        Example:
+            >>> login_page.login("testuser", "testpass")
+            >>> assert login_page.is_user_logged_in()
         """
         self.open_login_modal()
-        self.fill_login_username(username)
-        self.fill_login_password(password)
+        self.type(self.LOGIN_USERNAME_FIELD, username)
+        self.type(self.LOGIN_PASSWORD_FIELD, password)
+        self.click(self.LOGIN_SUBMIT_BUTTON)
 
-        if use_enter_key:
-            self.submit_login_with_enter()
-        else:
-            self.click_login_submit()
+        # Wait for modal to close (indicates submission)
+        self.wait_for_element_invisible(self.LOGIN_MODAL, timeout=5)
 
         self.logger.info(f"Login attempted for user: {username}")
-        return True
 
-    def logout(self) -> bool:
+        # Check if login was successful by looking for logged-in indicator
+        return self.is_user_logged_in()
+
+    def logout(self) -> None:
         """
-        Logout the current user.
+        Perform logout.
+
+        TEMPLATE METHOD - Adapt to your application's logout mechanism.
+        """
+        if self.is_user_logged_in():
+            self.click(self.LOGOUT_BUTTON_NAV)
+            # Wait for logout to complete
+            self.wait_for_element_invisible(self.WELCOME_USER_TEXT, timeout=5)
+            self.logger.info("User logged out")
+
+    def is_user_logged_in(self) -> bool:
+        """
+        Check if user is currently logged in.
+
+        TEMPLATE METHOD - Adapt to your application's session indicators.
 
         Returns:
-            True if logout action completed
-        """
-        self.click(self.LOGOUT_BUTTON_NAV)
-        self.wait(1)  # Wait for logout to process
-        self.logger.info("Logout completed")
-        return True
+            True if user appears to be logged in, False otherwise
 
-    def is_logout_button_visible(self) -> bool:
+        Note:
+            This checks for the presence of an element that only appears
+            when logged in (e.g., welcome message, user menu, logout button).
+            Adapt the locator to match your application.
         """
-        Check if logout button is visible.
+        # Check if logout button is visible (indicates logged in)
+        logout_visible = self.is_element_visible(
+            self.LOGOUT_BUTTON_NAV, timeout=3
+        )
+
+        # Or check for welcome message
+        welcome_visible = self.is_element_visible(
+            self.WELCOME_USER_TEXT, timeout=3
+        )
+
+        return logout_visible or welcome_visible
+
+    def get_logged_in_username(self) -> Optional[str]:
+        """
+        Get the username of the currently logged-in user.
+
+        TEMPLATE METHOD - Adapt to your application.
 
         Returns:
-            True if logout button visible, False otherwise
+            Username if logged in, None otherwise
         """
-        return self.is_element_visible(self.LOGOUT_BUTTON_NAV, timeout=2)
+        if self.is_user_logged_in():
+            welcome_text = self.get_text(self.WELCOME_USER_TEXT)
+            # Parse username from welcome text (e.g., "Welcome user123")
+            # Adapt this parsing to match your app's format
+            if welcome_text:
+                return welcome_text.replace("Welcome", "").strip()
+        return None
+
+    # ========================================================================
+    # SIGNUP METHODS - Adapt to your application
+    # ========================================================================
 
     def open_signup_modal(self) -> bool:
         """
         Open the signup modal.
 
+        TEMPLATE METHOD - Adapt to your application's signup trigger.
+
         Returns:
-            True if modal opened successfully
+            True if modal/page opened successfully
         """
         self.click(self.SIGNUP_BUTTON_NAV)
-        self.wait_for_element_visible(self.SIGNUP_MODAL)
-        self.wait_for_element_visible(self.SIGNUP_USERNAME_FIELD)
-        self.logger.info("Signup modal opened")
-        return True
+        modal_visible = self.wait_for_element_visible(self.SIGNUP_MODAL)
+        if modal_visible:
+            self.wait_for_element_visible(self.SIGNUP_USERNAME_FIELD)
+            self.logger.info("Signup modal opened")
+            return True
+        return False
 
-    def close_signup_modal(self) -> None:
-        """Close the signup modal."""
-        self.click(self.SIGNUP_CLOSE_BUTTON)
-        self.wait_for_element_invisible(self.SIGNUP_MODAL)
-        self.logger.info("Signup modal closed")
-
-    def fill_signup_username(
-        self, username: str, clear_first: bool = True
-    ) -> None:
+    def signup(self, username: str, password: str) -> None:
         """
-        Fill the username field in signup modal.
+        Perform signup/registration.
+
+        TEMPLATE METHOD - Adapt to your application's signup flow.
+        Your app may require additional fields (email, name, etc.).
 
         Args:
-            username: Username to enter
-            clear_first: Clear field before typing (default: True)
-        """
-        self.type(
-            self.SIGNUP_USERNAME_FIELD, username, clear_first=clear_first
-        )
-        self.logger.info(f"Entered signup username: {username}")
-
-    def fill_signup_password(
-        self, password: str, clear_first: bool = True
-    ) -> None:
-        """
-        Fill the password field in signup modal.
-
-        Args:
-            password: Password to enter
-            clear_first: Clear field before typing (default: True)
-        """
-        self.type(
-            self.SIGNUP_PASSWORD_FIELD, password, clear_first=clear_first
-        )
-        self.logger.info("Entered signup password")
-
-    def click_signup_submit(self) -> None:
-        """Click the signup submit button."""
-        self.click(self.SIGNUP_SUBMIT_BUTTON)
-        self.logger.info("Clicked signup submit button")
-
-    def signup(self, username: str, password: str) -> bool:
-        """
-        Complete signup flow: open modal, fill fields, submit.
-
-        Args:
-            username: Username to signup with
-            password: Password to signup with
-
-        Returns:
-            True if signup action completed (does not verify success)
+            username: Desired username
+            password: Desired password
         """
         self.open_signup_modal()
-        self.fill_signup_username(username)
-        self.fill_signup_password(password)
-        self.click_signup_submit()
+        self.type(self.SIGNUP_USERNAME_FIELD, username)
+        self.type(self.SIGNUP_PASSWORD_FIELD, password)
+        self.click(self.SIGNUP_SUBMIT_BUTTON)
         self.logger.info(f"Signup attempted for user: {username}")
-        return True
 
-    def is_user_logged_in(self, timeout: int = 3) -> bool:
+    # ========================================================================
+    # HELPER METHODS
+    # ========================================================================
+
+    def get_login_error_message(self) -> Optional[str]:
         """
-        Check if user is currently logged in.
+        Get login error message if present.
 
-        Verifies by checking for welcome message presence.
-
-        Args:
-            timeout: Timeout in seconds (default: 3)
+        TEMPLATE METHOD - Adapt to your application's error display.
 
         Returns:
-            True if user is logged in, False otherwise
+            Error message text if present, None otherwise
         """
-        is_logged_in = self.is_element_visible(
-            self.WELCOME_USER_TEXT, timeout=timeout
-        )
-        if is_logged_in:
-            self.logger.info("User is logged in")
-        else:
-            self.logger.info("User is not logged in")
-        return is_logged_in
+        # Check for alert (common pattern)
+        alert_text = self.get_alert_text(timeout=2)
+        if alert_text:
+            return alert_text
 
-    def get_welcome_message(self) -> Optional[str]:
-        """
-        Get the welcome message text (e.g., "Welcome Apolo2025").
+        # Or check for error element on page
+        # ERROR_MESSAGE_LOCATOR = (By.CSS_SELECTOR, ".error-message")
+        # if self.is_element_visible(ERROR_MESSAGE_LOCATOR, timeout=2):
+        #     return self.get_text(ERROR_MESSAGE_LOCATOR)
 
-        Returns:
-            Welcome message text, or None if not logged in
-        """
-        if self.is_user_logged_in():
-            text = self.get_text(self.WELCOME_USER_TEXT)
-            self.logger.info(f"Welcome message: {text}")
-            return text
         return None
 
-    def get_logged_in_username(self) -> Optional[str]:
+    def wait_for_login_completion(self, timeout: int = 10) -> bool:
         """
-        Extract username from welcome message.
+        Wait for login process to complete.
 
-        Returns:
-            Username string, or None if not logged in
-        """
-        welcome_msg = self.get_welcome_message()
-        if welcome_msg:
-            username = welcome_msg.replace("Welcome", "").strip()
-            self.logger.info(f"Logged in username: {username}")
-            return username
-        return None
-
-    def get_login_username_value(self) -> Optional[str]:
-        """Get current value of login username field."""
-        return self.get_attribute(self.LOGIN_USERNAME_FIELD, "value")
-
-    def get_login_password_value(self) -> Optional[str]:
-        """Get current value of login password field."""
-        return self.get_attribute(self.LOGIN_PASSWORD_FIELD, "value")
-
-    def get_login_username_placeholder(self) -> Optional[str]:
-        """Get placeholder text of login username field."""
-        return self.get_attribute(self.LOGIN_USERNAME_FIELD, "placeholder")
-
-    def get_login_password_placeholder(self) -> Optional[str]:
-        """Get placeholder text of login password field."""
-        return self.get_attribute(self.LOGIN_PASSWORD_FIELD, "placeholder")
-
-    def is_login_username_field_enabled(self) -> bool:
-        """Check if login username field is enabled."""
-        enabled = self.get_attribute(self.LOGIN_USERNAME_FIELD, "disabled")
-        return enabled is None
-
-    def is_login_password_field_enabled(self) -> bool:
-        """Check if login password field is enabled."""
-        enabled = self.get_attribute(self.LOGIN_PASSWORD_FIELD, "disabled")
-        return enabled is None
-
-    def get_login_username_aria_label(self) -> Optional[str]:
-        """Get aria-label of login username field (for accessibility testing)."""
-        return self.get_attribute(self.LOGIN_USERNAME_FIELD, "aria-label")
-
-    def get_login_password_aria_label(self) -> Optional[str]:
-        """Get aria-label of login password field (for accessibility testing)."""
-        return self.get_attribute(self.LOGIN_PASSWORD_FIELD, "aria-label")
-
-    def tab_through_login_form(self) -> bool:
-        """
-        Tab through login form fields (for keyboard navigation testing).
-
-        Returns:
-            List of focused element IDs
-        """
-        self.open_login_modal()
-
-        self.send_keys(self.LOGIN_USERNAME_FIELD, Keys.TAB)
-
-        self.send_keys(self.LOGIN_PASSWORD_FIELD, Keys.TAB)
-
-        self.logger.info("Tabbed through login form")
-        return True
-
-    def inject_sql_payload_username(self, payload: str) -> bool:
-        """
-        Inject SQL payload into username field (for security testing).
+        TEMPLATE METHOD - Adapt to your application's post-login behavior.
 
         Args:
-            payload: SQL injection payload
+            timeout: Maximum time to wait in seconds
 
         Returns:
-            True if injection attempt completed
+            True if login completed successfully
         """
-        self.open_login_modal()
-        self.fill_login_username(payload)
-        self.fill_login_password("anypassword")
-        self.click_login_submit()
-        self.logger.warning(f"SQL injection payload tested: {payload}")
-        return True
+        # Wait for modal to close
+        self.wait_for_element_invisible(self.LOGIN_MODAL, timeout=timeout)
 
-    def inject_xss_payload_username(self, payload: str) -> bool:
-        """
-        Inject XSS payload into username field (for security testing).
-
-        Args:
-            payload: XSS payload
-
-        Returns:
-            True if injection attempt completed
-        """
-        self.open_login_modal()
-        self.fill_login_username(payload)
-        self.fill_login_password("anypassword")
-        self.click_login_submit()
-        self.logger.warning(f"XSS payload tested: {payload}")
-        return True
-
-    def check_for_csrf_token(self) -> bool:
-        """
-        Check if login form has CSRF token (for security testing).
-
-        Returns:
-            True if CSRF token found, False otherwise
-        """
-        self.open_login_modal()
-        page_source = self.get_page_source()
-
-        has_csrf = (
-            "csrf" in page_source.lower() or "token" in page_source.lower()
+        # Wait for logged-in indicator
+        return (
+            self.wait_for_element_visible(
+                self.WELCOME_USER_TEXT, timeout=timeout
+            )
+            is not None
         )
 
-        if has_csrf:
-            self.logger.info("CSRF token detected")
-        else:
-            self.logger.warning("No CSRF token found")
 
-        return has_csrf
+# ============================================================================
+# USAGE EXAMPLE - How to adapt this template to your application
+# ============================================================================
+"""
+EXAMPLE ADAPTATION:
 
-    def get_session_cookies(self) -> List[Dict[str, Any]]:
-        """
-        Get all session-related cookies (for security testing).
+1. Update locators to match your application:
+   LOGIN_BUTTON_NAV = (By.ID, "your-login-button-id")
+   LOGIN_USERNAME_FIELD = (By.NAME, "your-username-field-name")
+   # ... etc
 
-        Returns:
-            List of cookie dictionaries
-        """
-        cookies = self.driver.get_cookies()
-        session_cookies = [
-            c for c in cookies if "session" in c.get("name", "").lower()
-        ]
-        self.logger.info(f"Found {len(session_cookies)} session cookies")
-        return session_cookies
+2. If your app uses page-based login instead of modal:
+   def open_login_modal(self):
+       # Instead of opening modal, navigate to login page
+       self.navigate_to(f"{self.base_url}/login")
+       self.wait_for_page_load()
+
+3. If your app requires additional fields (email, captcha, etc.):
+   def login(self, username: str, password: str, email: str = None):
+       self.open_login_modal()
+       if email:
+           self.type(self.EMAIL_FIELD, email)
+       self.type(self.LOGIN_USERNAME_FIELD, username)
+       self.type(self.LOGIN_PASSWORD_FIELD, password)
+       # Handle captcha if needed
+       self.click(self.LOGIN_SUBMIT_BUTTON)
+
+4. Load locators from config/locators.json (recommended):
+   from utils.locator_loader import load_locators
+
+   class LoginPage(BasePage):
+       def __init__(self, driver):
+           super().__init__(driver)
+           # Load locators from JSON
+           self.locators = load_locators("login_page")
+           self.LOGIN_BUTTON_NAV = self.locators.get("login_button_nav")
+
+5. Use discovery-based element finding for more resilient tests:
+   from framework.core import ElementFinder
+
+   def open_login_modal(self):
+       # Find login button by text (more resilient than ID)
+       login_btn = self.finder.find_by_text("Login", tag="button")
+       if login_btn:
+           self.interactor.click(login_btn)
+"""

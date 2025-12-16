@@ -1,11 +1,13 @@
 """
-Base Page Object Model
-Author: Marc Arévalo
-Version: 2.0
+Base Page Object Model - Universal Test Automation Framework
+Author: Marc Arevalo
+Version: 6.0
 
-This base class contains common methods used across all page objects.
+Base class for Page Objects using composition with universal framework components.
 All page objects should inherit from this class.
-Universal and reusable across any web application.
+
+This class is a CONVENIENCE WRAPPER around the universal framework components.
+For new code, consider using ElementFinder, ElementInteractor, and WaitHandler directly.
 """
 
 import logging
@@ -15,26 +17,38 @@ from typing import Any, List, Optional, Tuple, Union
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.alert import Alert
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from config import config
+from framework.core import ElementFinder, ElementInteractor, WaitHandler
 
 
 class BasePage:
     """
     Base class for all Page Objects.
 
-    Provides common methods for interacting with web elements:
-    - Finding elements with waits
-    - Clicking elements
-    - Typing text
-    - Handling alerts
-    - Taking screenshots
+    Uses composition with universal framework components:
+    - ElementFinder: For finding elements with intelligent strategies
+    - ElementInteractor: For reliable element interactions
+    - WaitHandler: For intelligent waiting without sleep()
 
-    Universal and reusable across any web application.
+    This class provides backward compatibility while using modern
+    discovery-based testing patterns internally.
+
+    For new code, consider using the framework components directly:
+        from framework.core import ElementFinder, ElementInteractor, WaitHandler
+
+    Attributes:
+        driver: Selenium WebDriver instance
+        base_url: Base URL of the application
+        timeout: Default timeout for waits
+        finder: ElementFinder instance for element discovery
+        interactor: ElementInteractor instance for interactions
+        waiter: WaitHandler instance for intelligent waiting
     """
 
     def __init__(
@@ -44,7 +58,7 @@ class BasePage:
         timeout: int = 10,
     ) -> None:
         """
-        Initialize the BasePage.
+        Initialize the BasePage with universal framework components.
 
         Args:
             driver: Selenium WebDriver instance
@@ -58,11 +72,22 @@ class BasePage:
             self.__class__.__name__
         )
 
+        # Universal framework components (composition over inheritance)
+        self.finder: ElementFinder = ElementFinder(driver)
+        self.interactor: ElementInteractor = ElementInteractor(driver)
+        self.waiter: WaitHandler = WaitHandler(driver, default_timeout=timeout)
+
+    # ========================================================================
+    # ELEMENT FINDING METHODS - Delegate to ElementFinder
+    # ========================================================================
+
     def find_element(
         self, locator: Tuple[str, str], timeout: Optional[int] = None
     ) -> WebElement:
         """
         Find an element with explicit wait.
+
+        Delegates to WaitHandler for intelligent waiting.
 
         Args:
             locator: Tuple (By.TYPE, "value")
@@ -75,21 +100,23 @@ class BasePage:
             TimeoutException if element not found
         """
         wait_time: int = timeout if timeout else self.timeout
-        try:
-            element: WebElement = WebDriverWait(self.driver, wait_time).until(
-                EC.presence_of_element_located(locator)
-            )
+        element = self.waiter.wait_for_element_present(
+            locator[0], locator[1], timeout=wait_time
+        )
+        if element:
             self.logger.debug(f"Element found: {locator}")
             return element
-        except TimeoutException:
+        else:
             self.logger.error(f"Element not found: {locator}")
-            raise
+            raise TimeoutException(f"Element not found: {locator}")
 
     def find_elements(
         self, locator: Tuple[str, str], timeout: Optional[int] = None
     ) -> List[WebElement]:
         """
         Find multiple elements with explicit wait.
+
+        Delegates to ElementFinder.
 
         Args:
             locator: Tuple (By.TYPE, "value")
@@ -100,62 +127,71 @@ class BasePage:
         """
         wait_time: int = timeout if timeout else self.timeout
         try:
-            elements: List[WebElement] = WebDriverWait(
-                self.driver, wait_time
-            ).until(EC.presence_of_all_elements_located(locator))
+            WebDriverWait(self.driver, wait_time).until(
+                EC.presence_of_element_located(locator)
+            )
+            elements: List[WebElement] = self.finder.find_elements(
+                locator[0], locator[1]
+            )
             self.logger.debug(f"Found {len(elements)} elements: {locator}")
             return elements
         except TimeoutException:
             self.logger.warning(f"No elements found: {locator}")
             return []
 
+    # ========================================================================
+    # WAITING METHODS - Delegate to WaitHandler
+    # ========================================================================
+
     def wait_for_element_visible(
         self, locator: Tuple[str, str], timeout: Optional[int] = None
-    ) -> WebElement:
+    ) -> Optional[WebElement]:
         """
         Wait for element to be visible.
 
+        Delegates to WaitHandler.
+
         Args:
             locator: Tuple (By.TYPE, "value")
             timeout: Optional custom timeout
 
         Returns:
-            WebElement if visible
+            WebElement if visible, None if timeout
         """
         wait_time: int = timeout if timeout else self.timeout
-        try:
-            element: WebElement = WebDriverWait(self.driver, wait_time).until(
-                EC.visibility_of_element_located(locator)
-            )
+        element = self.waiter.wait_for_element_visible(
+            locator[0], locator[1], timeout=wait_time
+        )
+        if element:
             self.logger.debug(f"Element visible: {locator}")
-            return element
-        except TimeoutException:
-            self.logger.error(f"Element not visible: {locator}")
-            raise
+        else:
+            self.logger.warning(f"Element not visible: {locator}")
+        return element
 
     def wait_for_element_clickable(
         self, locator: Tuple[str, str], timeout: Optional[int] = None
-    ) -> WebElement:
+    ) -> Optional[WebElement]:
         """
         Wait for element to be clickable.
+
+        Delegates to WaitHandler.
 
         Args:
             locator: Tuple (By.TYPE, "value")
             timeout: Optional custom timeout
 
         Returns:
-            WebElement if clickable
+            WebElement if clickable, None if timeout
         """
         wait_time: int = timeout if timeout else self.timeout
-        try:
-            element: WebElement = WebDriverWait(self.driver, wait_time).until(
-                EC.element_to_be_clickable(locator)
-            )
+        element = self.waiter.wait_for_element_clickable(
+            locator[0], locator[1], timeout=wait_time
+        )
+        if element:
             self.logger.debug(f"Element clickable: {locator}")
-            return element
-        except TimeoutException:
-            self.logger.error(f"Element not clickable: {locator}")
-            raise
+        else:
+            self.logger.warning(f"Element not clickable: {locator}")
+        return element
 
     def wait_for_element_invisible(
         self, locator: Tuple[str, str], timeout: Optional[int] = None
@@ -163,229 +199,232 @@ class BasePage:
         """
         Wait for element to become invisible.
 
+        Delegates to WaitHandler.
+
         Args:
             locator: Tuple (By.TYPE, "value")
             timeout: Optional custom timeout
 
         Returns:
-            True if element becomes invisible
+            True if element became invisible, False if timeout
         """
-        wait_time = timeout if timeout else self.timeout
-        try:
-            result = WebDriverWait(self.driver, wait_time).until(
-                EC.invisibility_of_element_located(locator)
-            )
+        wait_time: int = timeout if timeout else self.timeout
+        result = self.waiter.wait_for_element_invisible(
+            locator[0], locator[1], timeout=wait_time
+        )
+        if result:
             self.logger.debug(f"Element invisible: {locator}")
-            return bool(result)
-        except TimeoutException:
-            self.logger.error(f"Element still visible: {locator}")
-            raise
+        else:
+            self.logger.warning(f"Element still visible: {locator}")
+        return result
 
-    def click(
-        self, locator: Tuple[str, str], timeout: Optional[int] = None
-    ) -> None:
+    # ========================================================================
+    # INTERACTION METHODS - Delegate to ElementInteractor
+    # ========================================================================
+
+    def click(self, locator: Tuple[str, str], force: bool = False) -> None:
         """
         Click an element.
 
+        Delegates to ElementInteractor with retry logic.
+
         Args:
             locator: Tuple (By.TYPE, "value")
-            timeout: Optional custom timeout
+            force: If True, use JavaScript click as fallback
         """
-        element: WebElement = self.wait_for_element_clickable(locator, timeout)
-        element.click()
-        self.logger.info(f"Clicked: {locator}")
+        element = self.find_element(locator)
+        success = self.interactor.click(element, force=force)
+        if success:
+            self.logger.debug(f"Clicked element: {locator}")
+        else:
+            self.logger.error(f"Failed to click: {locator}")
+            raise Exception(f"Failed to click element: {locator}")
 
     def type(
-        self,
-        locator: Tuple[str, str],
-        text: str,
-        clear_first: bool = True,
-        timeout: Optional[int] = None,
+        self, locator: Tuple[str, str], text: str, clear_first: bool = True
     ) -> None:
         """
         Type text into an element.
+
+        Delegates to ElementInteractor.
 
         Args:
             locator: Tuple (By.TYPE, "value")
             text: Text to type
             clear_first: Clear field before typing (default: True)
-            timeout: Optional custom timeout
         """
-        element: WebElement = self.wait_for_element_visible(locator, timeout)
-        if clear_first:
-            element.clear()
-        element.send_keys(text)
-        self.logger.info(f"Typed '{text}' into: {locator}")
+        element = self.find_element(locator)
+        success = self.interactor.type(element, text, clear_first=clear_first)
+        if success:
+            self.logger.debug(f"Typed '{text}' into: {locator}")
+        else:
+            self.logger.error(f"Failed to type into: {locator}")
+            raise Exception(f"Failed to type into element: {locator}")
 
-    def get_text(
-        self, locator: Tuple[str, str], timeout: Optional[int] = None
-    ) -> str:
+    def get_text(self, locator: Tuple[str, str]) -> str:
         """
-        Get text from an element.
+        Get text content of an element.
 
         Args:
             locator: Tuple (By.TYPE, "value")
-            timeout: Optional custom timeout
 
         Returns:
-            Text content of element
+            Text content of the element
         """
-        element: WebElement = self.wait_for_element_visible(locator, timeout)
-        text: str = element.text
+        element = self.find_element(locator)
+        text = element.text
         self.logger.debug(f"Got text '{text}' from: {locator}")
         return text
 
     def get_attribute(
-        self,
-        locator: Tuple[str, str],
-        attribute: str,
-        timeout: Optional[int] = None,
+        self, locator: Tuple[str, str], attribute: str
     ) -> Optional[str]:
         """
-        Get attribute value from an element.
+        Get attribute value of an element.
 
         Args:
             locator: Tuple (By.TYPE, "value")
             attribute: Attribute name
-            timeout: Optional custom timeout
 
         Returns:
-            Attribute value
+            Attribute value or None
         """
-        element = self.find_element(locator, timeout)
+        element = self.find_element(locator)
         value = element.get_attribute(attribute)
         self.logger.debug(
-            f"Got attribute '{attribute}' = '{value}' from: {locator}"
+            f"Got attribute '{attribute}'='{value}' from: {locator}"
         )
         return value
 
+    # ========================================================================
+    # ELEMENT STATE CHECKING METHODS
+    # ========================================================================
+
     def is_element_present(
-        self, locator: Tuple[str, str], timeout: int = 2
+        self, locator: Tuple[str, str], timeout: int = 3
     ) -> bool:
         """
-        Check if element is present (short timeout).
+        Check if element is present in DOM.
 
         Args:
             locator: Tuple (By.TYPE, "value")
-            timeout: Timeout in seconds (default: 2)
+            timeout: Timeout for check (default: 3 seconds)
 
         Returns:
-            True if element present, False otherwise
+            True if present, False otherwise
         """
-        try:
-            self.find_element(locator, timeout)
-            return True
-        except TimeoutException:
-            return False
+        element = self.waiter.wait_for_element_present(
+            locator[0], locator[1], timeout=timeout
+        )
+        return element is not None
 
     def is_element_visible(
-        self, locator: Tuple[str, str], timeout: int = 2
+        self, locator: Tuple[str, str], timeout: int = 3
     ) -> bool:
         """
-        Check if element is visible (short timeout).
+        Check if element is visible.
 
         Args:
             locator: Tuple (By.TYPE, "value")
-            timeout: Timeout in seconds (default: 2)
+            timeout: Timeout for check (default: 3 seconds)
 
         Returns:
-            True if element visible, False otherwise
+            True if visible, False otherwise
         """
-        try:
-            self.wait_for_element_visible(locator, timeout)
-            return True
-        except TimeoutException:
-            return False
+        element = self.waiter.wait_for_element_visible(
+            locator[0], locator[1], timeout=timeout
+        )
+        return element is not None
+
+    # ========================================================================
+    # ALERT HANDLING METHODS
+    # ========================================================================
 
     def wait_for_alert(self, timeout: int = 5) -> Optional[Alert]:
         """
         Wait for alert to be present.
 
+        Delegates to WaitHandler.
+
         Args:
-            timeout: Timeout in seconds (default: 5)
+            timeout: Timeout in seconds
 
         Returns:
-            Alert object if present, None otherwise
+            Alert object if present, None if timeout
         """
-        try:
-            WebDriverWait(self.driver, timeout).until(EC.alert_is_present())
-            alert: Alert = self.driver.switch_to.alert
-            self.logger.info(f"Alert present: '{alert.text}'")
-            return alert
-        except TimeoutException:
-            self.logger.debug("No alert present")
-            return None
+        alert = self.waiter.wait_for_alert(timeout=timeout)
+        if alert:
+            self.logger.debug("Alert present")
+        return alert
 
     def get_alert_text(self, timeout: int = 5) -> Optional[str]:
         """
-        Get alert text and accept it.
+        Get alert text.
 
         Args:
-            timeout: Timeout in seconds (default: 5)
+            timeout: Timeout in seconds
 
         Returns:
-            Alert text if present, None otherwise
+            Alert text or None if no alert
         """
-        alert: Optional[Alert] = self.wait_for_alert(timeout)
+        alert = self.wait_for_alert(timeout=timeout)
         if alert:
-            alert_text: str = alert.text
-            alert.accept()
-            self.logger.info(f"Alert accepted: '{alert_text}'")
-            return alert_text
+            text = alert.text
+            self.logger.debug(f"Alert text: '{text}'")
+            return text
         return None
 
     def accept_alert(self, timeout: int = 5) -> None:
         """
-        Accept alert if present.
+        Accept (click OK on) alert.
 
         Args:
-            timeout: Timeout in seconds (default: 5)
+            timeout: Timeout in seconds
         """
-        alert = self.wait_for_alert(timeout)
+        alert = self.wait_for_alert(timeout=timeout)
         if alert:
             alert.accept()
-            self.logger.info("Alert accepted")
+            self.logger.debug("Alert accepted")
 
     def dismiss_alert(self, timeout: int = 5) -> None:
         """
-        Dismiss alert if present.
+        Dismiss (click Cancel on) alert.
 
         Args:
-            timeout: Timeout in seconds (default: 5)
+            timeout: Timeout in seconds
         """
-        alert = self.wait_for_alert(timeout)
+        alert = self.wait_for_alert(timeout=timeout)
         if alert:
             alert.dismiss()
-            self.logger.info("Alert dismissed")
+            self.logger.debug("Alert dismissed")
+
+    # ========================================================================
+    # NAVIGATION METHODS
+    # ========================================================================
 
     def navigate_to(self, url: str) -> None:
-        """
-        Navigate to a URL.
-
-        Args:
-            url: URL to navigate to
-        """
+        """Navigate to a URL."""
         self.driver.get(url)
         self.logger.info(f"Navigated to: {url}")
 
     def refresh_page(self) -> None:
         """Refresh the current page."""
         self.driver.refresh()
-        self.logger.info("Page refreshed")
+        self.logger.debug("Page refreshed")
 
     def go_back(self) -> None:
-        """Navigate back in browser history."""
+        """Go back to previous page."""
         self.driver.back()
-        self.logger.info("Navigated back")
+        self.logger.debug("Navigated back")
 
     def get_current_url(self) -> str:
         """
         Get current URL.
 
         Returns:
-            Current URL
+            Current page URL
         """
-        url: str = self.driver.current_url
+        url = self.driver.current_url
         self.logger.debug(f"Current URL: {url}")
         return url
 
@@ -396,16 +435,20 @@ class BasePage:
         Returns:
             Page title
         """
-        title: str = self.driver.title
+        title = self.driver.title
         self.logger.debug(f"Page title: {title}")
         return title
+
+    # ========================================================================
+    # JAVASCRIPT EXECUTION METHODS
+    # ========================================================================
 
     def execute_script(self, script: str, *args: Any) -> Any:
         """
         Execute JavaScript.
 
         Args:
-            script: JavaScript code
+            script: JavaScript code to execute
             *args: Arguments to pass to script
 
         Returns:
@@ -419,103 +462,108 @@ class BasePage:
         """
         Scroll to element.
 
+        Delegates to ElementInteractor.
+
         Args:
             locator: Tuple (By.TYPE, "value")
         """
         element = self.find_element(locator)
-        self.driver.execute_script(
-            "arguments[0].scrollIntoView(true);", element
-        )
-        self.logger.info(f"Scrolled to: {locator}")
+        self.interactor.scroll_to_element(element)
+        self.logger.debug(f"Scrolled to: {locator}")
 
     def scroll_to_bottom(self) -> None:
         """Scroll to bottom of page."""
-        self.driver.execute_script(
-            "window.scrollTo(0, document.body.scrollHeight);"
-        )
-        self.logger.info("Scrolled to bottom")
+        self.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        self.logger.debug("Scrolled to bottom")
 
-    def send_keys(
-        self,
-        locator: Tuple[str, str],
-        keys: str,
-        timeout: Optional[int] = None,
-    ) -> None:
+    # ========================================================================
+    # KEYBOARD AND MOUSE METHODS
+    # ========================================================================
+
+    def send_keys(self, locator: Tuple[str, str], *keys_to_send: str) -> None:
         """
-        Send keyboard keys to element.
+        Send keys to an element.
 
         Args:
             locator: Tuple (By.TYPE, "value")
-            keys: Keys to send (e.g., Keys.ENTER)
-            timeout: Optional custom timeout
+            *keys_to_send: Keys to send
         """
-        element = self.find_element(locator, timeout)
-        element.send_keys(keys)
-        self.logger.info(f"Sent keys to: {locator}")
+        element = self.find_element(locator)
+        element.send_keys(*keys_to_send)
+        self.logger.debug(f"Sent keys to: {locator}")
 
     def press_key(self, key: str) -> None:
         """
-        Press a keyboard key.
+        Press a keyboard key (e.g., Keys.ENTER, Keys.ESCAPE).
 
         Args:
-            key: Key to press (e.g., Keys.ESCAPE)
+            key: Key to press (from selenium.webdriver.common.keys.Keys)
         """
-        ActionChains(self.driver).send_keys(key).perform()
-        self.logger.info(f"Pressed key: {key}")
+        actions = ActionChains(self.driver)
+        actions.send_keys(key).perform()
+        self.logger.debug(f"Pressed key: {key}")
 
-    def hover(
-        self, locator: Tuple[str, str], timeout: Optional[int] = None
-    ) -> None:
+    def hover(self, locator: Tuple[str, str], duration: float = 0.5) -> None:
         """
-        Hover over element.
+        Hover over an element.
+
+        Delegates to ElementInteractor.
 
         Args:
             locator: Tuple (By.TYPE, "value")
-            timeout: Optional custom timeout
+            duration: Hover duration in seconds
         """
-        element = self.find_element(locator, timeout)
-        ActionChains(self.driver).move_to_element(element).perform()
-        self.logger.info(f"Hovered over: {locator}")
+        element = self.find_element(locator)
+        self.interactor.hover(element)
+        if duration > 0:
+            time.sleep(duration)
+        self.logger.debug(f"Hovered over: {locator}")
+
+    # ========================================================================
+    # UTILITY METHODS
+    # ========================================================================
 
     def wait(self, seconds: Union[int, float]) -> None:
         """
-        Explicit wait (use sparingly, prefer explicit waits).
+        Explicit wait (sleep).
+
+        WARNING: Use WaitHandler condition-based waits instead when possible.
+        This method should only be used when absolutely necessary.
 
         Args:
             seconds: Seconds to wait
         """
+        self.logger.warning(
+            f"Using explicit sleep({seconds}s) - consider using WaitHandler instead"
+        )
         time.sleep(seconds)
-        self.logger.debug(f"Waited {seconds} seconds")
 
     def wait_for_page_load(self, timeout: int = 30) -> bool:
         """
-        Wait for page to finish loading.
-
-        Uses JavaScript document.readyState to verify page is fully loaded.
+        Wait for page to load completely.
 
         Args:
-            timeout: Maximum time to wait in seconds (default: 30)
+            timeout: Timeout in seconds
 
         Returns:
-            True if page loaded successfully
-
-        Raises:
-            TimeoutException: If page doesn't load within timeout
+            True if page loaded, False if timeout
         """
         try:
             WebDriverWait(self.driver, timeout).until(
-                lambda d: d.execute_script("return document.readyState")
+                lambda driver: driver.execute_script(
+                    "return document.readyState"
+                )
                 == "complete"
             )
-            self.logger.debug("Page loaded successfully")
+            self.logger.debug("Page loaded completely")
             return True
         except TimeoutException:
-            self.logger.error(f"Page did not load within {timeout} seconds")
-            raise
+            self.logger.warning("Page load timeout")
+            return False
 
     def take_screenshot(self, filename: str) -> None:
         """
-        Take screenshot.
+        Take screenshot and save to file.
 
         Args:
             filename: Path to save screenshot
@@ -530,68 +578,69 @@ class BasePage:
         Returns:
             Page source HTML
         """
-        return self.driver.page_source
+        source = self.driver.page_source
+        self.logger.debug(f"Got page source ({len(source)} chars)")
+        return source
 
-    # ============================================================================
-    # MODAL OPERATIONS (Generic methods for all modals)
-    # ============================================================================
+    # ========================================================================
+    # MODAL HANDLING METHODS
+    # ========================================================================
 
     def close_modal_with_button(
         self,
-        close_button_locator: Tuple[str, str],
-        modal_locator: Tuple[str, str],
-    ) -> None:
+        button_locator: Tuple[str, str],
+        timeout: int = 5,
+        wait_after: float = 0.5,
+    ) -> bool:
         """
-        Close modal using close button.
+        Close modal by clicking a button.
 
         Args:
-            close_button_locator: Locator for close button
-            modal_locator: Locator for modal to wait for invisibility
+            button_locator: Locator for close button
+            timeout: Timeout to wait for button
+            wait_after: Time to wait after clicking (default: 0.5s)
 
-        Example:
-            self.close_modal_with_button(
-                self.LOGIN_CLOSE_BUTTON,
-                self.LOGIN_MODAL
+        Returns:
+            True if closed successfully, False otherwise
+        """
+        try:
+            button = self.wait_for_element_clickable(
+                button_locator, timeout=timeout
             )
-        """
-        self.click(close_button_locator)
-        self.wait_for_element_invisible(modal_locator)
-        self.logger.debug("Modal closed with button")
+            if button:
+                self.click(button_locator)
+                if wait_after > 0:
+                    time.sleep(wait_after)
+                self.logger.debug("Modal closed with button")
+                return True
+            return False
+        except Exception as e:
+            self.logger.warning(f"Failed to close modal: {e}")
+            return False
 
-    def close_modal_with_esc(
-        self, modal_locator: Tuple[str, str], timeout: int = 3
-    ) -> None:
+    def close_modal_with_esc(self, wait_after: float = 0.5) -> None:
         """
-        Close modal using ESC key.
+        Close modal by pressing ESC key.
 
         Args:
-            modal_locator: Locator for modal to wait for invisibility
-            timeout: Maximum time to wait for modal to close
-
-        Example:
-            self.close_modal_with_esc(self.LOGIN_MODAL)
+            wait_after: Time to wait after pressing ESC (default: 0.5s)
         """
-        from selenium.webdriver.common.keys import Keys
-
         self.press_key(Keys.ESCAPE)
-        self.wait_for_element_invisible(modal_locator, timeout=timeout)
+        if wait_after > 0:
+            time.sleep(wait_after)
         self.logger.debug("Modal closed with ESC key")
 
     def is_modal_visible(
-        self, modal_locator: Tuple[str, str], timeout: int = 2
+        self, modal_locator: Tuple[str, str], timeout: int = 3
     ) -> bool:
         """
         Check if modal is visible.
 
         Args:
-            modal_locator: Locator for modal
-            timeout: Maximum time to wait
+            modal_locator: Locator for modal element
+            timeout: Timeout for check
 
         Returns:
-            True if modal is visible, False otherwise
-
-        Example:
-            if self.is_modal_visible(self.LOGIN_MODAL):
-                print("Login modal is open")
+            True if modal visible, False otherwise
         """
         return self.is_element_visible(modal_locator, timeout=timeout)
