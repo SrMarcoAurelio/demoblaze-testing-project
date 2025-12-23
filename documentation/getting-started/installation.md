@@ -12,8 +12,8 @@
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/SrMarcoAurelio/demoblaze-testing-project.git
-cd demoblaze-testing-project
+git clone https://github.com/SrMarcoAurelio/test-automation-framework.git
+cd test-automation-framework
 ```
 
 ### 2. Create Virtual Environment

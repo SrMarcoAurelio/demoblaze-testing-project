@@ -222,7 +222,7 @@ class TestNavigationMethods:
         page = BasePage(browser)
         page.navigate_to(page.base_url)
         url = page.get_current_url()
-        assert "demoblaze.com" in url or "localhost" in url
+        assert "your-application-url.com" in url or "localhost" in url
 
     def test_get_page_title_BASE_024(self, browser):
         """Test getting page title"""

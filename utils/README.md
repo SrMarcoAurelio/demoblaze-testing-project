@@ -133,9 +133,9 @@ The helpers contain ZERO hardcoded values for any specific application:
 ❌ **BAD (Not Universal):**
 ```python
 def login(username):
-    # Hardcoded DemoBlaze-specific logic
-    driver.get("https://www.demoblaze.com")
-    driver.find_element(By.ID, "login2").click()  # DemoBlaze-specific ID
+    # Hardcoded Universal Test Automation Framework-specific logic
+    driver.get("https://www.your-application-url.com")
+    driver.find_element(By.ID, "login2").click()  # Universal Test Automation Framework-specific ID
 ```
 
 ✅ **GOOD (Universal):**
@@ -155,7 +155,7 @@ All application-specific values are externalized to `config.py`:
 
 ```python
 # config.py - Application-specific configuration
-BASE_URL = "https://www.demoblaze.com/"  # Change for your app
+BASE_URL = "https://www.your-application-url.com/"  # Change for your app
 PRODUCT_URL_PATTERN = "prod.html?idp_={product_id}"  # Change for your URL structure
 
 # utils/helpers - Universal code that uses config
@@ -254,7 +254,7 @@ password = generate_random_password(length=12)
 ### Before (Not Universal)
 
 ```python
-# signup_page.py - DemoBlaze-specific
+# signup_page.py - Universal Test Automation Framework-specific
 def generate_unique_username():
     timestamp = int(time.time())
     return f"testuser_{timestamp}"  # Hardcoded in page object

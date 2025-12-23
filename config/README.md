@@ -31,7 +31,7 @@ WebDriverWait(driver, TIMEOUT).until(...)
 **Configuration:**
 ```python
 # config.py
-BASE_URL = "https://www.demoblaze.com"
+BASE_URL = "https://www.your-application-url.com"
 TIMEOUT = 10
 HEADLESS = False
 BROWSER = "chrome"

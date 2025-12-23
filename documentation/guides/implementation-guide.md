@@ -357,7 +357,7 @@ prepared_checkout     # Ready for checkout
 ## 🏗️ FRAMEWORK ARCHITECTURE
 
 ```
-demoblaze-testing-project/
+test-automation-framework/
 │
 ├── pages/                      # Page Object Model
 │   ├── base_page.py           # Base class with common utilities
@@ -449,8 +449,8 @@ Before starting, ensure you have:
 
 ```bash
 # Clone the repository
-git clone https://github.com/SrMarcoAurelio/demoblaze-testing-project.git
-cd demoblaze-testing-project
+git clone https://github.com/SrMarcoAurelio/test-automation-framework.git
+cd test-automation-framework
 
 # Create virtual environment
 python -m venv venv
@@ -733,7 +733,7 @@ docker-compose up --build
 docker-compose run tests pytest tests/login/ -v
 
 # Run with coverage
-docker-compose run tests pytest --cov=pages --cov=utils
+docker-compose run tests pytest --cov=framework --cov=utils
 ```
 
 ---
@@ -794,7 +794,7 @@ docker-compose run tests pytest tests/login/ -v
 docker-compose run tests pytest -m functional
 
 # Generate coverage report
-docker-compose run tests pytest --cov=pages --cov=utils --cov-report=html
+docker-compose run tests pytest --cov=framework --cov=utils --cov-report=html
 
 # Access results
 # Results are saved to ./results/ on your host machine
@@ -960,10 +960,10 @@ allure generate ./allure-results -o ./allure-report --clean
 **Generation**:
 ```bash
 # Run with coverage
-pytest --cov=pages --cov=utils
+pytest --cov=framework --cov=utils
 
 # Generate HTML report
-pytest --cov=pages --cov=utils --cov-report=html
+pytest --cov=framework --cov=utils --cov-report=html
 
 # View report
 open results/coverage/html/index.html
@@ -978,7 +978,7 @@ open results/coverage/html/index.html
 **CI Integration**:
 ```bash
 # Fail if coverage below threshold
-pytest --cov=pages --cov=utils --cov-fail-under=70
+pytest --cov=framework --cov=utils --cov-fail-under=70
 ```
 
 ---
@@ -1261,9 +1261,9 @@ pytest --cov=pages --cov=utils --cov-fail-under=70
 
 ---
 
-### 8. DemoBlaze-Specific Examples
+### 8. Your Application-Specific Examples
 
-**Current State**: Tests are written for DemoBlaze.com application
+**Current State**: Tests are written for Your Application.com application
 
 **Adaptation Required**:
 - Update all test scenarios for your application
@@ -1295,7 +1295,7 @@ This framework provides a **solid, professional architecture** for QA automation
 ⚠️ **Learning Curve**: 1-2 days for team onboarding
 ⚠️ **Maintenance**: Ongoing effort required (2-4 hours/month)
 ⚠️ **Not Comprehensive**: Complements but doesn't replace specialized tools
-⚠️ **DemoBlaze-Specific**: Current tests need modification for your app
+⚠️ **Your Application-Specific**: Current tests need modification for your app
 
 ### Recommended Approach:
 

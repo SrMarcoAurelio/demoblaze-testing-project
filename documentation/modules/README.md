@@ -198,7 +198,7 @@ pre-commit install
 
 4. **Configure environment variables:**
 ```bash
-export BASE_URL="https://www.demoblaze.com"
+export BASE_URL="https://your-application-url.com"
 export HEADLESS=false
 export BROWSER=chrome
 ```

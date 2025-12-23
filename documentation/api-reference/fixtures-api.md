@@ -109,7 +109,7 @@ def test_config(request):
     "browser": "chrome",
     "headless": False,
     "slow_mode": 0.0,
-    "base_url": "https://www.demoblaze.com",
+    "base_url": "https://your-application-url.com",
     "timeouts": {...}
 }
 ```

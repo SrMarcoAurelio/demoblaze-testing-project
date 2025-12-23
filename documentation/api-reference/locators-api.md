@@ -383,7 +383,7 @@ To adapt framework to a new application:
 
 ### Example: Adapting Login Page
 
-**Old Application (DemoBlaze):**
+**Old Application (Your Application):**
 ```json
 {
   "login": {

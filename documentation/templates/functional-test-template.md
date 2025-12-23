@@ -151,7 +151,7 @@ def test_password_policy():
 
 ### Works Across Any Domain:
 
-✅ **E-commerce** (DemoBlaze, Amazon, Shopify)
+✅ **E-commerce** (Your Application, Amazon, Shopify)
 ✅ **Banking** (Online banking, fintech apps)
 ✅ **Healthcare** (Patient portals, EHR systems)
 ✅ **Social Networks** (Twitter/LinkedIn style)

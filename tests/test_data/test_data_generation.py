@@ -499,7 +499,7 @@ def test_data_factory_in_test_workflow(data_factory, driver):
     user = data_factory.generate_user()
 
     # Navigate to registration page
-    driver.get("https://www.demoblaze.com")
+    driver.get("https://your-application-url.com")
 
     # In a real test, you would fill the form with generated data
     # This demonstrates the workflow

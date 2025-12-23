@@ -1,11 +1,11 @@
-# User Flows - DemoBlaze
+# User Flows - Your Application
 
 ## Flow 1: Guest User Purchase (No Registration)
 **Actor:** Guest user
 **Objective:** Purchase a product without creating an account
 
 **Steps:**
-1. Access demoblaze.com
+1. Access your-application-url.com
 2. Browse products on the homepage
 3. Select a category (Phones/Laptops/Monitors)
 4. Click on a specific product
@@ -28,7 +28,7 @@
 **Objective:** Create a new account
 
 **Steps:**
-1. Access demoblaze.com
+1. Access your-application-url.com
 2. Click "Sign up" in the navigation menu
 3. Enter username in the username field
 4. Enter password in the password field
@@ -46,7 +46,7 @@
 **Objective:** Log in to existing account
 
 **Steps:**
-1. Access demoblaze.com
+1. Access your-application-url.com
 2. Click "Log in" in the navigation menu
 3. Enter valid username
 4. Enter valid password
@@ -64,7 +64,7 @@
 **Objective:** Attempt login with wrong credentials
 
 **Steps:**
-1. Access demoblaze.com
+1. Access your-application-url.com
 2. Click "Log in"
 3. Enter non-existent username
 4. Enter random password
@@ -82,7 +82,7 @@
 **Objective:** Add multiple different products to cart
 
 **Steps:**
-1. Access demoblaze.com
+1. Access your-application-url.com
 2. Click on first product (e.g., Samsung Galaxy S6)
 3. Click "Add to cart" and accept alert
 4. Click "Home" to return
@@ -103,7 +103,7 @@
 **Objective:** Delete a product from the shopping cart
 
 **Steps:**
-1. Access demoblaze.com
+1. Access your-application-url.com
 2. Add a product to cart (follow Flow 1 steps 1-7)
 3. In cart view, click "Delete" link next to product
 4. Observe product is removed
@@ -120,7 +120,7 @@
 **Objective:** Filter products by category
 
 **Steps:**
-1. Access demoblaze.com
+1. Access your-application-url.com
 2. Click "Phones" in the left sidebar
 3. Verify only phone products are displayed
 4. Click "Laptops" in the left sidebar
@@ -139,7 +139,7 @@
 **Objective:** Send a message through contact form
 
 **Steps:**
-1. Access demoblaze.com
+1. Access your-application-url.com
 2. Click "Contact" in navigation menu
 3. Enter email address in "Contact Email" field
 4. Enter name in "Contact Name" field
@@ -158,7 +158,7 @@
 **Objective:** Navigate through multiple pages of products
 
 **Steps:**
-1. Access demoblaze.com
+1. Access your-application-url.com
 2. Scroll to bottom of product list
 3. Click "Next" button
 4. Verify new products load
@@ -176,7 +176,7 @@
 **Objective:** Log out from the account
 
 **Steps:**
-1. Access demoblaze.com (already logged in)
+1. Access your-application-url.com (already logged in)
 2. Verify "Welcome [username]" appears in navigation
 3. Click "Log out" in navigation menu
 4. Verify "Log out" changes back to "Log in"

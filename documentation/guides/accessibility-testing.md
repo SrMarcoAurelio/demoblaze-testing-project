@@ -163,7 +163,7 @@ results/accessibility/
 
 ```json
 {
-  "url": "https://www.demoblaze.com",
+  "url": "https://your-application-url.com",
   "timestamp": "2023-12-15T14:30:00.000Z",
   "violations": [...],
   "incomplete": [...],

@@ -1,9 +1,9 @@
-# Test Summary Report - DemoBlaze Testing Project
+# Test Summary Report - Your Application Testing Project
 
 ## Executive Summary
 
-**Project:** DemoBlaze E-commerce Testing
-**URL:** https://www.demoblaze.com
+**Project:** Your Application E-commerce Testing
+**URL:** https://your-application-url.com
 **Test Period:** November 1-5, 2025
 **Tester:** Marc Arévalo
 **Report Date:** November 5, 2025
@@ -13,7 +13,7 @@
 
 ## 1. Overview
 
-This report summarizes the manual testing activities conducted on the DemoBlaze demo e-commerce website. The primary objective was to validate core functionalities, identify defects, and document findings for portfolio demonstration purposes.
+This report summarizes the manual testing activities conducted on the Your Application demo e-commerce website. The primary objective was to validate core functionalities, identify defects, and document findings for portfolio demonstration purposes.
 
 ---
 
@@ -137,7 +137,7 @@ This report summarizes the manual testing activities conducted on the DemoBlaze 
 
 ## 6. Test Environment
 
-**Application URL:** https://www.demoblaze.com
+**Application URL:** https://your-application-url.com
 **Browser:** Google Chrome (latest), Mozilla Firefox (latest)
 **Operating System:** Windows 11
 **Testing Type:** Manual Functional Testing
@@ -225,7 +225,7 @@ This report summarizes the manual testing activities conducted on the DemoBlaze 
 
 ## 11. Conclusion
 
-The manual testing phase of the DemoBlaze website revealed **29 defects** across all functional areas, with **5 critical** and **10 high-severity** issues. The application has significant **security vulnerabilities** and **business logic flaws** that would prevent production deployment.
+The manual testing phase of the Your Application website revealed **29 defects** across all functional areas, with **5 critical** and **10 high-severity** issues. The application has significant **security vulnerabilities** and **business logic flaws** that would prevent production deployment.
 
 ### Key Takeaways:
 -  All planned test cases were executed successfully
@@ -245,10 +245,10 @@ The manual testing phase of the DemoBlaze website revealed **29 defects** across
 ## 12. Appendices
 
 ### Appendix A: Bug Report Links
-All bugs are documented in GitHub Issues: https://github.com/SrMarcoAurelio/demoblaze-testing-project/issues
+All bugs are documented in GitHub Issues: https://github.com/SrMarcoAurelio/test-automation-framework/issues
 
 ### Appendix B: Test Case Document
-Complete test cases available in: `docs/DemoBlaze_Test_Cases.xlsx`
+Complete test cases available in: `docs/Your Application_Test_Cases.xlsx`
 
 ### Appendix C: Test Plan
 Test strategy documented in: `docs/test-plan.md`
