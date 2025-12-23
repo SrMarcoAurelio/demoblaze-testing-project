@@ -1,9 +1,10 @@
 """
-Pytest Configuration - DemoBlaze Test Automation
-Author: Arévalo, Marc
+Pytest Configuration - Universal Test Automation Framework
+Author: Arevalo, Marc
 Version: 6.0
 
-Centralized pytest configuration using config.py for all settings.
+Centralized pytest configuration for universal test automation framework.
+Provides browser management, fixtures, reporting, and performance tracking.
 """
 
 import datetime
@@ -323,7 +324,7 @@ def pytest_runtest_makereport(item, call):
 
 def pytest_html_report_title(report):
     """Customize HTML report title."""
-    report.title = "DemoBlaze Test Automation Report"
+    report.title = "Universal Test Automation Report"
 
 
 def pytest_html_results_summary(prefix, summary, postfix):
@@ -338,7 +339,7 @@ def pytest_html_results_summary(prefix, summary, postfix):
 
 
 # ============================================================================
-# DATA FIXTURES (Phase 6) - Test Data Management
+# DATA FIXTURES - Test Data Management
 # ============================================================================
 
 
@@ -348,7 +349,7 @@ def valid_user():
     Provide valid user credentials for login tests.
 
     Returns:
-        dict: Valid username and password
+        dict: Valid username and password from environment variables
 
     Example:
         >>> def test_login(browser, base_url, valid_user):
@@ -403,8 +404,11 @@ def purchase_data():
     """
     Provide valid purchase/checkout data.
 
+    IMPORTANT: Adapt PurchaseData in static_test_data.py to match
+    your application's form fields.
+
     Returns:
-        dict: Valid credit card and billing info
+        dict: Valid billing and payment information
 
     Example:
         >>> def test_checkout(browser, purchase_data):
@@ -424,7 +428,7 @@ def minimal_purchase_data():
 
 
 # ============================================================================
-# PAGE OBJECT FIXTURES (Phase 6) - Initialized Page Objects
+# PAGE OBJECT FIXTURES - Initialized Page Objects
 # ============================================================================
 
 
@@ -492,52 +496,7 @@ def purchase_page(browser, base_url):
 
 
 # ============================================================================
-# PRODUCT FIXTURES (Phase 6) - Product Test Data
-# ============================================================================
-
-
-@pytest.fixture(scope="session")
-def product_phone():
-    """Provide phone product name."""
-    from tests.static_test_data import Products
-
-    return Products.SAMSUNG_GALAXY_S6
-
-
-@pytest.fixture(scope="session")
-def product_laptop():
-    """Provide laptop product name."""
-    from tests.static_test_data import Products
-
-    return Products.LAPTOPS["SONY_VAIO_I5"]
-
-
-@pytest.fixture(scope="session")
-def product_monitor():
-    """Provide monitor product name."""
-    from tests.static_test_data import Products
-
-    return Products.MONITORS["APPLE_MONITOR_24"]
-
-
-@pytest.fixture(scope="function")
-def random_product():
-    """Provide random product from available products."""
-    import random
-
-    from tests.static_test_data import Products
-
-    all_products = [
-        Products.SAMSUNG_GALAXY_S6,
-        Products.NOKIA_LUMIA_1520,
-        Products.NEXUS_6,
-        Products.IPHONE_6_32GB,
-    ]
-    return random.choice(all_products)
-
-
-# ============================================================================
-# STATE FIXTURES (Phase 6) - Pre-configured Test States
+# STATE FIXTURES - Pre-configured Test States
 # ============================================================================
 
 
@@ -550,9 +509,9 @@ def logged_in_user(login_page, valid_user):
     User is logged out after test completion.
 
     Example:
-        >>> def test_add_to_cart(logged_in_user, catalog_page):
-        ...     catalog_page.select_product("Samsung galaxy s6")
-        ...     # User is already logged in
+        >>> def test_something_as_logged_user(logged_in_user, catalog_page):
+        ...     # User is already logged in, proceed with test
+        ...     catalog_page.navigate_to_products()
     """
     login_page.login(**valid_user)
 
@@ -574,73 +533,8 @@ def logged_in_user(login_page, valid_user):
         logger.warning(f"Logout cleanup failed: {e}")
 
 
-@pytest.fixture(scope="function")
-def cart_with_product(logged_in_user, catalog_page, product_phone):
-    """
-    Provide cart with one product already added.
-
-    User is logged in, product is added to cart.
-
-    Returns:
-        tuple: (cart_page, product_name)
-
-    Example:
-        >>> def test_checkout(cart_with_product):
-        ...     cart_page, product = cart_with_product
-        ...     cart_page.click_place_order()
-    """
-    from pages.cart_page import CartPage
-    from pages.product_page import ProductPage
-
-    catalog_page.select_product(product_phone)
-
-    product_page_obj = ProductPage(catalog_page.driver)
-    product_page_obj.add_to_cart()
-
-    alert = product_page_obj.get_alert_text(timeout=3)
-    if alert and "added" in alert.lower():
-        product_page_obj.accept_alert()
-
-    cart_page_obj = CartPage(catalog_page.driver)
-    cart_page_obj.go_to_cart()
-
-    logger.info(f"✓ Product added to cart: {product_phone}")
-
-    return (cart_page_obj, product_phone)
-
-
-@pytest.fixture(scope="function")
-def prepared_checkout(cart_with_product):
-    """
-    Provide checkout state ready for purchase.
-
-    Cart has product, purchase modal is opened.
-
-    Returns:
-        purchase_page: PurchasePage with modal already open
-
-    Example:
-        >>> def test_purchase(prepared_checkout, purchase_data):
-        ...     prepared_checkout.fill_form(**purchase_data)
-        ...     prepared_checkout.confirm_purchase()
-    """
-    from pages.purchase_page import PurchasePage
-
-    cart_page_obj, _ = cart_with_product
-    cart_page_obj.click_place_order()
-
-    purchase_page_obj = PurchasePage(cart_page_obj.driver)
-
-    if not purchase_page_obj.is_modal_open():
-        pytest.fail("Purchase modal did not open")
-
-    logger.info("✓ Checkout prepared, modal open")
-
-    return purchase_page_obj
-
-
 # ============================================================================
-# PERFORMANCE FIXTURES (Phase 7) - Performance Testing
+# PERFORMANCE FIXTURES - Performance Testing
 # ============================================================================
 
 
@@ -665,9 +559,6 @@ def performance_collector():
     collector.clear_metrics()
 
     yield collector
-
-    # Optional: Auto-save report on failure
-    # Can be enabled by setting environment variable
 
 
 @pytest.fixture(scope="function")
@@ -719,6 +610,94 @@ def performance_report_cleanup(request):
             logger.info(f"{'='*70}\n")
     except Exception as e:
         logger.warning(f"Could not generate performance report: {e}")
+
+
+# ============================================================================
+# UNIVERSAL FRAMEWORK FIXTURES - Discovery-Based Testing
+# ============================================================================
+
+
+@pytest.fixture(scope="function")
+def element_finder(browser):
+    """
+    Provide ElementFinder instance for element discovery.
+
+    Example:
+        def test_something(browser, element_finder):
+            button = element_finder.find_by_text("Login", tag="button")
+            button.click()
+    """
+    from framework.core import ElementFinder
+
+    return ElementFinder(browser)
+
+
+@pytest.fixture(scope="function")
+def element_interactor(browser):
+    """
+    Provide ElementInteractor instance for element interactions.
+
+    Example:
+        def test_something(browser, element_interactor):
+            element_interactor.click(button, force=True)
+            element_interactor.type(input_field, "text")
+    """
+    from framework.core import ElementInteractor
+
+    return ElementInteractor(browser)
+
+
+@pytest.fixture(scope="function")
+def wait_handler(browser):
+    """
+    Provide WaitHandler instance for intelligent waiting.
+
+    Example:
+        def test_something(browser, wait_handler):
+            element = wait_handler.wait_for_element_visible(By.ID, "modal")
+            wait_handler.wait_for_element_clickable(By.ID, "submit")
+    """
+    from framework.core import WaitHandler
+
+    return WaitHandler(browser, default_timeout=config.TIMEOUT_DEFAULT)
+
+
+@pytest.fixture(scope="function")
+def discovery_engine(browser):
+    """
+    Provide DiscoveryEngine instance for automatic page structure discovery.
+
+    Example:
+        def test_something(browser, discovery_engine):
+            forms = discovery_engine.discover_forms()
+            nav = discovery_engine.discover_navigation()
+            report = discovery_engine.generate_page_report()
+    """
+    from framework.core import DiscoveryEngine
+
+    return DiscoveryEngine(browser)
+
+
+@pytest.fixture(scope="function")
+def universal_page(browser, element_finder, element_interactor, wait_handler):
+    """
+    Provide all universal components together for convenience.
+
+    Returns a simple object with: finder, interactor, waiter
+
+    Example:
+        def test_something(browser, universal_page):
+            button = universal_page.finder.find_by_text("Login")
+            universal_page.interactor.click(button)
+            universal_page.waiter.wait_for_element_visible(By.ID, "success")
+    """
+    from types import SimpleNamespace
+
+    return SimpleNamespace(
+        finder=element_finder,
+        interactor=element_interactor,
+        waiter=wait_handler,
+    )
 
 
 @pytest.hookimpl(tryfirst=True)

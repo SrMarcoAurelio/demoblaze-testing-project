@@ -1,196 +1,396 @@
-# Professional QA Automation Framework
+# Universal Web Test Automation Framework
 
-Production-ready test automation architecture built with Python, Selenium, and Pytest.
+Professional test automation framework built with Python, Selenium, and Pytest for web application testing.
 
-[![Tests](https://github.com/SrMarcoAurelio/demoblaze-testing-project/actions/workflows/tests.yml/badge.svg)](https://github.com/SrMarcoAurelio/demoblaze-testing-project/actions/workflows/tests.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Selenium](https://img.shields.io/badge/selenium-4.25.0-green.svg)](https://www.selenium.dev/)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-**Version**: 5.0 (Comprehensive Edition)
-**Author**: Marc Arévalo
+**Version**: 6.0 (Universal Edition)
+**Author**: Marc Arevalo
 **License**: MIT
 
 ---
 
 ## Overview
 
-Professional-grade QA automation framework designed as an architecture template for web application testing. Provides clean structure, comprehensive testing capabilities, and modern development practices.
+Universal test automation framework providing reusable components, patterns, and infrastructure for web application testing. Like pytest or selenium, this framework provides the **building blocks** - you provide the application-specific implementation.
+
+### Philosophy
+
+Professional frameworks don't assume your application structure - they provide tools to build upon:
+
+- **Framework provides**: Element discovery, intelligent waits, page object patterns, test infrastructure
+- **You provide**: Application URL, locators, page objects, test scenarios
+- **Result**: Maintainable, scalable test automation adapted to YOUR application
 
 ### What This Framework Provides
 
-- **Clean Architecture** - Page Object Model with proper separation of concerns
-- **External Configuration** - JSON-based locator management
-- **Comprehensive Testing** - Functional, security, accessibility, and performance tests
-- **Type Safety** - Type hints for better IDE support
-- **CI/CD Ready** - Docker, GitHub Actions, pre-commit hooks
-- **Professional Reporting** - HTML, Allure, and code coverage reports
-- **Standards-Based** - References OWASP, ISO 25010, WCAG 2.1, PCI-DSS
-- **Well-Documented** - Extensive guides and examples
+- **Universal Core Components** - Discovery-based element finding, interaction, and waiting
+- **Page Object Model Infrastructure** - Base classes and patterns for page objects
+- **Comprehensive Fixtures** - 25+ pytest fixtures for browser management, data, and performance
+- **Multiple Test Types** - Functional, security, accessibility, performance testing capabilities
+- **CI/CD Ready** - Docker support, GitHub Actions, pre-commit hooks
+- **Professional Reporting** - HTML reports, performance metrics, failure screenshots
+- **Type Safety** - Type hints throughout for better IDE support
 
 ### What This Framework Is NOT
 
-- Not a zero-configuration solution
-- Not production-ready without adaptation
-- Not a DAST tool (UI-level testing only)
-- Not suitable for complete beginners without guidance
+- **Not zero-configuration** - Requires adaptation to your application (4-8 hours estimated)
+- **Not application-specific** - Provides patterns and tools, not ready-made tests
+- **Not a DAST tool** - UI-level testing only, use dedicated security tools for comprehensive security testing
+- **Not for beginners** - Requires Selenium, Pytest, and Python knowledge
 
 ---
 
 ## Quick Start
 
+### Installation
+
 ```bash
-# 1. Clone and setup
-git clone https://github.com/SrMarcoAurelio/demoblaze-testing-project.git
-cd demoblaze-testing-project
+# Clone repository
+git clone <your-fork-url>
+cd universal-test-framework
+
+# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# 2. Install dependencies
+# Install dependencies
 pip install -r requirements.txt
 
-# 3. Install pre-commit hooks (optional)
+# Install pre-commit hooks (optional)
 pre-commit install
+```
 
-# 4. Run tests
+### Configuration
+
+```bash
+# REQUIRED: Set your application URL
+export BASE_URL="https://your-application.com"
+
+# REQUIRED: Set test credentials
+export TEST_USERNAME="your_test_user"
+export TEST_PASSWORD="your_test_password"
+
+# Optional browser configuration
+export BROWSER="chrome"          # chrome, firefox, or edge
+export HEADLESS="false"          # true for headless mode
+export TIMEOUT_DEFAULT="10"      # default wait timeout (seconds)
+```
+
+### Run Tests
+
+```bash
+# Run specific test module (after adaptation)
 pytest tests/login/test_login_functional.py -v
-```
 
-See [Installation Guide](documentation/getting-started/installation.md) for detailed setup instructions.
+# Run with specific browser
+pytest --browser=firefox --headless
+
+# Run with HTML report
+pytest --html=results/report.html
+
+# Run with coverage
+pytest --cov=pages --cov=utils
+```
 
 ---
 
-## Documentation
+## Framework Architecture
 
-Complete documentation available in `/documentation`:
+### Core Components (`framework/`)
 
-### Quick Navigation
-- [Installation Guide](documentation/getting-started/installation.md)
-- [Quick Start](documentation/getting-started/quick-start.md)
-- [Your First Test](documentation/getting-started/first-test.md)
-- [Implementation Guide](documentation/guides/implementation-guide.md)
-- [All Documentation](documentation/README.md)
+Universal, discovery-based components for any web application:
 
-### Key Guides
-- **Getting Started** - Installation, quick start, first test
-- **Complete Guides** - Implementation, accessibility, performance, coverage
-- **Architecture** - Framework design and technical details
-- **Templates** - Structured templates for creating tests
-- **Testing Philosophy** - Discover vs Assume methodology
-- **QA Guidelines** - Professional QA standards and issue reporting (English/Spanish)
+```
+framework/
+├── core/
+│   ├── element_finder.py      # Element discovery with fallback strategies
+│   ├── element_interactor.py  # Reliable element interactions with retry logic
+│   ├── wait_handler.py        # Intelligent waits (no sleep() calls)
+│   └── discovery_engine.py    # Automatic page structure discovery
+│
+└── adapters/
+    ├── base_adapter.py        # Abstract adapter interface
+    └── adapter_template.py    # Template for your application adapter
+```
 
-### Module Documentation
-- **[Modules Index](documentation/modules/README.md)** - Complete testing modules overview
-- **[Accessibility Testing](documentation/modules/accessibility-testing.md)** - WCAG 2.1 compliance (52 tests)
-- **[API Testing](documentation/modules/api-testing.md)** - REST API validation (27+ tests)
-- **[Security Testing](documentation/modules/security-testing.md)** - OWASP Top 10 coverage (102+ tests)
-- **[Visual Regression](documentation/modules/visual-regression-testing.md)** - UI consistency testing
+**Key Principle**: Tests should DISCOVER page structure, not ASSUME it.
+
+### Page Objects (`pages/`)
+
+Page Object Model templates for your application:
+
+```
+pages/
+├── base_page.py      # Base page class with common functionality
+├── login_page.py     # Example: Login page template
+├── cart_page.py      # Example: Shopping cart template
+└── ...               # Add your application's page objects
+```
+
+**Adaptation Required**: Modify page objects to match YOUR application's structure.
+
+### Tests (`tests/`)
+
+Test templates organized by type and module:
+
+```
+tests/
+├── login/            # Login functionality tests
+├── cart/             # Shopping cart tests
+├── security_real/    # Security testing (OWASP Top 10)
+├── accessibility/    # WCAG 2.1 compliance tests
+├── performance/      # Performance and load time tests
+└── static_test_data.py  # Test data structures
+```
+
+**Adaptation Required**: Modify tests to match YOUR application's workflows.
+
+### Utilities (`utils/`)
+
+Testing utilities and helpers:
+
+- **Security**: Payload library, vulnerability scanner (1,265 lines)
+- **Accessibility**: WCAG 2.1 validator with axe-core
+- **Performance**: Core Web Vitals monitoring
+- **API**: REST API testing client
+- **Visual**: Screenshot comparison and visual regression
 
 ---
 
-## Project Structure
+## Framework Features
 
+### 1. Discovery-Based Element Finding
+
+Instead of hardcoding selectors, discover elements intelligently:
+
+```python
+from framework.core import ElementFinder
+
+def test_login_discovery(browser, element_finder):
+    # Find login button by text (tries multiple strategies)
+    login_btn = element_finder.find_by_text("Login", tag="button")
+
+    # Find form inputs automatically
+    inputs = element_finder.find_input_elements()
+
+    # Fallback strategies if primary locator fails
+    element = element_finder.find_element_with_fallback([
+        (By.ID, "submit"),
+        (By.NAME, "submit-button"),
+        (By.XPATH, "//button[@type='submit']")
+    ])
 ```
-demoblaze-testing-project/
-├── documentation/                  # Complete framework documentation
-│   ├── getting-started/           # Installation and quick start
-│   ├── guides/                   # Implementation guides
-│   ├── architecture/             # Framework architecture
-│   ├── templates/                # Test templates
-│   ├── testing-philosophy/       # Testing methodology
-│   ├── qa-guidelines/            # Professional QA standards (English/Spanish)
-│   └── modules/                  # Module-specific documentation
-│       ├── README.md             # Modules index (598 tests)
-│       ├── accessibility-testing.md   # WCAG 2.1 (52 tests)
-│       ├── api-testing.md            # REST API (27+ tests)
-│       ├── security-testing.md       # OWASP Top 10 (102+ tests)
-│       └── visual-regression-testing.md  # UI consistency
-│
-├── config/               # Configuration
-│   ├── config.py        # Application settings
-│   └── locators.json    # UI element locators
-│
-├── pages/               # Page Object Model
-│   ├── base_page.py    # Base class (598 lines, 35 tests)
-│   └── ...             # Page objects
-│
-├── tests/              # Test suites (598+ tests total)
-│   ├── login/          # Login tests
-│   ├── signup/         # Signup tests
-│   ├── cart/           # Shopping cart tests
-│   ├── catalog/        # Product catalog tests
-│   ├── product/        # Product page tests
-│   ├── purchase/       # Purchase flow tests
-│   ├── accessibility/  # WCAG 2.1 tests (52 tests)
-│   ├── performance/    # Performance tests
-│   ├── security_real/  # Security tests (102+ tests)
-│   ├── visual/         # Visual regression tests
-│   ├── api/            # API tests
-│   ├── database/       # Database tests
-│   ├── test_data/      # Test data management
-│   └── test_utils/     # Unit tests (42 tests)
-│
-├── utils/              # Utilities (1,265 lines security, 598 lines base_page)
-│   ├── accessibility/  # WCAG validator
-│   ├── security/       # Payload library, scanner, analyzer (1,265 lines)
-│   ├── performance/    # Core Web Vitals monitoring
-│   ├── api/            # API client and validators
-│   ├── database/       # Database utilities
-│   ├── visual/         # Screenshot and comparison
-│   ├── test_data/      # Data generation
-│   ├── auto_config/    # Auto-configurator
-│   └── helpers/        # Wait helpers, validators
-│
-├── conftest.py         # Pytest fixtures
-├── pytest.ini          # Pytest configuration
-├── requirements.txt    # Dependencies
-├── auto_configure.py   # Automatic setup script
-└── docker-compose.yml  # Docker setup
+
+### 2. Intelligent Waiting (No sleep())
+
+No `time.sleep()` calls - only condition-based waits:
+
+```python
+from framework.core import WaitHandler
+
+def test_modal(browser, wait_handler):
+    # Wait for element to be visible
+    modal = wait_handler.wait_for_element_visible(By.ID, "modal")
+
+    # Wait for element to be clickable
+    button = wait_handler.wait_for_element_clickable(By.ID, "submit")
+
+    # Wait for custom condition
+    wait_handler.wait_for_condition(lambda d: len(d.find_elements(By.TAG_NAME, "tr")) > 5)
 ```
+
+### 3. Page Structure Discovery
+
+Automatically discover page structure for adaptive testing:
+
+```python
+from framework.core import DiscoveryEngine
+
+def test_discover_forms(browser, discovery_engine):
+    # Discover all forms on page
+    forms = discovery_engine.discover_forms()
+
+    for form in forms:
+        print(f"Form: {form['id']}")
+        print(f"Inputs: {len(form['inputs'])}")
+        print(f"Buttons: {len(form['buttons'])}")
+
+    # Generate comprehensive page report
+    report = discovery_engine.generate_page_report()
+```
+
+### 4. Comprehensive Fixtures
+
+25+ pytest fixtures available:
+
+- **Browser**: `browser`, `base_url`, `timeout_config`
+- **Data**: `valid_user`, `invalid_user`, `new_user`, `purchase_data`
+- **Pages**: `login_page`, `signup_page`, `catalog_page`, `cart_page`, `purchase_page`
+- **State**: `logged_in_user` (automatic login/logout)
+- **Performance**: `performance_collector`, `performance_timer`
+- **Universal Framework**: `element_finder`, `element_interactor`, `wait_handler`, `discovery_engine`
+
+### 5. Multiple Test Types
+
+**Functional Testing**: Core application workflows
+**Security Testing**: OWASP Top 10 payloads (SQL injection, XSS, CSRF, etc.)
+**Accessibility Testing**: WCAG 2.1 Level AA compliance with axe-core
+**Performance Testing**: Page load times, Core Web Vitals
+**Business Logic Testing**: Standards compliance (ISO 25010, NIST, PCI-DSS)
+
+### 6. Professional Development Practices
+
+- **Pre-commit Hooks**: 15 automated checks (black, flake8, mypy, etc.)
+- **CI/CD Integration**: GitHub Actions with automated testing
+- **Docker Support**: Containerized test execution
+- **Type Hints**: Throughout codebase for IDE support
+- **Code Coverage**: Automated coverage reporting
+
+---
+
+## Adapting This Framework
+
+### Estimated Time: 4-8 Hours
+
+This framework requires adaptation for your specific application:
+
+#### 1. Configuration (30 minutes)
+
+```bash
+# Set required environment variables
+export BASE_URL="https://your-app.com"
+export TEST_USERNAME="your_test_user"
+export TEST_PASSWORD="your_test_password"
+
+# Optional: customize config.py for your needs
+# - Timeouts
+# - Browser preferences
+# - Report directories
+```
+
+#### 2. Locators (2-4 hours)
+
+Update `config/locators.json` with your application's element selectors:
+
+```json
+{
+  "login": {
+    "username_input": "id=username",
+    "password_input": "id=password",
+    "login_button": "css=button[type='submit']"
+  }
+}
+```
+
+#### 3. Page Objects (2-3 hours)
+
+Modify page objects in `pages/` to match your application:
+
+```python
+class YourLoginPage(BasePage):
+    def login(self, username, password):
+        # Adapt to YOUR application's login flow
+        self.type_text(self.locators["username_input"], username)
+        self.type_text(self.locators["password_input"], password)
+        self.click(self.locators["login_button"])
+```
+
+#### 4. Test Data (30 minutes)
+
+Update `tests/static_test_data.py`:
+
+- Replace `PurchaseData` fields with YOUR checkout form fields
+- Add application-specific test data classes
+
+#### 5. Tests (1-2 hours)
+
+Adapt tests in `tests/` to YOUR workflows:
+
+- Modify functional tests to match your application flows
+- Update assertions to match your application behavior
+- Add/remove test modules as needed
 
 ---
 
 ## Testing Capabilities
 
 ### Functional Testing
-- Login/Signup workflows
-- Product browsing and selection
-- Shopping cart operations
-- Purchase/checkout flows
-- Form validation and navigation
 
-### Business Logic Testing
-- Standards compliance (ISO 25010)
-- Password strength (NIST 800-63B)
-- Credit card validation (Luhn algorithm, PCI-DSS)
-- Form validation rules
+Test core application workflows:
+- User authentication (login, signup, logout)
+- Navigation and routing
+- Form submission and validation
+- CRUD operations
+- State management
 
 ### Security Testing (UI Level)
-- SQL injection payloads (input validation)
-- XSS payloads (output encoding)
-- CSRF token validation (UI observation)
-- Session management (UI behavior)
 
-**Note**: UI-level security tests verify input validation and error handling. For comprehensive security testing, use dedicated DAST tools like OWASP ZAP or Burp Suite.
+**IMPORTANT**: These tests verify UI-level input validation only. For comprehensive security testing, use dedicated DAST tools like OWASP ZAP or Burp Suite.
+
+- SQL Injection payloads (input validation)
+- XSS payloads (output encoding)
+- CSRF protection (UI observation)
+- Authentication security
+- Session management
 
 ### Accessibility Testing
-- WCAG 2.1 Level AA compliance
-- Automated scans (axe-core)
+
+- WCAG 2.1 Level AA automated scans (axe-core)
 - Color contrast verification
-- Keyboard navigation
+- Keyboard navigation testing
 - Screen reader compatibility
+- Form label associations
 
 ### Performance Testing
-- Page load times
-- Action duration metrics
-- Performance baselines
-- Threshold validation
 
-### Code Coverage
-- Automated coverage reporting
-- Configurable threshold (varies by test type)
-- HTML coverage reports
-- Branch coverage tracking
+- Page load time measurement
+- Action duration metrics
+- Performance baselines and thresholds
+- Core Web Vitals monitoring
+
+---
+
+## Project Structure
+
+```
+universal-test-framework/
+├── framework/              # Universal framework core
+│   ├── core/              # Discovery-based components
+│   └── adapters/          # Application adapter pattern
+│
+├── pages/                 # Page Object Model (adapt to your app)
+│   ├── base_page.py      # Base page class
+│   └── *.py              # Your page objects
+│
+├── tests/                 # Test suites (adapt to your app)
+│   ├── login/            # Example: Login tests
+│   ├── security_real/    # Security testing
+│   ├── accessibility/    # WCAG testing
+│   └── static_test_data.py  # Test data structures
+│
+├── utils/                 # Testing utilities
+│   ├── security/         # Payload library, scanner
+│   ├── accessibility/    # WCAG validator
+│   ├── performance/      # Metrics collector
+│   └── ...
+│
+├── config/
+│   ├── config.py         # Configuration management
+│   └── locators.json     # Element locators (adapt to your app)
+│
+├── documentation/         # Comprehensive guides
+│   ├── getting-started/  # Installation, quick start
+│   ├── guides/          # Implementation guides
+│   └── api-reference/   # API documentation
+│
+├── conftest.py           # Pytest fixtures
+├── pytest.ini            # Pytest configuration
+├── requirements.txt      # Dependencies
+└── docker-compose.yml    # Docker setup
+```
 
 ---
 
@@ -214,13 +414,13 @@ pytest -m accessibility   # Accessibility tests
 pytest --cov=pages --cov=utils
 
 # Generate HTML report
-pytest --html=results/report.html
+pytest --html=results/report.html --self-contained-html
 ```
 
 ### Docker Execution
 
 ```bash
-# Run all tests
+# Run all tests in Docker
 docker-compose up --build
 
 # Run specific module
@@ -230,377 +430,154 @@ docker-compose run tests pytest tests/login/ -v
 docker-compose run tests pytest --cov=pages --cov=utils
 ```
 
-See [Quick Start Guide](documentation/getting-started/quick-start.md) for more commands.
+### Pytest Markers
 
----
-
-## Adapting This Framework
-
-### Realistic Time Estimate: 4-8 hours
-
-This framework requires adaptation for your specific application:
-
-1. **Update Configuration** (30-60 min) - BASE_URL, timeouts, browser settings
-2. **Map UI Elements** (2-4 hours) - Update `config/locators.json` with your selectors
-3. **Update Page Objects** (2-3 hours) - Modify workflows to match your application
-4. **Update Test Data** (30 min) - Replace test data in `tests/test_data.py`
-5. **Adapt Tests** (1-2 hours) - Modify test logic for your application
-
-See [Implementation Guide](documentation/guides/implementation-guide.md) for detailed adaptation instructions.
-
----
-
-## Key Features
-
-### Page Object Model
-Encapsulates page interactions in dedicated classes with type hints for better IDE support.
-
-### External Locators
-UI element locators stored in JSON for easier maintenance when UI changes.
-
-### Trinity Structure
-Tests organized by type: Functional (does it work?), Business (meets standards?), Security (is it secure?).
-
-### Fixture System
-18 pytest fixtures for test data, page objects, and state management.
-
-### Pre-commit Hooks
-15 automated checks before each commit: formatting, linting, type checking, security.
-
-### CI/CD Integration
-GitHub Actions workflow with automated testing, coverage reporting, and artifact upload.
+- `@pytest.mark.smoke` - Critical smoke tests
+- `@pytest.mark.functional` - Functional tests
+- `@pytest.mark.security` - Security tests
+- `@pytest.mark.accessibility` - Accessibility tests
+- `@pytest.mark.performance` - Performance tests
+- `@pytest.mark.slow` - Long-running tests
 
 ---
 
 ## Requirements
 
+### System Requirements
+
 - Python 3.11 or higher
 - Modern browser (Chrome, Firefox, or Edge)
-- 4GB RAM minimum (8GB recommended)
-- Basic knowledge of Python and Selenium
-- Familiarity with pytest framework (recommended)
+- 4GB RAM minimum (8GB recommended for parallel execution)
+- Unix-like OS or Windows with WSL (for Docker)
+
+### Knowledge Requirements
+
+- Python programming fundamentals
+- Selenium WebDriver basics
+- Pytest framework understanding
+- Page Object Model pattern
+- Web technologies (HTML, CSS, JavaScript)
+
+### Not Suitable For
+
+- Complete beginners without Selenium knowledge
+- Projects requiring zero-configuration solutions
+- Teams without Python/testing experience
+- Applications without web UI
 
 ---
 
-## Honest Limitations
+## Documentation
 
-### 1. Not Truly Universal
-- Requires 4-8 hours of adaptation work
-- Page objects need modification for different workflows
-- Some test logic is application-specific
-- External locators help but don't eliminate all code changes
+Complete documentation available in `/documentation`:
 
-### 2. Security Testing Limitations
-- UI-level validation only (not network-level)
-- Cannot replace dedicated DAST tools
-- Requires manual verification of findings
-- Does not test API security directly
+### Getting Started
 
-### 3. Type Hints Coverage
-- Full type hints on `base_page.py`
-- Partial coverage on other page objects
-- Test files have minimal type hints
-- Ongoing improvement (not 100% coverage)
+- [Installation Guide](documentation/getting-started/installation.md)
+- [Quick Start](documentation/getting-started/quick-start.md)
+- [Your First Test](documentation/getting-started/first-test.md)
 
-### 4. Learning Curve
-- Requires Selenium knowledge
-- Pytest framework understanding
-- Page Object Model pattern
-- Python programming skills
-- Not suitable for complete beginners without guidance
+### Guides
 
-### 5. Maintenance
-- Locator updates needed when UI changes
-- Test data needs periodic refresh
-- CI/CD pipeline may need adjustments
-- Performance thresholds require tuning
+- [Implementation Guide](documentation/guides/implementation-guide.md) - Adapting framework to your app
+- [Accessibility Testing](documentation/guides/accessibility-testing.md) - WCAG 2.1 testing
+- [Performance Testing](documentation/guides/performance-testing.md) - Performance monitoring
+- [Security Testing](documentation/guides/real-security-testing.md) - Security testing guide
+
+### API Reference
+
+- [BasePage API](documentation/api-reference/base-page-api.md)
+- [Fixtures API](documentation/api-reference/fixtures-api.md)
+- [Locators API](documentation/api-reference/locators-api.md)
+
+### Testing Philosophy
+
+- [Discover vs Assume](documentation/testing-philosophy/discover-vs-assume.md) - Core testing philosophy
 
 ---
 
 ## Contributing
 
-This is a personal learning project, but contributions are welcome:
+This is a learning project, but contributions are welcome:
 
-- Bug reports: Open an issue
-- Feature requests: Open a discussion
-- Pull requests: Fork and submit PR
-- Documentation improvements: Always appreciated
+- **Bug Reports**: Open an issue with reproduction steps
+- **Feature Requests**: Open a discussion describing the use case
+- **Pull Requests**: Fork, implement, and submit PR with tests
+- **Documentation**: Improvements always appreciated
+
+Please follow existing code style (black, flake8, mypy) and include tests for new features.
 
 ---
 
-## Contact
+## Standards Compliance
 
-**Author**: Marc Arévalo
-**Email**: marcarevalocano@gmail.com
-**GitHub**: [@SrMarcoAurelio](https://github.com/SrMarcoAurelio)
+This framework references industry standards:
 
-Open to:
-- Questions about the framework
-- Code review and feedback
-- Collaboration opportunities
+- **ISTQB**: International Software Testing Qualifications Board
+- **IEEE 829**: Software Test Documentation
+- **ISO/IEC 25010**: Software Quality Model
+- **WCAG 2.1**: Web Content Accessibility Guidelines
+- **OWASP Top 10**: Web Application Security Risks
+- **NIST 800-63B**: Digital Identity Guidelines (password requirements)
+- **PCI-DSS**: Payment Card Industry Data Security Standard
+
+---
+
+## Honest Limitations
+
+### 1. Not Truly Zero-Configuration
+
+- Requires 4-8 hours adaptation work
+- Page objects need modification for different workflows
+- Locators must be updated for your application
+- Some test logic is template-based, needs customization
+
+### 2. Security Testing Limitations
+
+- UI-level validation only (not network-level)
+- Cannot replace dedicated DAST tools (OWASP ZAP, Burp Suite)
+- Requires manual verification of findings
+- Does not test API security directly
+
+### 3. Learning Curve
+
+- Requires Selenium knowledge
+- Pytest framework understanding needed
+- Page Object Model pattern familiarity
+- Python programming skills required
+- Not suitable for complete beginners
+
+### 4. Maintenance
+
+- Locator updates needed when UI changes
+- Test data needs periodic refresh
+- CI/CD pipeline may need adjustments for your environment
+- Performance thresholds require tuning per application
 
 ---
 
 ## License
 
-MIT License - Free to use, modify, and distribute.
+MIT License - Free to use, modify, and distribute with attribution.
 
 ---
 
-## Project History and Versions
+## Contact
 
-### Development Timeline
+**Author**: Marc Arevalo
+**Email**: marcarevalocano@gmail.com
+**GitHub**: [@SrMarcoAurelio](https://github.com/SrMarcoAurelio)
 
-This project has evolved through multiple phases of comprehensive testing implementation, with each version adding significant capabilities and improvements.
-
-### Version 5.0 - Comprehensive Edition (December 2025)
-**Focus**: Priority 2 (HIGH) Testing Coverage + Professional Documentation
-
-**Major Additions:**
-- **124 New Tests Added**:
-  - 52 Accessibility Tests (WCAG 2.1 Level AA compliance)
-  - 35 BasePage Integration Tests (comprehensive coverage for 598-line BasePage)
-  - 37 Security Utils Unit Tests (PayloadLibrary, ResponseAnalyzer, VulnerabilityScanner)
-
-- **CI/CD Pipeline Fixes**:
-  - Fixed unit test classification (removed browser dependencies from unit tests)
-  - Updated CI workflow to use pytest markers (`pytest -m unit`)
-  - Resolved flake8 linting errors across test files
-  - All pre-commit hooks passing
-
-- **Professional QA Documentation**:
-  - Created centralized `documentation/modules/` structure
-  - Comprehensive module documentation (Accessibility, API, Security, Visual Regression)
-  - Professional QA guidelines based on ISTQB, IEEE 829, ISO/IEC 25010
-  - Bilingual issue reporting guides (English + Spanish)
-  - Zero emojis, technical professional writing
-
-**Statistics:**
-- Total Tests: 598+ tests
-- Code Quality: All checks passing
-- Documentation: 5,000+ lines of professional technical documentation
-- Test Classification: Proper separation of unit, integration, and E2E tests
-
-**Standards Compliance:**
-- ISTQB (International Software Testing Qualifications Board)
-- IEEE 829-2008 (Software Test Documentation)
-- ISO/IEC 25010 (Software Quality Model)
-- WCAG 2.1 Level AA (Web Accessibility)
-- OWASP Top 10 2021 (Security)
-- Core Web Vitals (Performance)
+Questions, feedback, and collaboration opportunities welcome.
 
 ---
 
-### Version 4.5 - Advanced Testing Modules (December 2025)
-**Focus**: Priority 1 (CRITICAL) Comprehensive Audit Implementation
-
-**Major Additions:**
-- **Visual Regression Testing Module**:
-  - Screenshot capture and baseline management
-  - Pixel-perfect image comparison
-  - Responsive design testing (mobile, tablet, desktop)
-  - Visual diff generation
-
-- **Test Data Management Module**:
-  - Fake data generation utilities
-  - Database seeding and cleanup
-  - Data factory patterns
-  - JSON/CSV data loading
-
-- **Database Testing Module**:
-  - Database connection management
-  - Query execution and validation
-  - Data integrity checks
-  - Transaction testing
-
-- **API Testing Module**:
-  - REST API endpoint testing
-  - JSON schema validation
-  - Response time monitoring
-  - Authentication testing (Basic, Bearer, OAuth)
-
-**Comprehensive Code Audit:**
-- Analyzed entire codebase (75 issues identified)
-- Priority classification: CRITICAL, HIGH, MEDIUM, LOW
-- Systematic resolution of all critical and high-priority issues
-
-**Statistics:**
-- Issues Resolved: 75 audit findings
-- Test Coverage Increase: +200 tests
-- Code Quality Improvements: 100% of critical issues resolved
+## Acknowledgments
 
 ---
 
-### Version 4.0 - Template Edition (November-December 2025)
-**Focus**: Production-Ready Architecture Template
-
-**Major Features:**
-- Clean Page Object Model architecture
-- External JSON-based locator management
-- Comprehensive fixture system (18 fixtures)
-- Pre-commit hooks (15 automated checks)
-- GitHub Actions CI/CD integration
-- Docker support
-
-**Testing Capabilities:**
-- Functional testing (login, signup, cart, purchase workflows)
-- Business logic testing (ISO 25010, NIST 800-63B, PCI-DSS)
-- UI-level security testing (SQL injection, XSS, CSRF)
-- Accessibility testing (WCAG 2.1 Level AA)
-- Performance testing (Core Web Vitals)
-
-**Documentation:**
-- Complete getting-started guides
-- Implementation and adaptation guides
-- Architecture documentation
-- Test templates
-- Testing philosophy (Discover vs Assume)
-
----
-
-### Version 3.0 - Security & Real Testing Systems (November 2025)
-**Focus**: Real Security Testing Implementation
-
-**Major Additions:**
-- **Real Security Testing System**:
-  - HTTP interception with mitmproxy
-  - Comprehensive payload library (347 lines)
-  - Response analyzer for vulnerability detection (452 lines)
-  - Automated vulnerability scanner (466 lines)
-  - OWASP Top 10 2021 coverage
-
-- **Security Test Coverage**:
-  - 25 SQL Injection test cases
-  - 18 Cross-Site Scripting (XSS) tests
-  - 12 Command Injection tests
-  - 10 CSRF protection tests
-  - 15 Authentication security tests
-
-**Statistics:**
-- Security Tests: 102+ tests
-- OWASP Coverage: 100% of Top 10
-- Payload Library: 100+ security payloads
-
----
-
-### Version 2.0 - Advanced Testing Capabilities (October-November 2025)
-**Focus**: Expanding Test Coverage
-
-**Major Additions:**
-- Performance testing with Core Web Vitals
-- Auto-configurator system for project setup
-- Comprehensive cart functionality tests
-- Wait helpers and performance monitoring utilities
-- Extended accessibility testing
-
-**Statistics:**
-- Tests Added: +150 tests
-- New Utilities: Performance monitor, wait helpers, auto-config
-- Test Coverage: 532+ tests
-
----
-
-### Version 1.0 - Foundation (October 2025)
-**Focus**: Core Framework Establishment
-
-**Initial Implementation:**
-- Basic Page Object Model
-- Selenium WebDriver integration
-- Pytest framework setup
-- Login and signup test suites
-- Basic functional testing
-- Initial documentation
-
-**Statistics:**
-- Initial Tests: ~100 tests
-- Pages: 5 page objects
-- Test Suites: Login, Signup, basic navigation
-
----
-
-## Development Phases
-
-### Phase 1: Foundation (October 2025)
-- Core framework architecture
-- Basic page objects and test structure
-- Initial CI/CD setup
-
-### Phase 2: Expansion (October-November 2025)
-- Performance testing capabilities
-- Auto-configuration system
-- Extended test coverage
-
-### Phase 3: Security Focus (November 2025)
-- Real security testing implementation
-- OWASP Top 10 coverage
-- Payload library and vulnerability scanning
-
-### Phase 4: Production Ready (November-December 2025)
-- Template edition with clean architecture
-- Comprehensive documentation
-- Professional-grade structure
-
-### Phase 5: Advanced Modules (December 2025)
-- Visual regression testing
-- Database testing
-- API testing
-- Test data management
-- Comprehensive audit and resolution
-
-### Phase 6: Professional Documentation (December 2025)
-- Priority 2 (HIGH) test coverage completion
-- CI/CD pipeline optimization
-- Professional QA documentation based on industry standards
-- Bilingual documentation support
-- Module-specific comprehensive guides
-
----
-
-## Testing Evolution
-
-### Test Count Growth
-
-| Version | Unit Tests | Integration Tests | E2E Tests | Total Tests |
-|---------|-----------|-------------------|-----------|-------------|
-| v1.0 | 20 | 80 | 0 | 100 |
-| v2.0 | 50 | 282 | 0 | 332 |
-| v3.0 | 87 | 347 | 0 | 434 |
-| v4.0 | 120 | 380 | 32 | 532 |
-| v4.5 | 162 | 436 | 32 | 630 |
-| v5.0 | 204 | 359 | 35 | 598 |
-
-**Note**: v5.0 shows reduction due to proper test classification and removal of duplicate/incorrect tests during audit.
-
-### Module Implementation Timeline
-
-```
-October 2025:        Foundation + Core Testing
-November 2025:       Security + Performance + Auto-Config
-December 2025 (W1):  Template Edition + Documentation
-December 2025 (W2):  Advanced Modules (Visual, Database, API, Test Data)
-December 2025 (W3):  Comprehensive Audit + Priority 1 Implementation
-December 2025 (W4):  Priority 2 Tests + Professional Documentation
-```
-
-### Standards Adoption Timeline
-
-- **October 2025**: Basic testing practices
-- **November 2025**: OWASP Top 10 2021, WCAG 2.1
-- **December 2025**: ISTQB, IEEE 829, ISO/IEC 25010, Core Web Vitals
-- **Current**: Full compliance with 10+ industry standards
-
----
-
-## About This Project
-
-This framework was built over 4 months with significant AI assistance (Claude AI & Gemini) as a learning project. The AI helped with understanding QA fundamentals, learning Python/Selenium/Pytest, code structure, and documentation. All architectural decisions, testing strategy, and code validation were done manually.
-
-AI-assisted development is increasingly common. What matters is understanding the code you deploy, taking responsibility for the architecture, and delivering real value regardless of tools used.
-
----
-
-**Last Updated**: December 9, 2025
-**Version**: 5.0 (Comprehensive Edition)
-**Status**: Production-ready with comprehensive testing coverage and professional documentation
+**Last Updated**: December 2025
+**Version**: 6.0 (Universal Edition)
+**Status**: Production-ready framework requiring application-specific adaptation
 
 For complete documentation, see [documentation/README.md](documentation/README.md)
