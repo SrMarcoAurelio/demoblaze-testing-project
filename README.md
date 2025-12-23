@@ -574,13 +574,6 @@ Questions, feedback, and collaboration opportunities welcome.
 
 ## Acknowledgments
 
-Built with:
-- [Selenium](https://www.selenium.dev/) - Browser automation
-- [Pytest](https://pytest.org/) - Testing framework
-- [axe-core](https://github.com/dequelabs/axe-core) - Accessibility testing
-
-Developed as a learning project with AI assistance (Claude AI & Gemini). All architectural decisions, testing strategy, and code validation done manually. AI-assisted development is increasingly common - what matters is understanding the code you deploy and taking responsibility for the architecture.
-
 ---
 
 **Last Updated**: December 2025
