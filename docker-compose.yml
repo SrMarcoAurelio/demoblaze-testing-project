@@ -66,9 +66,11 @@ services:
       selenium-hub:
         condition: service_healthy
     environment:
-      - BASE_URL=https://www.demoblaze.com/
+      # IMPORTANT: Set BASE_URL environment variable before running
+      # Example: BASE_URL=https://your-app.com docker-compose up
+      - BASE_URL=${BASE_URL:-}
       - SELENIUM_HUB_URL=http://selenium-hub:4444/wd/hub
-      - BROWSER=chrome
+      - BROWSER=${BROWSER:-chrome}
     volumes:
       # Mount source code for development
       - ./tests:/app/tests
