@@ -1,25 +1,17 @@
-# -*- coding: utf-8 -*-
 """
-Page Objects - DemoBlaze Test Automation
-Author: Marc Arevalo
+Universal Test Automation Framework - Page Objects Package
 
-Page Object Model implementation for DemoBlaze website.
+This directory is for YOUR application's page objects.
+
+IMPORTANT:
+- Do NOT use the Demoblaze example page objects directly
+- See examples/demoblaze/pages/ for reference implementations
+- Use templates/ for starting points
+- Create page objects specific to YOUR application
+
+Example:
+    from pages.login_page import LoginPage
+
+    login_page = LoginPage(driver)
+    login_page.login("your_username", "your_password")
 """
-
-from pages.base_page import BasePage
-from pages.cart_page import CartPage
-from pages.catalog_page import CatalogPage
-from pages.login_page import LoginPage
-from pages.product_page import ProductPage
-from pages.purchase_page import PurchasePage
-from pages.signup_page import SignupPage
-
-__all__ = [
-    "BasePage",
-    "CartPage",
-    "CatalogPage",
-    "LoginPage",
-    "ProductPage",
-    "PurchasePage",
-    "SignupPage",
-]
