@@ -37,7 +37,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from pages.base_page import BasePage
+from .base_page import BasePage
 
 
 class PurchasePage(BasePage):

@@ -23,7 +23,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
-from pages.base_page import BasePage
+from examples.demoblaze.pages.base_page import BasePage
 
 
 class TestBasePageInitialization:

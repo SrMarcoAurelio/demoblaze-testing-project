@@ -6,13 +6,13 @@ Author: Marc Arevalo
 Page Object Model implementation for DemoBlaze website.
 """
 
-from pages.base_page import BasePage
-from pages.cart_page import CartPage
-from pages.catalog_page import CatalogPage
-from pages.login_page import LoginPage
-from pages.product_page import ProductPage
-from pages.purchase_page import PurchasePage
-from pages.signup_page import SignupPage
+from .base_page import BasePage
+from .cart_page import CartPage
+from .catalog_page import CatalogPage
+from .login_page import LoginPage
+from .product_page import ProductPage
+from .purchase_page import PurchasePage
+from .signup_page import SignupPage
 
 __all__ = [
     "BasePage",
