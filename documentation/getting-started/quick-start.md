@@ -60,7 +60,7 @@ pytest -m security           # Security tests only
 pytest -m accessibility      # Accessibility tests only
 
 # Run with coverage
-pytest --cov=pages --cov=utils
+pytest --cov=framework --cov=utils
 
 # Parallel execution (faster)
 pytest -n auto

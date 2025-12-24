@@ -28,7 +28,7 @@ from typing import Optional
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
-from pages.base_page import BasePage
+from .base_page import BasePage
 
 
 class SignupPage(BasePage):

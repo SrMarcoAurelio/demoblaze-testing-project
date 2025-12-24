@@ -332,7 +332,7 @@ def pytest_html_results_summary(prefix, summary, postfix):
     prefix.extend(
         [
             "<h2>Test Environment</h2>",
-            f"<p><strong>Application URL:</strong> {config.BASE_URL}</p>",
+            f"<p><strong>Application URL:</strong> {config.BASE_URL or 'Not Configured'}</p>",
             f"<p><strong>Test Date:</strong> {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>",
         ]
     )
@@ -430,107 +430,37 @@ def minimal_purchase_data():
 # ============================================================================
 # PAGE OBJECT FIXTURES - Initialized Page Objects
 # ============================================================================
-
-
-@pytest.fixture(scope="function")
-def login_page(browser, base_url):
-    """
-    Provide initialized LoginPage instance.
-
-    Automatically navigates to base_url before returning page object.
-
-    Example:
-        >>> def test_login(login_page, valid_user):
-        ...     login_page.login(**valid_user)
-        ...     assert login_page.is_user_logged_in()
-    """
-    from pages.login_page import LoginPage
-
-    browser.get(base_url)
-    return LoginPage(browser)
-
-
-@pytest.fixture(scope="function")
-def signup_page(browser, base_url):
-    """Provide initialized SignupPage instance."""
-    from pages.signup_page import SignupPage
-
-    browser.get(base_url)
-    return SignupPage(browser)
-
-
-@pytest.fixture(scope="function")
-def catalog_page(browser, base_url):
-    """Provide initialized CatalogPage instance."""
-    from pages.catalog_page import CatalogPage
-
-    browser.get(base_url)
-    return CatalogPage(browser)
-
-
-@pytest.fixture(scope="function")
-def product_page(browser, base_url):
-    """Provide initialized ProductPage instance."""
-    from pages.product_page import ProductPage
-
-    browser.get(base_url)
-    return ProductPage(browser)
-
-
-@pytest.fixture(scope="function")
-def cart_page(browser, base_url):
-    """Provide initialized CartPage instance."""
-    from pages.cart_page import CartPage
-
-    browser.get(base_url)
-    return CartPage(browser)
-
-
-@pytest.fixture(scope="function")
-def purchase_page(browser, base_url):
-    """Provide initialized PurchasePage instance."""
-    from pages.purchase_page import PurchasePage
-
-    browser.get(base_url)
-    return PurchasePage(browser)
+#
+# IMPORTANT: Create YOUR application-specific page object fixtures here
+#
+# Example:
+#
+# @pytest.fixture(scope="function")
+# def login_page(browser, base_url):
+#     """Provide initialized LoginPage for YOUR application."""
+#     from pages.login_page import LoginPage
+#     browser.get(base_url)
+#     return LoginPage(browser)
+#
+# See examples/demoblaze/conftest.py for reference implementation
 
 
 # ============================================================================
 # STATE FIXTURES - Pre-configured Test States
 # ============================================================================
-
-
-@pytest.fixture(scope="function")
-def logged_in_user(login_page, valid_user):
-    """
-    Provide logged-in user session.
-
-    Performs login automatically and yields the page.
-    User is logged out after test completion.
-
-    Example:
-        >>> def test_something_as_logged_user(logged_in_user, catalog_page):
-        ...     # User is already logged in, proceed with test
-        ...     catalog_page.navigate_to_products()
-    """
-    login_page.login(**valid_user)
-
-    if not login_page.is_user_logged_in():
-        alert = login_page.get_alert_text(timeout=3)
-        if alert:
-            logger.warning(f"Login failed with alert: {alert}")
-        pytest.fail("Failed to login with valid credentials in fixture")
-
-    logger.info(f"✓ User logged in: {valid_user['username']}")
-
-    yield login_page
-
-    try:
-        if login_page.is_user_logged_in():
-            login_page.logout()
-            logger.info("✓ User logged out (fixture cleanup)")
-    except Exception as e:
-        logger.warning(f"Logout cleanup failed: {e}")
+#
+# IMPORTANT: Create YOUR application-specific state fixtures here
+#
+# Example:
+#
+# @pytest.fixture(scope="function")
+# def logged_in_user(login_page, valid_user):
+#     """Provide logged-in user session for YOUR application."""
+#     login_page.login(**valid_user)
+#     yield login_page
+#     login_page.logout()
+#
+# See examples/demoblaze/conftest.py for reference implementation
 
 
 # ============================================================================

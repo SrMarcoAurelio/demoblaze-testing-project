@@ -5,7 +5,7 @@ Learn how to create a test from scratch.
 ## Project Structure Overview
 
 ```
-demoblaze-testing-project/
+test-automation-framework/
 ├── config/              # Configuration files
 ├── pages/               # Page Object Model classes
 ├── tests/               # Test files

@@ -1,8 +1,8 @@
-# Test Plan - DemoBlaze E-commerce Testing Project
+# Test Plan - Your Application E-commerce Testing Project
 
 ## 1. Introduction
 
-This document outlines the testing strategy for DemoBlaze (https://www.demoblaze.com), a demo e-commerce application. The purpose of this project is to demonstrate manual and automated testing skills through comprehensive functional testing of core e-commerce features.
+This document outlines the testing strategy for Your Application (https://your-application-url.com), a demo e-commerce application. The purpose of this project is to demonstrate manual and automated testing skills through comprehensive functional testing of core e-commerce features.
 
 **Project Duration:** 2 weeks
 **Tester:** Marc Arévalo
@@ -109,7 +109,7 @@ The following are NOT included in this testing cycle:
 ## 5. Test Environment
 
 ### 5.1 Application Under Test
-- **URL:** https://www.demoblaze.com
+- **URL:** https://your-application-url.com
 - **Type:** Demo e-commerce web application
 - **Environment:** Production (public demo)
 
@@ -139,7 +139,7 @@ The following artifacts will be produced:
 1. **Documentation**
    - User Flows document (`docs/users-flow.md`) ✅ Complete
    - Test Plan (`docs/test-plan.md`) - this document ✅ Complete
-   - Test Cases spreadsheet (`docs/DemoBlaze_Test_Cases.xlsx`) ✅ Complete (36 test cases)
+   - Test Cases spreadsheet (`docs/Your Application_Test_Cases.xlsx`) ✅ Complete (36 test cases)
    - Test Summary Report (`docs/Test_Summary_Report.md`) ✅ Complete
 
 2. **Bug Reports**
@@ -163,7 +163,7 @@ The following artifacts will be produced:
 ### 7.1 Entry Criteria
 
 Testing will begin when:
-- ✅ Test environment is accessible (demoblaze.com is up)
+- ✅ Test environment is accessible (your-application-url.com is up)
 - ✅ Testing tools are installed and configured
 - ✅ User flows are documented
 - ✅ Test cases are prepared
@@ -244,7 +244,7 @@ Testing will be considered complete when:
 ## 11. Assumptions and Dependencies
 
 ### Assumptions
-- DemoBlaze site will remain accessible throughout testing period ✅
+- Your Application site will remain accessible throughout testing period ✅
 - Site functionality will not change during test execution ✅
 - Demo site bugs are intentional for learning purposes ✅
 - No access to backend/database for verification ✅

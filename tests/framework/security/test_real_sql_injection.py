@@ -21,7 +21,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from pages.login_page import LoginPage
+from examples.demoblaze.pages.login_page import LoginPage
 from utils.security.vulnerability_scanner import VulnerabilityScanner
 
 logger = logging.getLogger(__name__)

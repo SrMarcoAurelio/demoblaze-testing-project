@@ -256,14 +256,14 @@ cd tests/login
 pytest test_login_functional.py  # Error!
 
 # Good - run from project root
-cd /path/to/demoblaze-testing-project
+cd /path/to/test-automation-framework
 pytest tests/login/test_login_functional.py
 ```
 
 **2. Check PYTHONPATH:**
 ```bash
 # Add project root to PYTHONPATH
-export PYTHONPATH=/path/to/demoblaze-testing-project:$PYTHONPATH
+export PYTHONPATH=/path/to/test-automation-framework:$PYTHONPATH
 
 # Or in PyCharm/VSCode:
 # - Mark project root as "Sources Root"
@@ -549,7 +549,7 @@ ls config/locators.json  # Should exist
 ```bash
 # Current directory should be project root
 pwd
-# /path/to/demoblaze-testing-project
+# /path/to/test-automation-framework
 
 pytest tests/
 ```
@@ -583,7 +583,7 @@ FAIL Required test coverage of 70% not reached. Total coverage: 45.32%
 pytest tests/
 
 # Check coverage
-pytest --cov=pages --cov=utils --cov-report=html
+pytest --cov=framework --cov=utils --cov-report=html
 ```
 
 **2. Adjust Threshold (if appropriate):**
@@ -600,7 +600,7 @@ pytest --cov=pages --cov=utils --cov-report=html
 **3. Identify Uncovered Code:**
 ```bash
 # Generate HTML coverage report
-pytest --cov=pages --cov=utils --cov-report=html
+pytest --cov=framework --cov=utils --cov-report=html
 
 # Open htmlcov/index.html
 # Red lines = uncovered code

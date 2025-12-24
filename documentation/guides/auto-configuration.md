@@ -211,10 +211,10 @@ def login_page(browser, base_url):
 ==================================================================
 INTELLIGENT AUTO-CONFIGURATOR
 ==================================================================
-Target URL: https://www.demoblaze.com
+Target URL: https://your-application-url.com
 Max Depth: 3
 Headless: False
-Project Root: /home/user/demoblaze-testing-project
+Project Root: /home/user/test-automation-framework
 ==================================================================
 
 Initializing browser...
@@ -222,15 +222,15 @@ Initializing browser...
 
 ==================================================================
 INTELLIGENT SCANNER - STARTING
-Target: https://www.demoblaze.com
+Target: https://your-application-url.com
 Max Depth: 3
 ==================================================================
 
 [PHASE 1] Crawling website...
-[Depth 0] Crawling: https://www.demoblaze.com
-[Depth 1] Crawling: https://www.demoblaze.com/index.html
-[Depth 1] Crawling: https://www.demoblaze.com/cart.html
-[Depth 1] Crawling: https://www.demoblaze.com/prod.html?idp_=1
+[Depth 0] Crawling: https://your-application-url.com
+[Depth 1] Crawling: https://your-application-url.com/index.html
+[Depth 1] Crawling: https://your-application-url.com/cart.html
+[Depth 1] Crawling: https://your-application-url.com/prod.html?idp_=1
 ...
 ✓ Discovered 12 pages
 ✓ Found 4 sections
@@ -244,18 +244,18 @@ Max Depth: 3
 ✓ Extracted 46 locators from 5 pages
 
 [PHASE 3] Generating code...
-Generated: /home/user/demoblaze-testing-project/config/locators.json
+Generated: /home/user/test-automation-framework/config/locators.json
   Pages: 5
   Total locators: 46
-Generated: /home/user/demoblaze-testing-project/pages/home_page.py
-Generated: /home/user/demoblaze-testing-project/pages/login_page.py
-Generated: /home/user/demoblaze-testing-project/pages/cart_page.py
-Generated: /home/user/demoblaze-testing-project/pages/catalog_page.py
-Generated: /home/user/demoblaze-testing-project/pages/product_page.py
-Generated: /home/user/demoblaze-testing-project/tests/home/test_home_functional.py
-Generated: /home/user/demoblaze-testing-project/tests/login/test_login_functional.py
+Generated: /home/user/test-automation-framework/pages/home_page.py
+Generated: /home/user/test-automation-framework/pages/login_page.py
+Generated: /home/user/test-automation-framework/pages/cart_page.py
+Generated: /home/user/test-automation-framework/pages/catalog_page.py
+Generated: /home/user/test-automation-framework/pages/product_page.py
+Generated: /home/user/test-automation-framework/tests/home/test_home_functional.py
+Generated: /home/user/test-automation-framework/tests/login/test_login_functional.py
 ...
-Updated: /home/user/demoblaze-testing-project/conftest.py
+Updated: /home/user/test-automation-framework/conftest.py
 ✓ Code generation complete
 
 ==================================================================

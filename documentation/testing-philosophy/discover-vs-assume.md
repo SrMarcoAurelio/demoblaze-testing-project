@@ -175,7 +175,7 @@ Following DISCOVER methodology means:
 def test_2fa():
     """Test 2FA functionality"""
     # PROBLEM: Assumes app doesn't have 2FA
-    pytest.skip("DemoBlaze doesn't implement 2FA")
+    pytest.skip("Your Application doesn't implement 2FA")
 
 # Result: No test runs, no discovery, feature absence unreported
 ```
@@ -252,7 +252,7 @@ def test_2fa_enforcement_BR_016():
 def test_rate_limiting():
     """Test for rate limiting"""
     # PROBLEM: Assumes rate limiting doesn't exist
-    pytest.skip("Out of scope - DemoBlaze doesn't have rate limiting")
+    pytest.skip("Out of scope - Your Application doesn't have rate limiting")
 
 # Result: Brute force vulnerability unreported
 ```
@@ -331,7 +331,7 @@ def test_account_lockout_enforcement_BR_013():
 def test_password_complexity():
     """Test password strength requirements"""
     # PROBLEM: Doesn't test because "app allows weak passwords"
-    pass  # Not implemented - DemoBlaze accepts any password
+    pass  # Not implemented - Your Application accepts any password
 
 # Result: Security gap unreported
 ```
@@ -470,7 +470,7 @@ def test_captcha_protection_BR_017():
 ```markdown
 ## Tests Not Implemented
 
-The following tests are not implemented because DemoBlaze doesn't have these features:
+The following tests are not implemented because Your Application doesn't have these features:
 - 2FA Testing (no 2FA implemented)
 - Rate Limiting (no rate limiting)
 - CAPTCHA Testing (no CAPTCHA)
@@ -487,7 +487,7 @@ These are out of scope for this demo application.
 ```markdown
 ## Expected Test Failures
 
-The following tests DISCOVER security violations on DemoBlaze:
+The following tests DISCOVER security violations on Your Application:
 
 | Test ID | Feature Tested | Standard | Expected Result |
 |---------|----------------|----------|-----------------|
@@ -511,16 +511,16 @@ of missing security controls that violate industry standards.
 #### ❌ WRONG
 ```python
 def test_login():
-    # Hardcoded for DemoBlaze only
-    browser.get("https://www.demoblaze.com")
+    # Hardcoded for Your Application only
+    browser.get("https://your-application-url.com")
     browser.find_element(By.ID, "login2").click()
-    # ... DemoBlaze-specific code ...
+    # ... Your Application-specific code ...
 ```
 
 #### ✅ CORRECT
 ```python
 # Configuration at top
-BASE_URL = "https://www.demoblaze.com/"
+BASE_URL = "https://your-application-url.com/"
 LOCATORS = {
     "login_link": ("ID", "login2"),
     "username_field": ("ID", "loginusername"),

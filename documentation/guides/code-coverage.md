@@ -40,13 +40,13 @@ pytest
 ### Manual Coverage Run
 ```bash
 # Run tests with coverage
-pytest --cov=pages --cov=utils
+pytest --cov=framework --cov=utils
 
 # HTML report only
-pytest --cov=pages --cov=utils --cov-report=html
+pytest --cov=framework --cov=utils --cov-report=html
 
 # Terminal report only
-pytest --cov=pages --cov=utils --cov-report=term
+pytest --cov=framework --cov=utils --cov-report=term
 
 # Skip coverage
 pytest --no-cov
@@ -55,10 +55,10 @@ pytest --no-cov
 ### Specific Tests
 ```bash
 # Coverage for specific module
-pytest tests/login/ --cov=pages.login_page
+pytest tests/login/ --cov=framework.login_page
 
 # Coverage for specific test
-pytest tests/login/test_login_functional.py --cov=pages
+pytest tests/login/test_login_functional.py --cov=framework
 ```
 
 ## 📁 Reports Location
@@ -122,7 +122,7 @@ Required coverage: 70.0%
 ### 1. Find Uncovered Code
 ```bash
 # Run with missing lines
-pytest --cov=pages --cov-report=term-missing
+pytest --cov=framework --cov-report=term-missing
 
 # Look for red lines in HTML report
 open results/coverage/html/index.html
@@ -160,7 +160,7 @@ def test_guest_user():        # Covers Branch 2
 **Solution**:
 ```bash
 # Identify missing coverage
-pytest --cov=pages --cov-report=term-missing
+pytest --cov=framework --cov-report=term-missing
 
 # Add tests for uncovered lines
 # Aim for critical paths first
@@ -192,7 +192,7 @@ Main configuration file with:
 ### `pytest.ini`
 Coverage options in pytest:
 ```ini
---cov=pages                                # Measure pages/
+--cov=framework                                # Measure pages/
 --cov=utils                                # Measure utils/
 --cov-report=html:results/coverage/html    # HTML report
 --cov-report=term-missing                  # Terminal report
@@ -205,7 +205,7 @@ Coverage options in pytest:
 ### Use XML Report
 ```bash
 # Generate XML for CI tools (Jenkins, GitLab CI, etc.)
-pytest --cov=pages --cov=utils --cov-report=xml
+pytest --cov=framework --cov=utils --cov-report=xml
 
 # XML file: results/coverage/coverage.xml
 ```
@@ -256,7 +256,7 @@ pytest --cov-report=term
 pytest --cov-report=term-missing
 
 # Specific module
-pytest --cov=pages.login_page tests/login/
+pytest --cov=framework.login_page tests/login/
 
 # Lower threshold for one run
 pytest --cov-fail-under=60

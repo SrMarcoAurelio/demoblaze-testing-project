@@ -1,4 +1,4 @@
-# Contributing to DemoBlaze Test Automation
+# Contributing to Universal Test Automation Framework
 
 Thank you for your interest in contributing! This document provides guidelines and conventions for contributing to this project.
 
@@ -50,7 +50,7 @@ pytest -m security
 pytest -m functional
 
 # Run with coverage
-pytest --cov=pages --cov=utils
+pytest --cov=framework --cov=utils
 ```
 
 ---
@@ -60,8 +60,8 @@ pytest --cov=pages --cov=utils
 ### 1. Fork and Clone
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/demoblaze-testing-project.git
-cd demoblaze-testing-project
+git clone https://github.com/YOUR_USERNAME/test-automation-framework.git
+cd test-automation-framework
 ```
 
 ### 2. Create Virtual Environment
@@ -408,10 +408,12 @@ utils/
 TEST_USERNAME=your_test_user
 TEST_PASSWORD=your_test_password
 
+# Required
+BASE_URL=https://your-application-url.com
+
 # Optional
 BROWSER=chrome
 HEADLESS=true
-BASE_URL=https://www.demoblaze.com
 ```
 
 ### Configuration

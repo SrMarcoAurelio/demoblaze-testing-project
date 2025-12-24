@@ -37,7 +37,7 @@ class PageCrawler:
 
         Args:
             driver: Selenium WebDriver instance
-            base_url: Base URL to crawl (e.g., "https://www.demoblaze.com")
+            base_url: Base URL to crawl (e.g., "https://your-application-url.com")
             max_depth: Maximum crawl depth (default: 3)
         """
         self.driver = driver

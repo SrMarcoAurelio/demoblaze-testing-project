@@ -1,13 +1,13 @@
-# Coverage.py Configuration - DemoBlaze Test Automation
+# Coverage.py Configuration - Universal Test Automation Framework
 # Author: Marc Arévalo
-# Version: 1.0 - Phase 8
+# Version: 6.0
 #
 # Configuration for code coverage reporting
 
 [run]
 # Source directories to measure
 source =
-    pages
+    framework
     utils
 
 # Omit these files from coverage
@@ -94,7 +94,7 @@ ignore_errors = False
 directory = results/coverage/html
 
 # Title for HTML report
-title = DemoBlaze Test Automation - Code Coverage Report
+title = Universal Test Automation Framework - Code Coverage Report
 
 [xml]
 # Output file for XML report (for CI/CD)
@@ -109,4 +109,4 @@ show_contexts = True
 # Map source paths (useful for CI/CD)
 source =
     .
-    */demoblaze-testing-project
+    */test-automation-framework

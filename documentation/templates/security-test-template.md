@@ -66,7 +66,7 @@ I've created a **comprehensive, universal security testing template** split into
 #### ❌ WRONG (Assuming):
 ```python
 def test_sql_injection():
-    # "I know DemoBlaze is vulnerable"
+    # "I know Your Application is vulnerable"
     inject_sql()
     assert False  # Assumes it will fail
 ```
@@ -140,7 +140,7 @@ DISCOVER = EXECUTE + OBSERVE + DECIDE
 
 ### Works Across Any Domain:
 
-✅ **E-commerce** (DemoBlaze, Amazon, etc.)
+✅ **E-commerce** (Your Application, Amazon, etc.)
 ✅ **Banking** (Online banking, fintech)
 ✅ **Healthcare** (Patient portals, medical records)
 ✅ **Social Networks** (Facebook, Twitter style apps)

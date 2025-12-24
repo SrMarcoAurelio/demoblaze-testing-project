@@ -207,13 +207,13 @@ class TestWaitForPageReady:
 
     def test_wait_for_page_ready_success_WAIT_014(self, browser):
         """Test wait for page ready on loaded page"""
-        browser.get("https://www.demoblaze.com")
+        browser.get("https://your-application-url.com")
         result = wait_for_page_ready(browser, timeout=10)
         assert result is True, "Page should be ready after navigation"
 
     def test_wait_for_page_ready_already_loaded_WAIT_015(self, browser):
         """Test wait for page ready when page is already loaded"""
-        browser.get("https://www.demoblaze.com")
+        browser.get("https://your-application-url.com")
         time.sleep(2)  # Ensure page is fully loaded
         result = wait_for_page_ready(browser, timeout=5)
         assert result is True, "Should return True for already loaded page"

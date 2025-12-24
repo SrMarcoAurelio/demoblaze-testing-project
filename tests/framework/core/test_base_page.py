@@ -23,7 +23,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
-from pages.base_page import BasePage
+from examples.demoblaze.pages.base_page import BasePage
 
 
 class TestBasePageInitialization:
@@ -222,7 +222,7 @@ class TestNavigationMethods:
         page = BasePage(browser)
         page.navigate_to(page.base_url)
         url = page.get_current_url()
-        assert "demoblaze.com" in url or "localhost" in url
+        assert "your-application-url.com" in url or "localhost" in url
 
     def test_get_page_title_BASE_024(self, browser):
         """Test getting page title"""

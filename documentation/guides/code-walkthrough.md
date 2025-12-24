@@ -116,7 +116,7 @@ config.addinivalue_line("markers", "functional: Functional tests")
 ```python
 @pytest.fixture(scope="session")
 def base_url():
-    return config.BASE_URL  # Returns "https://www.demoblaze.com"
+    return config.BASE_URL  # Returns "https://your-application-url.com"
 ```
 
 2. **timeout_config** (line 147):
@@ -249,7 +249,7 @@ yield driver  # Test receives driver here
 def login_page(browser, base_url):
     from pages.login_page import LoginPage
 
-    browser.get(base_url)  # Navigate to https://www.demoblaze.com
+    browser.get(base_url)  # Navigate to https://your-application-url.com
     return LoginPage(browser)
 ```
 
@@ -262,7 +262,7 @@ from pages.login_page import LoginPage
 
 2. **Navigate to base URL:**
 ```python
-browser.get(base_url)  # Opens https://www.demoblaze.com
+browser.get(base_url)  # Opens https://your-application-url.com
 ```
 
 3. **Instantiate LoginPage:**

@@ -1,0 +1,152 @@
+# Universal Test Automation Framework - Environment Configuration Template
+#
+# INSTRUCTIONS:
+# 1. Copy this file to your project root as: .env
+# 2. Replace ALL_CAPS placeholders with YOUR actual values
+# 3. NEVER commit .env to version control (add to .gitignore)
+# 4. Create .env.example with placeholder values for team sharing
+#
+# Security Notes:
+# - Keep credentials secret
+# - Use different values for dev/staging/prod
+# - Rotate credentials regularly
+# - Never hardcode credentials in test files
+
+# ============================================================================
+# APPLICATION CONFIGURATION
+# ============================================================================
+
+# Base URL of YOUR application
+# Replace with YOUR application's URL
+BASE_URL=https://YOUR_APPLICATION_URL.com
+
+# Environment (dev, staging, prod)
+# Adapt to YOUR environments
+ENVIRONMENT=dev
+
+# ============================================================================
+# TEST USER CREDENTIALS
+# ============================================================================
+
+# Test user credentials
+# Create a dedicated test user in YOUR application
+# NEVER use real user credentials
+TEST_USERNAME=YOUR_TEST_USERNAME
+TEST_PASSWORD=YOUR_TEST_PASSWORD
+
+# Additional test users (if needed)
+# Adapt to YOUR application's user roles
+# TEST_ADMIN_USERNAME=YOUR_ADMIN_USERNAME
+# TEST_ADMIN_PASSWORD=YOUR_ADMIN_PASSWORD
+# TEST_READONLY_USERNAME=YOUR_READONLY_USERNAME
+# TEST_READONLY_PASSWORD=YOUR_READONLY_PASSWORD
+
+# ============================================================================
+# BROWSER CONFIGURATION
+# ============================================================================
+
+# Browser to use (chrome, firefox, edge)
+BROWSER=chrome
+
+# Run in headless mode (true/false)
+# Set to true for CI/CD environments
+HEADLESS=false
+
+# Browser window size (width,height)
+WINDOW_SIZE=1920,1080
+
+# Implicit wait timeout (seconds)
+# 0 = no implicit wait (recommended, use explicit waits instead)
+IMPLICIT_WAIT=0
+
+# Default explicit wait timeout (seconds)
+DEFAULT_TIMEOUT=10
+
+# ============================================================================
+# TEST CONFIGURATION
+# ============================================================================
+
+# Screenshot on failure (true/false)
+SCREENSHOT_ON_FAILURE=true
+
+# Screenshot directory
+SCREENSHOT_DIR=./screenshots
+
+# Test data directory
+TEST_DATA_DIR=./test_data
+
+# Log level (DEBUG, INFO, WARNING, ERROR)
+LOG_LEVEL=INFO
+
+# ============================================================================
+# API CONFIGURATION (if testing APIs)
+# ============================================================================
+
+# API base URL
+# Replace with YOUR API URL
+# API_URL=https://YOUR_API_URL.com/api/v1
+
+# API authentication token
+# Replace with YOUR API auth method
+# API_TOKEN=YOUR_API_TOKEN
+
+# API timeout (seconds)
+# API_TIMEOUT=30
+
+# ============================================================================
+# DATABASE CONFIGURATION (if testing with database)
+# ============================================================================
+
+# Database connection string
+# Replace with YOUR database details
+# DATABASE_URL=postgresql://user:password@localhost:5432/testdb
+
+# Database driver
+# DATABASE_DRIVER=postgresql
+
+# ============================================================================
+# EXTERNAL SERVICES (if applicable)
+# ============================================================================
+
+# Email service for testing
+# EMAIL_HOST=smtp.gmail.com
+# EMAIL_PORT=587
+# EMAIL_USERNAME=YOUR_EMAIL
+# EMAIL_PASSWORD=YOUR_EMAIL_PASSWORD
+
+# AWS credentials (if testing cloud services)
+# AWS_ACCESS_KEY_ID=YOUR_AWS_KEY
+# AWS_SECRET_ACCESS_KEY=YOUR_AWS_SECRET
+# AWS_REGION=us-east-1
+
+# ============================================================================
+# CI/CD CONFIGURATION
+# ============================================================================
+
+# CI/CD environment detection
+# CI=false
+# GITHUB_ACTIONS=false
+
+# Parallel test execution
+# PYTEST_WORKERS=4
+
+# ============================================================================
+# CUSTOM CONFIGURATION
+# ============================================================================
+
+# Add YOUR application-specific configuration here
+# CUSTOM_SETTING_1=value1
+# CUSTOM_SETTING_2=value2
+
+
+# ADAPTATION CHECKLIST:
+# [ ] Copied to project root as .env
+# [ ] Replaced BASE_URL with YOUR application URL
+# [ ] Created test user in YOUR application
+# [ ] Set TEST_USERNAME and TEST_PASSWORD
+# [ ] Configured browser settings
+# [ ] Added YOUR custom configuration
+# [ ] Added .env to .gitignore
+# [ ] Created .env.example for team (with placeholders, no real credentials)
+# [ ] Verified all tests can load from .env
+# [ ] Removed this checklist when done

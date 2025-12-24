@@ -28,7 +28,8 @@ permissions:
 
 env:
   PYTHON_VERSION: '3.11'
-  BASE_URL: 'https://www.demoblaze.com/'
+  # BASE_URL must be set as repository secret or workflow input
+  # DO NOT hardcode application URLs here
 
 jobs:
   # Job 1: Lint and Type Check
@@ -61,7 +62,7 @@ jobs:
 
       - name: Type check with mypy
         run: |
-          mypy pages/base_page.py --ignore-missing-imports
+          mypy framework/ --ignore-missing-imports
         continue-on-error: true
 
   # Job 2: Unit Tests
@@ -272,9 +273,9 @@ jobs:
         run: |
           echo "## Test Execution Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ **Framework**: Universal QA Automation Framework v3.0" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Framework**: Universal Test Automation Framework v6.0" >> $GITHUB_STEP_SUMMARY
           echo "🔧 **Python Version**: ${{ env.PYTHON_VERSION }}" >> $GITHUB_STEP_SUMMARY
-          echo "🌐 **Target**: ${{ env.BASE_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "🌐 **Target**: \${BASE_URL:-Not Set}" >> $GITHUB_STEP_SUMMARY
           echo "📅 **Date**: $(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Job Results:" >> $GITHUB_STEP_SUMMARY
