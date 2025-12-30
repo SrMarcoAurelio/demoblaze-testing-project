@@ -14,6 +14,8 @@ from unittest.mock import Mock, MagicMock, patch
 
 from framework.core.wait_handler import WaitHandler
 
+pytestmark = pytest.mark.unit
+
 
 class TestWaitHandler:
     """Test suite for WaitHandler class"""

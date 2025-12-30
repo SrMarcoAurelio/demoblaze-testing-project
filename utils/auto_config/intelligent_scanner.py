@@ -87,9 +87,9 @@ class IntelligentScanner:
             logger.info("\n[PHASE 1] Crawling website...")
             self.discovered_pages = self.crawler.crawl()
 
-            logger.info(f"✓ Discovered {len(self.discovered_pages)} pages")
+            logger.info(f"OK Discovered {len(self.discovered_pages)} pages")
             logger.info(
-                f"✓ Found {len(self.crawler.navigation_sections)} sections"
+                f"OK Found {len(self.crawler.navigation_sections)} sections"
             )
 
             # Phase 2: Extract locators from each page
@@ -100,7 +100,7 @@ class IntelligentScanner:
                 len(locs) for locs in self.page_locators.values()
             )
             logger.info(
-                f"✓ Extracted {total_locators} locators from {len(self.page_locators)} pages"
+                f"OK Extracted {total_locators} locators from {len(self.page_locators)} pages"
             )
 
             # Phase 3: Generate code
@@ -109,7 +109,7 @@ class IntelligentScanner:
                 self.discovered_pages, self.page_locators
             )
 
-            logger.info("✓ Code generation complete")
+            logger.info("OK Code generation complete")
 
             # Calculate statistics
             duration = time.time() - start_time
@@ -155,7 +155,7 @@ class IntelligentScanner:
 
                 if locators:
                     all_locators[page_name] = locators
-                    logger.info(f"  ✓ {page_name}: {len(locators)} locators")
+                    logger.info(f"  OK {page_name}: {len(locators)} locators")
 
             except Exception as e:
                 logger.warning(f"Failed to extract locators from {url}: {e}")

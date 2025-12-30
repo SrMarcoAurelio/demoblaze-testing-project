@@ -1,6 +1,6 @@
-# Framework Architecture
+# Project Architecture
 
-**Universal Test Automation Framework v6.2.0**
+**Pytest + Selenium Test Template v6.2.0**
 **Author**: Marc Arevalo
 **Last Updated**: December 2025
 
@@ -9,7 +9,7 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Design Philosophy](#design-philosophy)
+2. [Design Approach](#design-approach)
 3. [Architecture Diagram](#architecture-diagram)
 4. [Core Components](#core-components)
 5. [Directory Structure](#directory-structure)
@@ -23,34 +23,34 @@
 
 ## Overview
 
-This is a **universal, discovery-based test automation framework** built with Python, Selenium, and Pytest. Unlike application-specific test suites, this framework is designed to work with ANY web application without requiring upfront knowledge of the application's structure.
+This is a **test automation template** built with Python, Selenium, and Pytest. It provides structured patterns and reusable components for web application testing projects.
 
 ### Key Characteristics
 
-- **Universal**: Works with any web application - no hardcoded assumptions
-- **Discovery-Based**: Automatically discovers page structure at runtime
-- **Modular**: Highly extensible with clean separation of concerns
-- **Production-Ready**: Includes security testing, performance monitoring, and comprehensive reporting
-- **Developer-Friendly**: Interactive setup, CLI tools, and extensive documentation
+- **Template-based**: Starting point for pytest + Selenium projects
+- **Structured**: Pre-organized directories and example patterns
+- **Modular**: Separated utilities for different testing needs
+- **Educational**: Well-documented examples and patterns
+- **Not production-tested**: Use as reference, not as dependency
 
 ---
 
-## Design Philosophy
+## Design Approach
 
-### 1. Universal by Design
+### 1. Template, Not Framework
 
-The framework makes **zero assumptions** about your application:
-- No hardcoded URLs (all from environment variables)
-- No hardcoded locators (user-provided or auto-discovered)
-- No hardcoded test data (templates only)
-- No application-specific page objects (empty `pages/` directory by default)
+This project provides patterns and structure, not a standalone framework:
+- No hardcoded application-specific values
+- Configured via environment variables
+- Requires adaptation to your application
+- Empty `pages/` directory by default (you create your page objects)
 
-### 2. Discovery Over Configuration
+### 2. Selenium Wrappers
 
-Instead of requiring upfront configuration, the framework discovers what it needs:
-- `DiscoveryEngine`: Analyzes page structure dynamically
-- `ElementFinder`: Locates elements using multiple strategies
-- `AutoConfig`: Scans pages and generates locators automatically
+Convenience methods wrapping Selenium WebDriver:
+- `ElementFinder`: Find elements with fallback strategies
+- `ElementInteractor`: Interact with elements with retry logic
+- `WaitHandler`: Wait utilities (wraps WebDriverWait)
 
 ### 3. Layered Architecture
 
@@ -703,5 +703,5 @@ When contributing to the framework:
 
 ---
 
-**Framework Architecture v6.2.0**
-**Professional QA Automation Framework**
+**Project Architecture Documentation v6.2.0**
+**Pytest + Selenium Test Template**

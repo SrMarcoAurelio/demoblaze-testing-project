@@ -38,7 +38,7 @@ class SchemaValidator:
         """
         try:
             validate(instance=data, schema=schema)
-            logger.debug("✓ JSON schema validation passed")
+            logger.debug("OK JSON schema validation passed")
             return True
         except ValidationError as e:
             raise AssertionError(f"JSON schema validation failed: {e.message}")

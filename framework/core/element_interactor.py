@@ -69,20 +69,20 @@ class ElementInteractor:
         for attempt in range(retry):
             try:
                 element.click()
-                self.logger.debug(f"✓ Clicked element (attempt {attempt + 1})")
+                self.logger.debug(f"Found Clicked element (attempt {attempt + 1})")
                 return True
             except (
                 ElementNotInteractableException,
                 StaleElementReferenceException,
             ) as e:
                 self.logger.debug(
-                    f"✗ Click failed (attempt {attempt + 1}): {e}"
+                    f"Not found Click failed (attempt {attempt + 1}): {e}"
                 )
                 if attempt == retry - 1 and force:
                     self.logger.debug("↻ Trying JavaScript click as fallback")
                     return self.click_with_js(element)
 
-        self.logger.warning(f"✗ Click failed after {retry} attempts")
+        self.logger.warning(f"Not found Click failed after {retry} attempts")
         return False
 
     def click_with_js(self, element: WebElement) -> bool:
@@ -102,10 +102,10 @@ class ElementInteractor:
         """
         try:
             self.driver.execute_script("arguments[0].click();", element)
-            self.logger.debug("✓ JavaScript click succeeded")
+            self.logger.debug("Found JavaScript click succeeded")
             return True
         except JavascriptException as e:
-            self.logger.warning(f"✗ JavaScript click failed: {e}")
+            self.logger.warning(f"Not found JavaScript click failed: {e}")
             return False
 
     def type(
@@ -130,10 +130,10 @@ class ElementInteractor:
                 element.clear()
 
             element.send_keys(text)
-            self.logger.debug(f"✓ Typed text: '{text[:20]}...'")
+            self.logger.debug(f"Found Typed text: '{text[:20]}...'")
             return True
         except Exception as e:
-            self.logger.warning(f"✗ Type failed: {e}")
+            self.logger.warning(f"Not found Type failed: {e}")
             return False
 
     def type_slowly(
@@ -170,10 +170,10 @@ class ElementInteractor:
                 element.send_keys(char)
                 time.sleep(delay)
 
-            self.logger.debug(f"✓ Typed slowly: '{text}'")
+            self.logger.debug(f"Found Typed slowly: '{text}'")
             return True
         except Exception as e:
-            self.logger.warning(f"✗ Slow type failed: {e}")
+            self.logger.warning(f"Not found Slow type failed: {e}")
             return False
 
     def clear(self, element: WebElement) -> bool:
@@ -191,10 +191,10 @@ class ElementInteractor:
         """
         try:
             element.clear()
-            self.logger.debug("✓ Cleared element")
+            self.logger.debug("Found Cleared element")
             return True
         except Exception as e:
-            self.logger.warning(f"✗ Clear failed: {e}")
+            self.logger.warning(f"Not found Clear failed: {e}")
             return False
 
     def select_by_visible_text(self, element: WebElement, text: str) -> bool:
@@ -214,10 +214,10 @@ class ElementInteractor:
         try:
             select = Select(element)
             select.select_by_visible_text(text)
-            self.logger.debug(f"✓ Selected by text: '{text}'")
+            self.logger.debug(f"Found Selected by text: '{text}'")
             return True
         except Exception as e:
-            self.logger.warning(f"✗ Select by text failed: {e}")
+            self.logger.warning(f"Not found Select by text failed: {e}")
             return False
 
     def select_by_value(self, element: WebElement, value: str) -> bool:
@@ -237,10 +237,10 @@ class ElementInteractor:
         try:
             select = Select(element)
             select.select_by_value(value)
-            self.logger.debug(f"✓ Selected by value: '{value}'")
+            self.logger.debug(f"Found Selected by value: '{value}'")
             return True
         except Exception as e:
-            self.logger.warning(f"✗ Select by value failed: {e}")
+            self.logger.warning(f"Not found Select by value failed: {e}")
             return False
 
     def select_by_index(self, element: WebElement, index: int) -> bool:
@@ -260,10 +260,10 @@ class ElementInteractor:
         try:
             select = Select(element)
             select.select_by_index(index)
-            self.logger.debug(f"✓ Selected by index: {index}")
+            self.logger.debug(f"Found Selected by index: {index}")
             return True
         except Exception as e:
-            self.logger.warning(f"✗ Select by index failed: {e}")
+            self.logger.warning(f"Not found Select by index failed: {e}")
             return False
 
     def get_select_options(self, element: WebElement) -> List[str]:
@@ -285,10 +285,10 @@ class ElementInteractor:
         try:
             select = Select(element)
             options = [opt.text for opt in select.options]
-            self.logger.debug(f"✓ Found {len(options)} options")
+            self.logger.debug(f"Found Found {len(options)} options")
             return options
         except Exception as e:
-            self.logger.warning(f"✗ Get options failed: {e}")
+            self.logger.warning(f"Not found Get options failed: {e}")
             return []
 
     def hover(self, element: WebElement) -> bool:
@@ -307,10 +307,10 @@ class ElementInteractor:
         try:
             actions = ActionChains(self.driver)
             actions.move_to_element(element).perform()
-            self.logger.debug("✓ Hovered over element")
+            self.logger.debug("Found Hovered over element")
             return True
         except Exception as e:
-            self.logger.warning(f"✗ Hover failed: {e}")
+            self.logger.warning(f"Not found Hover failed: {e}")
             return False
 
     def double_click(self, element: WebElement) -> bool:
@@ -329,10 +329,10 @@ class ElementInteractor:
         try:
             actions = ActionChains(self.driver)
             actions.double_click(element).perform()
-            self.logger.debug("✓ Double-clicked element")
+            self.logger.debug("Found Double-clicked element")
             return True
         except Exception as e:
-            self.logger.warning(f"✗ Double-click failed: {e}")
+            self.logger.warning(f"Not found Double-click failed: {e}")
             return False
 
     def right_click(self, element: WebElement) -> bool:
@@ -351,10 +351,10 @@ class ElementInteractor:
         try:
             actions = ActionChains(self.driver)
             actions.context_click(element).perform()
-            self.logger.debug("✓ Right-clicked element")
+            self.logger.debug("Found Right-clicked element")
             return True
         except Exception as e:
-            self.logger.warning(f"✗ Right-click failed: {e}")
+            self.logger.warning(f"Not found Right-click failed: {e}")
             return False
 
     def drag_and_drop(self, source: WebElement, target: WebElement) -> bool:
@@ -374,10 +374,10 @@ class ElementInteractor:
         try:
             actions = ActionChains(self.driver)
             actions.drag_and_drop(source, target).perform()
-            self.logger.debug("✓ Drag and drop completed")
+            self.logger.debug("Found Drag and drop completed")
             return True
         except Exception as e:
-            self.logger.warning(f"✗ Drag and drop failed: {e}")
+            self.logger.warning(f"Not found Drag and drop failed: {e}")
             return False
 
     def scroll_to_element(self, element: WebElement) -> bool:
@@ -398,10 +398,10 @@ class ElementInteractor:
                 "arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});",
                 element,
             )
-            self.logger.debug("✓ Scrolled to element")
+            self.logger.debug("Found Scrolled to element")
             return True
         except Exception as e:
-            self.logger.warning(f"✗ Scroll failed: {e}")
+            self.logger.warning(f"Not found Scroll failed: {e}")
             return False
 
     def send_keys(self, element: WebElement, *keys) -> bool:
@@ -421,10 +421,10 @@ class ElementInteractor:
         """
         try:
             element.send_keys(*keys)
-            self.logger.debug(f"✓ Sent keys: {keys}")
+            self.logger.debug(f"Found Sent keys: {keys}")
             return True
         except Exception as e:
-            self.logger.warning(f"✗ Send keys failed: {e}")
+            self.logger.warning(f"Not found Send keys failed: {e}")
             return False
 
     def get_text(self, element: WebElement) -> str:
@@ -442,10 +442,10 @@ class ElementInteractor:
         """
         try:
             text = element.text
-            self.logger.debug(f"✓ Got text: '{text[:50]}...'")
+            self.logger.debug(f"Found Got text: '{text[:50]}...'")
             return text
         except Exception as e:
-            self.logger.warning(f"✗ Get text failed: {e}")
+            self.logger.warning(f"Not found Get text failed: {e}")
             return ""
 
     def get_attribute(
@@ -467,10 +467,10 @@ class ElementInteractor:
         """
         try:
             value = element.get_attribute(attribute)
-            self.logger.debug(f"✓ Got attribute '{attribute}': '{value}'")
+            self.logger.debug(f"Found Got attribute '{attribute}': '{value}'")
             return value
         except Exception as e:
-            self.logger.warning(f"✗ Get attribute failed: {e}")
+            self.logger.warning(f"Not found Get attribute failed: {e}")
             return None
 
     def is_displayed(self, element: WebElement) -> bool:

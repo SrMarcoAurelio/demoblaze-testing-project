@@ -5,7 +5,7 @@ Comprehensive library of attack payloads for security testing.
 Author: Marc Arévalo
 Version: 1.0
 
-⚠️  CRITICAL SECURITY WARNING ⚠️
+WARNING️  CRITICAL SECURITY WARNING WARNING️
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 This library contains DESTRUCTIVE payloads that can cause data loss!
 
@@ -14,13 +14,13 @@ DESTRUCTIVE PAYLOADS INCLUDE:
 - DELETE/TRUNCATE operations (can remove all data)
 - File system operations (can delete files)
 
-⚠️  NEVER USE AGAINST:
+WARNING️  NEVER USE AGAINST:
 - Production systems
 - Live databases
 - Shared environments
 - Any system with real data
 
-✓  ONLY USE FOR:
+OK  ONLY USE FOR:
 - Isolated test environments
 - Test databases with dummy data
 - Security testing with explicit authorization
@@ -123,9 +123,9 @@ class PayloadLibrary:
             ),
             Payload(
                 value="'; DROP TABLE users--",
-                name="⚠️ DESTRUCTIVE SQL Injection - DROP TABLE",
+                name="WARNING️ DESTRUCTIVE SQL Injection - DROP TABLE",
                 description=(
-                    "⚠️ DANGER: This payload attempts to DELETE ENTIRE TABLE! "
+                    "WARNING️ DANGER: This payload attempts to DELETE ENTIRE TABLE! "
                     "ONLY use in isolated test environment with backups. "
                     "NEVER use against production or shared systems."
                 ),

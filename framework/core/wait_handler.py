@@ -81,11 +81,11 @@ class WaitHandler:
                 self.driver, timeout, poll_frequency=self.poll_frequency
             )
             element = wait.until(EC.visibility_of_element_located((by, value)))
-            self.logger.debug(f"✓ Element visible: {by}='{value}'")
+            self.logger.debug(f"Found Element visible: {by}='{value}'")
             return element
         except TimeoutException:
             self.logger.debug(
-                f"✗ Element not visible after {timeout}s: {by}='{value}'"
+                f"Not found Element not visible after {timeout}s: {by}='{value}'"
             )
             return None
 
@@ -112,11 +112,11 @@ class WaitHandler:
                 self.driver, timeout, poll_frequency=self.poll_frequency
             )
             element = wait.until(EC.presence_of_element_located((by, value)))
-            self.logger.debug(f"✓ Element present: {by}='{value}'")
+            self.logger.debug(f"Found Element present: {by}='{value}'")
             return element
         except TimeoutException:
             self.logger.debug(
-                f"✗ Element not present after {timeout}s: {by}='{value}'"
+                f"Not found Element not present after {timeout}s: {by}='{value}'"
             )
             return None
 
@@ -143,11 +143,11 @@ class WaitHandler:
                 self.driver, timeout, poll_frequency=self.poll_frequency
             )
             element = wait.until(EC.element_to_be_clickable((by, value)))
-            self.logger.debug(f"✓ Element clickable: {by}='{value}'")
+            self.logger.debug(f"Found Element clickable: {by}='{value}'")
             return element
         except TimeoutException:
             self.logger.debug(
-                f"✗ Element not clickable after {timeout}s: {by}='{value}'"
+                f"Not found Element not clickable after {timeout}s: {by}='{value}'"
             )
             return None
 
@@ -175,11 +175,11 @@ class WaitHandler:
                 self.driver, timeout, poll_frequency=self.poll_frequency
             )
             wait.until(EC.invisibility_of_element_located((by, value)))
-            self.logger.debug(f"✓ Element invisible: {by}='{value}'")
+            self.logger.debug(f"Found Element invisible: {by}='{value}'")
             return True
         except TimeoutException:
             self.logger.debug(
-                f"✗ Element still visible after {timeout}s: {by}='{value}'"
+                f"Not found Element still visible after {timeout}s: {by}='{value}'"
             )
             return False
 
@@ -208,10 +208,10 @@ class WaitHandler:
                 self.driver, timeout, poll_frequency=self.poll_frequency
             )
             wait.until(EC.text_to_be_present_in_element((by, value), text))
-            self.logger.debug(f"✓ Text present: '{text}' in {by}='{value}'")
+            self.logger.debug(f"Found Text present: '{text}' in {by}='{value}'")
             return True
         except TimeoutException:
-            self.logger.debug(f"✗ Text not present after {timeout}s: '{text}'")
+            self.logger.debug(f"Not found Text not present after {timeout}s: '{text}'")
             return False
 
     def wait_for_alert(self, timeout: Optional[int] = None) -> Optional[Any]:
@@ -235,10 +235,10 @@ class WaitHandler:
                 self.driver, timeout, poll_frequency=self.poll_frequency
             )
             alert = wait.until(EC.alert_is_present())
-            self.logger.debug("✓ Alert present")
+            self.logger.debug("Found Alert present")
             return alert
         except TimeoutException:
-            self.logger.debug(f"✗ No alert after {timeout}s")
+            self.logger.debug(f"Not found No alert after {timeout}s")
             return None
 
     def wait_for_url_contains(
@@ -264,11 +264,11 @@ class WaitHandler:
                 self.driver, timeout, poll_frequency=self.poll_frequency
             )
             wait.until(EC.url_contains(url_part))
-            self.logger.debug(f"✓ URL contains: '{url_part}'")
+            self.logger.debug(f"Found URL contains: '{url_part}'")
             return True
         except TimeoutException:
             self.logger.debug(
-                f"✗ URL does not contain '{url_part}' after {timeout}s"
+                f"Not found URL does not contain '{url_part}' after {timeout}s"
             )
             return False
 
@@ -295,10 +295,10 @@ class WaitHandler:
                 self.driver, timeout, poll_frequency=self.poll_frequency
             )
             wait.until(EC.url_to_be(url))
-            self.logger.debug(f"✓ URL is: '{url}'")
+            self.logger.debug(f"Found URL is: '{url}'")
             return True
         except TimeoutException:
-            self.logger.debug(f"✗ URL is not '{url}' after {timeout}s")
+            self.logger.debug(f"Not found URL is not '{url}' after {timeout}s")
             return False
 
     def wait_for_title_contains(
@@ -324,11 +324,11 @@ class WaitHandler:
                 self.driver, timeout, poll_frequency=self.poll_frequency
             )
             wait.until(EC.title_contains(title))
-            self.logger.debug(f"✓ Title contains: '{title}'")
+            self.logger.debug(f"Found Title contains: '{title}'")
             return True
         except TimeoutException:
             self.logger.debug(
-                f"✗ Title does not contain '{title}' after {timeout}s"
+                f"Not found Title does not contain '{title}' after {timeout}s"
             )
             return False
 
@@ -375,12 +375,12 @@ class WaitHandler:
             )
             wait.until(check_attribute)
             self.logger.debug(
-                f"✓ Attribute '{attribute}' = '{attribute_value}' for {by}='{value}'"
+                f"Found Attribute '{attribute}' = '{attribute_value}' for {by}='{value}'"
             )
             return True
         except TimeoutException:
             self.logger.debug(
-                f"✗ Attribute condition not met after {timeout}s"
+                f"Not found Attribute condition not met after {timeout}s"
             )
             return False
 
@@ -417,10 +417,10 @@ class WaitHandler:
                 self.driver, timeout, poll_frequency=self.poll_frequency
             )
             wait.until(condition)
-            self.logger.debug(f"✓ Custom condition met")
+            self.logger.debug(f"Found Custom condition met")
             return True
         except TimeoutException:
-            self.logger.debug(f"✗ {error_message} after {timeout}s")
+            self.logger.debug(f"Not found {error_message} after {timeout}s")
             return False
 
     def wait_for_page_load(self, timeout: Optional[int] = None) -> bool:

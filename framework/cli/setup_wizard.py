@@ -34,12 +34,12 @@ def print_header(text: str) -> None:
 
 def print_success(text: str) -> None:
     """Print success message"""
-    print(f"{Colors.GREEN}✓ {text}{Colors.END}")
+    print(f"{Colors.GREEN}OK {text}{Colors.END}")
 
 
 def print_error(text: str) -> None:
     """Print error message"""
-    print(f"{Colors.RED}✗ {text}{Colors.END}")
+    print(f"{Colors.RED}FAIL {text}{Colors.END}")
 
 
 def print_info(text: str) -> None:
@@ -248,7 +248,7 @@ def show_next_steps() -> None:
     """Show next steps after setup"""
     print_header("Setup Complete!")
 
-    print(f"{Colors.GREEN}{Colors.BOLD}✓ Framework configured successfully!{Colors.END}\n")
+    print(f"{Colors.GREEN}{Colors.BOLD}OK Framework configured successfully!{Colors.END}\n")
 
     print(f"{Colors.BOLD}Next Steps:{Colors.END}\n")
 

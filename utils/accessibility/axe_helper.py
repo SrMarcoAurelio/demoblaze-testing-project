@@ -48,7 +48,7 @@ class AxeHelper:
     def inject_axe(self) -> None:
         """Inject axe-core script into page."""
         self.axe.inject()
-        logger.debug("✓ Axe-core injected into page")
+        logger.debug("OK Axe-core injected into page")
 
     def run_wcag_aa(self) -> Dict[str, Any]:
         """

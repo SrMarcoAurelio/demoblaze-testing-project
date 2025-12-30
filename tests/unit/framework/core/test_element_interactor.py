@@ -16,6 +16,8 @@ from unittest.mock import Mock, MagicMock, patch, call
 
 from framework.core.element_interactor import ElementInteractor
 
+pytestmark = pytest.mark.unit
+
 
 class TestElementInteractor:
     """Test suite for ElementInteractor class"""

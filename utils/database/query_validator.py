@@ -46,7 +46,7 @@ class QueryValidator:
             )
             assert found, f"No row found matching {expected_values}"
 
-        logger.debug(f"✓ Row exists (found {len(results)} rows)")
+        logger.debug(f"OK Row exists (found {len(results)} rows)")
         return True
 
     @staticmethod
@@ -65,7 +65,7 @@ class QueryValidator:
         """
         assert len(results) == 0, f"Expected 0 rows, got {len(results)}"
 
-        logger.debug("✓ Row does not exist")
+        logger.debug("OK Row does not exist")
         return True
 
     @staticmethod
@@ -90,7 +90,7 @@ class QueryValidator:
             actual_count == expected_count
         ), f"Expected {expected_count} rows, got {actual_count}"
 
-        logger.debug(f"✓ Row count = {actual_count}")
+        logger.debug(f"OK Row count = {actual_count}")
         return True
 
     @staticmethod
@@ -118,7 +118,7 @@ class QueryValidator:
             actual_value == expected_value
         ), f"Field '{field}': expected '{expected_value}', got '{actual_value}'"
 
-        logger.debug(f"✓ Field '{field}' = '{expected_value}'")
+        logger.debug(f"OK Field '{field}' = '{expected_value}'")
         return True
 
     @staticmethod
@@ -139,7 +139,7 @@ class QueryValidator:
         assert field in row, f"Field '{field}' not found in row"
         assert row[field] is not None, f"Field '{field}' is NULL"
 
-        logger.debug(f"✓ Field '{field}' is not NULL")
+        logger.debug(f"OK Field '{field}' is not NULL")
         return True
 
     @staticmethod
@@ -160,7 +160,7 @@ class QueryValidator:
         assert field in row, f"Field '{field}' not found in row"
         assert row[field] is None, f"Field '{field}' is not NULL: {row[field]}"
 
-        logger.debug(f"✓ Field '{field}' is NULL")
+        logger.debug(f"OK Field '{field}' is NULL")
         return True
 
     @staticmethod
@@ -190,7 +190,7 @@ class QueryValidator:
             actual_value, expected_type
         ), f"Field '{field}': expected {expected_type.__name__}, got {actual_type.__name__}"
 
-        logger.debug(f"✓ Field '{field}' type is {expected_type.__name__}")
+        logger.debug(f"OK Field '{field}' type is {expected_type.__name__}")
         return True
 
     @staticmethod
@@ -219,6 +219,6 @@ class QueryValidator:
             ), f"Row {i}: field '{field}' expected '{expected_value}', got '{actual}'"
 
         logger.debug(
-            f"✓ All {len(results)} rows have '{field}' = '{expected_value}'"
+            f"OK All {len(results)} rows have '{field}' = '{expected_value}'"
         )
         return True
