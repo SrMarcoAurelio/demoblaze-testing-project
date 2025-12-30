@@ -13,6 +13,8 @@ from unittest.mock import Mock, MagicMock, patch
 
 from framework.core.element_finder import ElementFinder
 
+pytestmark = pytest.mark.unit
+
 
 class TestElementFinder:
     """Test suite for ElementFinder class"""

@@ -11,6 +11,8 @@ from unittest.mock import Mock, MagicMock, patch
 
 from framework.core.discovery_engine import DiscoveryEngine
 
+pytestmark = pytest.mark.unit
+
 
 class TestDiscoveryEngine:
     """Test suite for DiscoveryEngine class"""
