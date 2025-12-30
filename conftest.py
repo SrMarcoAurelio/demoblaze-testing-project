@@ -542,7 +542,7 @@ def minimal_purchase_data():
 #     browser.get(base_url)
 #     return LoginPage(browser)
 #
-# See examples/demoblaze/conftest.py for reference implementation
+# See templates/page_objects/ and templates/configuration/ for templates
 
 
 # ============================================================================
@@ -560,7 +560,7 @@ def minimal_purchase_data():
 #     yield login_page
 #     login_page.logout()
 #
-# See examples/demoblaze/conftest.py for reference implementation
+# See templates/configuration/__template_conftest.py for more examples
 
 
 # ============================================================================

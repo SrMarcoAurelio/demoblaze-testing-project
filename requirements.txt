@@ -1,24 +1,38 @@
+# Universal Test Automation Framework - Core Dependencies
+# Only essential dependencies for the framework to work
+
+# Core Test Framework
 selenium==4.25.0
-selenium-wire==5.1.0
-webdriver-manager==4.0.2
-requests==2.32.3
 pytest==8.3.3
 pytest-html==4.1.1
 pytest-xdist==3.5.0
 pytest-rerunfailures==15.0
 pytest-cov==6.0.0
-allure-pytest==2.13.2
 coverage==7.6.10
+
+# WebDriver Management
+webdriver-manager==4.0.2
+
+# HTTP/API Testing
+requests==2.32.3
+selenium-wire==5.1.0
+
+# Reporting
+allure-pytest==2.13.2
+
+# Accessibility Testing
 axe-selenium-python==2.1.6
+
+# Data Generation
+Faker==33.1.0
+
+# Configuration & Validation
+jsonschema==4.23.0
+
+# Code Quality (Development)
 flake8==7.0.0
 mypy==1.18.2
 types-requests==2.32.4.20250913
 black==25.11.0
 isort==5.13.2
 pre-commit==4.5.0
-Faker==33.1.0
-jsonschema==4.23.0
-pymysql==1.1.1
-psycopg2-binary==2.9.10
-pyodbc==5.2.0
-Pillow==11.0.0
