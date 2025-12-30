@@ -1,7 +1,7 @@
 """
 Project Configuration - Universal Test Automation Framework
 Author: Marc Arevalo
-Version: 6.0
+Version: 6.2.0
 
 Centralized configuration management for all test components.
 All configuration values MUST be provided via environment variables.

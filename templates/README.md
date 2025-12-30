@@ -9,7 +9,7 @@ These templates are **starting points** for building YOUR test automation suite.
 ## ⚠️ Important
 
 - **DO NOT use templates directly** - They will not work without adaptation
-- **DO NOT copy Demoblaze examples** - They are application-specific
+- **DO NOT treat framework examples as YOUR tests** - They demonstrate features, not your application
 - **DO adapt templates** to YOUR application's locators, workflows, and business logic
 
 ## 📁 Directory Structure
@@ -197,18 +197,18 @@ Work through the checklist to ensure complete adaptation.
 
 ## 🎓 Learning Resources
 
-### Study the Demoblaze Example
+### Study the Framework Examples
 
-The `examples/demoblaze/` directory contains a **complete working example**:
+The `tests/examples/` directory contains examples demonstrating framework capabilities:
 
 ```bash
-# View example implementation
-ls examples/demoblaze/pages/     # Page objects
-ls examples/demoblaze/tests/     # Tests
-cat examples/demoblaze/README.md # Detailed guide
+# View example tests
+ls tests/examples/api/          # API testing examples
+ls tests/examples/database/     # Database testing examples
+cat tests/examples/README.md    # Examples documentation
 ```
 
-**Remember:** The example is Demoblaze-specific. Study the patterns, then adapt to YOUR application.
+**Remember:** These are examples showing HOW to use framework features, not application-specific tests. Study the patterns, then create tests for YOUR application.
 
 ### Framework Documentation
 
@@ -231,8 +231,8 @@ Read the framework documentation to understand:
 **Q: Can I use templates without modification?**
 A: No. Templates have placeholder values that won't work without adaptation.
 
-**Q: Should I copy the Demoblaze examples?**
-A: No. Study them for patterns, but create your own for YOUR application.
+**Q: Should I copy the framework examples?**
+A: No. Those examples demonstrate framework features (API testing, database testing). Study them for patterns, but create your own tests for YOUR application.
 
 **Q: What if my application doesn't have a login page?**
 A: Skip that template and adapt the ones you need.
@@ -251,12 +251,12 @@ A: Adapt it or create your own. Templates are guides, not requirements.
 
 ## 🔗 Next Steps
 
-1. **Read** framework documentation
-2. **Study** Demoblaze examples (examples/demoblaze/)
-3. **Copy** templates you need
-4. **Find** YOUR application's locators
-5. **Replace** all placeholders
-6. **Remove** pytest.skip()
+1. **Read** framework documentation (documentation/README.md)
+2. **Study** framework examples (tests/examples/)
+3. **Copy** templates you need to pages/ and tests/
+4. **Find** YOUR application's locators using DevTools (F12)
+5. **Replace** all placeholders with YOUR values
+6. **Remove** pytest.skip() when adapted
 7. **Test** with YOUR application
 8. **Iterate** and improve
 
@@ -264,8 +264,8 @@ A: Adapt it or create your own. Templates are guides, not requirements.
 
 For template questions:
 - Check adaptation checklist in each template
-- Study Demoblaze examples for reference
-- Read framework documentation
+- Study framework examples for patterns (tests/examples/)
+- Read framework documentation (documentation/README.md)
 - Review best practices above
 
 ---

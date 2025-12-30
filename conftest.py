@@ -1,7 +1,7 @@
 """
 Pytest Configuration - Universal Test Automation Framework
 Author: Arevalo, Marc
-Version: 6.0
+Version: 6.2.0
 
 Centralized pytest configuration for universal test automation framework.
 Provides browser management, fixtures, reporting, and performance tracking.

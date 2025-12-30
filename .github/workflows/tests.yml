@@ -89,7 +89,8 @@ jobs:
         run: |
           # Run only tests marked with @pytest.mark.unit
           # These tests don't require browser/WebDriver
-          pytest -m unit -v --maxfail=5 --tb=short
+          # Disable retries for unit tests (--reruns=0) since they shouldn't be flaky
+          pytest -m unit -v --maxfail=5 --tb=short --reruns=0
         continue-on-error: false
 
   # Job 3: Functional Tests (Chrome)
@@ -273,7 +274,7 @@ jobs:
         run: |
           echo "## Test Execution Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ **Framework**: Universal Test Automation Framework v6.0" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Framework**: Universal Test Automation Framework v6.2.0" >> $GITHUB_STEP_SUMMARY
           echo "🔧 **Python Version**: ${{ env.PYTHON_VERSION }}" >> $GITHUB_STEP_SUMMARY
           echo "🌐 **Target**: \${BASE_URL:-Not Set}" >> $GITHUB_STEP_SUMMARY
           echo "📅 **Date**: $(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_STEP_SUMMARY

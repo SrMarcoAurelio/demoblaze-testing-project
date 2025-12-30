@@ -6,7 +6,7 @@ Professional test automation framework built with Python, Selenium, and Pytest f
 [![Selenium](https://img.shields.io/badge/selenium-4.25.0-green.svg)](https://www.selenium.dev/)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-**Version**: 6.0 (Universal Edition)
+**Version**: 6.2.0 (Universal Edition)
 **Author**: Marc Arevalo
 **License**: MIT
 
@@ -187,6 +187,8 @@ pytest --cov=pages --cov=utils
 ---
 
 ## Framework Architecture
+
+📖 **For detailed architecture documentation, see [ARCHITECTURE.md](ARCHITECTURE.md)**
 
 ### Core Components (`framework/`)
 
@@ -666,7 +668,7 @@ Questions, feedback, and collaboration opportunities welcome.
 ---
 
 **Last Updated**: December 2025
-**Version**: 6.0 (Universal Edition)
+**Version**: 6.2.0 (Universal Edition)
 **Status**: Production-ready framework requiring application-specific adaptation
 
 For complete documentation, see [documentation/README.md](documentation/README.md)
