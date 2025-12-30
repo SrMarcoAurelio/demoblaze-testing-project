@@ -29,12 +29,54 @@ This framework follows a **universal design philosophy**:
 utils/
 ├── __init__.py
 ├── README.md (this file)
-└── helpers/
-    ├── __init__.py
-    ├── data_generator.py    # Generate test data (users, emails, passwords, etc.)
-    ├── wait_helpers.py      # Waiting strategies and retry logic
-    └── validators.py        # Data validation functions
+├── locators_loader.py       # ⭐ Locator file loader (root level for convenience)
+│
+├── api/                     # REST API testing utilities
+│   ├── api_client.py
+│   ├── response_validator.py
+│   └── schema_validator.py
+│
+├── database/                # Database testing utilities
+│   ├── connection_manager.py
+│   ├── query_executor.py
+│   └── query_validator.py
+│
+├── security/                # Security testing utilities
+│   ├── payload_library.py
+│   ├── vulnerability_scanner.py
+│   ├── response_analyzer.py
+│   ├── http_interceptor.py
+│   └── security_report.py
+│
+├── performance/             # Performance monitoring utilities
+│   ├── metrics.py
+│   ├── decorators.py
+│   └── reporter.py
+│
+├── visual/                  # Visual regression utilities
+│   ├── screenshot_manager.py
+│   └── visual_comparator.py
+│
+├── accessibility/           # Accessibility testing utilities
+│   └── axe_helper.py
+│
+├── test_data/              # Test data generation utilities
+│   ├── generators.py
+│   └── data_factory.py
+│
+├── auto_config/            # Auto-configuration utilities
+│   ├── page_crawler.py
+│   ├── locator_extractor.py
+│   ├── code_generator.py
+│   └── intelligent_scanner.py
+│
+└── helpers/                # General helper utilities
+    ├── data_generator.py   # Generate test data (users, emails, passwords, etc.)
+    ├── wait_helpers.py     # Waiting strategies and retry logic
+    └── validators.py       # Data validation functions
 ```
+
+**Note on `locators_loader.py`**: This commonly-used utility is kept at the package root level (not in a subdirectory) for convenience. It's imported frequently throughout the framework, and the shorter import path (`from utils.locators_loader import ...`) improves usability without compromising organization.
 
 ---
 

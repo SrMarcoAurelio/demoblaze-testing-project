@@ -1,18 +1,22 @@
 """
-DemoBlaze Test Automation Suite - POM Architecture
+Universal Test Automation Framework - Test Suite
 Author: Arévalo, Marc
-Version: 5.0
+Version: 6.2.0
 
-Test Modules:
-- catalog: Product catalog and navigation tests
-- login: User authentication tests
-- product: Product detail page tests
-- purchase: Shopping cart and checkout tests
-- signup: User registration tests
+Test Organization:
+- unit/: Framework unit tests (utilities, helpers, core modules)
+- framework/: Framework feature tests (auto-config, security, performance)
+- examples/: Example tests demonstrating framework capabilities
+  - api/: API testing examples
+  - database/: Database testing examples
 
-Test Structure:
-Each module contains:
-- test_*_functional.py: Core functionality tests
-- test_*_business.py: Business rules validation tests
-- test_*_security.py: Security and vulnerability tests
+Test Types (Markers):
+- @pytest.mark.unit: Unit tests (no browser required)
+- @pytest.mark.functional: Functional/integration tests
+- @pytest.mark.security: Security and vulnerability tests
+- @pytest.mark.api: API testing examples
+- @pytest.mark.database: Database testing examples
+
+Note: This is a UNIVERSAL framework. Application-specific tests
+should be placed in tests/ root directory (not in subdirectories).
 """

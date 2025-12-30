@@ -330,7 +330,7 @@ pytest tests/your_test.py::test_something -v
 
 ## 📚 Examples
 
-See `tests/examples/test_fixtures_demo.py` for comprehensive examples of:
+See framework documentation and `tests/examples/` for comprehensive examples of:
 - Basic fixture usage
 - Parametrized tests with fixtures
 - Before/after comparisons

@@ -1,0 +1,49 @@
+# Optional Dependencies - Universal Test Automation Framework
+# Install only if you need specific features
+
+# ============================================================================
+# DATABASE TESTING
+# ============================================================================
+# Install if you need to test database interactions or validate data
+#
+# Usage:
+#   pip install -r requirements-optional.txt
+#
+# Or install selectively:
+#   pip install pymysql  # For MySQL/MariaDB
+#   pip install psycopg2-binary  # For PostgreSQL
+#   pip install pyodbc  # For SQL Server
+
+# MySQL / MariaDB
+pymysql==1.1.1
+
+# PostgreSQL
+psycopg2-binary==2.9.10
+
+# SQL Server
+pyodbc==5.2.0
+
+
+# ============================================================================
+# VISUAL REGRESSION TESTING
+# ============================================================================
+# Install if you need screenshot comparison or image processing
+#
+# Usage:
+#   pip install Pillow
+
+# Image Processing
+Pillow==11.0.0
+
+
+# ============================================================================
+# ADVANCED FEATURES (Future)
+# ============================================================================
+# Placeholder for future optional dependencies
+#
+# Examples:
+# - opencv-python  # Advanced visual testing
+# - numpy  # Data analysis
+# - pandas  # Test data management
+# - locust  # Performance/load testing
+# - behave  # BDD support

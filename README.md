@@ -6,7 +6,7 @@ Professional test automation framework built with Python, Selenium, and Pytest f
 [![Selenium](https://img.shields.io/badge/selenium-4.25.0-green.svg)](https://www.selenium.dev/)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-**Version**: 6.0 (Universal Edition)
+**Version**: 6.2.0 (Universal Edition)
 **Author**: Marc Arevalo
 **License**: MIT
 
@@ -14,33 +14,53 @@ Professional test automation framework built with Python, Selenium, and Pytest f
 
 ## 🚀 5-Minute Quick Start
 
-**Want to try it out? Here's the fastest path:**
+**Want to get started? Use our interactive setup script:**
 
 ```bash
-# 1. Clone and install (1 minute)
+# 1. Clone and navigate (30 seconds)
 git clone https://github.com/SrMarcoAurelio/demoblaze-testing-project.git
 cd demoblaze-testing-project
+
+# 2. Run quick start script (3 minutes)
+python quick_start.py
+# This will:
+#   - Check Python version and dependencies
+#   - Create virtual environment (if needed)
+#   - Install dependencies
+#   - Configure .env file interactively
+#   - Run framework unit tests
+#   - Show you next steps
+
+# 3. Create your first page object (2 minutes)
+cp templates/page_objects/__template_login_page.py pages/login_page.py
+# Edit pages/login_page.py with YOUR app's locators
+
+# 4. Create your first test (1 minute)
+cp templates/test_files/__template_functional_test.py tests/test_login.py
+# Edit tests/test_login.py to test YOUR app
+
+# 5. Run your tests!
+pytest tests/test_login.py -v
+```
+
+**Alternative - Manual Setup:**
+
+```bash
+# 1. Install dependencies
 python -m venv venv && source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-# 2. Run example tests (30 seconds)
-cd examples/demoblaze
-pytest tests/login/ -v  # See the framework in action
+# 2. Configure environment
+cp config/examples/.env.development .env
+# Edit .env with your application URL and credentials
 
-# 3. Start building YOUR test suite (3 minutes)
-cd ../..
-export BASE_URL="https://your-application.com"  # YOUR app URL
-cp templates/page_objects/__template_login_page.py pages/login_page.py
+# 3. Verify framework works
+pytest tests/unit/framework/core/ -v
 
-# 4. Adapt to YOUR app
-# - Open browser DevTools (F12)
-# - Find YOUR login button ID
-# - Replace "YOUR_LOGIN_BUTTON_ID" in pages/login_page.py
-# - Remove pytest.skip() line
-# - Run pytest tests/!
+# 4. Start building YOUR test suite (see step 3-5 above)
 ```
 
-**That's it!** You've seen the framework in action and started adapting it to YOUR application.
+**That's it!** Framework verified and ready for YOUR application.
 
 ---
 
@@ -167,6 +187,8 @@ pytest --cov=pages --cov=utils
 ---
 
 ## Framework Architecture
+
+📖 **For detailed architecture documentation, see [ARCHITECTURE.md](ARCHITECTURE.md)**
 
 ### Core Components (`framework/`)
 
@@ -646,7 +668,7 @@ Questions, feedback, and collaboration opportunities welcome.
 ---
 
 **Last Updated**: December 2025
-**Version**: 6.0 (Universal Edition)
+**Version**: 6.2.0 (Universal Edition)
 **Status**: Production-ready framework requiring application-specific adaptation
 
 For complete documentation, see [documentation/README.md](documentation/README.md)

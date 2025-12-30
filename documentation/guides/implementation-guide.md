@@ -357,77 +357,83 @@ prepared_checkout     # Ready for checkout
 ## 🏗️ FRAMEWORK ARCHITECTURE
 
 ```
-test-automation-framework/
+universal-test-framework/
 │
-├── pages/                      # Page Object Model
-│   ├── base_page.py           # Base class with common utilities
-│   ├── login_page.py          # Login page
-│   ├── catalog_page.py        # Catalog page
-│   ├── product_page.py        # Product page
-│   ├── cart_page.py           # Shopping cart page
-│   ├── purchase_page.py       # Checkout page
-│   └── signup_page.py         # Registration page
+├── framework/                  # UNIVERSAL FRAMEWORK CORE
+│   ├── core/                  # Discovery-based core components
+│   │   ├── element_finder.py  # Element discovery with fallback
+│   │   ├── element_interactor.py  # Element interactions
+│   │   ├── wait_handler.py    # Intelligent wait strategies
+│   │   └── discovery_engine.py    # Page structure discovery
+│   ├── adapters/              # Application adapters (optional)
+│   │   ├── base_adapter.py    # Abstract adapter interface
+│   │   └── adapter_template.py    # Template for your adapter
+│   ├── cli/                   # Command-line tools
+│   │   ├── setup_wizard.py    # Interactive configuration
+│   │   └── README.md          # CLI documentation
+│   └── generators/            # Code generators (planned v7.0)
+│       └── README.md          # Generator roadmap
 │
-├── tests/                      # Tests organized by module
-│   ├── login/                 # Login tests
-│   │   ├── test_login_functional.py
-│   │   ├── test_login_business.py
-│   │   └── test_login_security.py
-│   ├── catalog/               # Catalog tests
-│   ├── product/               # Product tests
-│   ├── cart/                  # Cart tests (future)
-│   ├── purchase/              # Purchase tests
-│   ├── signup/                # Signup tests
-│   ├── performance/           # Performance tests
-│   ├── accessibility/         # Accessibility tests
-│   ├── test_utils/            # Utility unit tests
-│   ├── test_data.py           # Centralized test data
-│   └── examples/              # Fixture usage examples
+├── pages/                     # YOUR PAGE OBJECTS (empty by default)
+│   ├── README.md              # Instructions for users
+│   └── __init__.py           # Package marker
 │
-├── utils/                      # Reusable utilities
-│   ├── accessibility/
-│   │   └── axe_helper.py      # WCAG testing helper
-│   ├── performance/
-│   │   ├── metrics.py         # Performance metrics collector
-│   │   ├── decorators.py      # Performance decorators
-│   │   └── reporter.py        # HTML reporter
-│   ├── helpers/
-│   │   ├── data_generator.py  # Test data generation
-│   │   ├── validators.py      # Validation utilities
-│   │   └── wait_helpers.py    # Wait strategies
-│   └── locators_loader.py     # JSON locator loader
+├── tests/                     # TEST ORGANIZATION
+│   ├── unit/                  # Framework unit tests
+│   │   └── framework/core/    # Tests for framework core
+│   ├── framework/             # Framework feature tests
+│   │   ├── utils/            # Utility tests
+│   │   └── security/         # Security feature tests
+│   ├── examples/              # Example/demo tests
+│   │   ├── api/              # API testing examples
+│   │   ├── database/         # Database testing examples
+│   │   └── README.md         # Examples documentation
+│   └── static_test_data.py   # Universal test data templates
 │
-├── config/                     # Configuration
-│   ├── config.py              # Application settings
-│   └── locators.json          # External locators (JSON)
+├── utils/                     # REUSABLE UTILITIES
+│   ├── accessibility/         # WCAG testing
+│   ├── api/                  # API testing client
+│   ├── database/             # Database testing
+│   ├── performance/          # Performance monitoring
+│   ├── security/             # Security testing
+│   ├── helpers/              # Generic helpers
+│   ├── standards/            # Standards validators
+│   ├── test_data/            # Test data factories
+│   └── visual/               # Visual regression
 │
-├── results/                    # Test results and reports
-│   ├── general/               # HTML test reports
-│   ├── coverage/              # Code coverage reports
-│   ├── performance/           # Performance metrics
-│   └── accessibility/         # Accessibility reports
+├── config/                    # CONFIGURATION
+│   ├── config.py             # Framework configuration
+│   └── examples/             # Multi-environment examples
+│       ├── .env.development  # Dev environment
+│       ├── .env.staging      # Staging environment
+│       ├── .env.production   # Production (read-only)
+│       └── browser_options.py    # Performance configs
 │
-├── docs/                       # Documentation
-│   ├── test-plan.md
-│   ├── users-flow.md
-│   └── test_summary_report.md
+├── templates/                 # USER TEMPLATES
+│   ├── page_objects/         # Page object templates
+│   ├── test_files/           # Test file templates
+│   ├── configuration/        # Config templates
+│   └── README.md             # Template guide
 │
-├── templates/                  # Testing templates
-│   ├── Functionality/         # Functional test templates
-│   ├── Security/              # Security test templates
-│   └── discover-philosophy/   # Testing philosophy
+├── documentation/             # COMPREHENSIVE GUIDES
+│   ├── getting-started/      # Installation & quick start
+│   ├── guides/               # Implementation guides
+│   ├── api-reference/        # API documentation
+│   ├── architecture/         # Architecture docs
+│   └── testing-philosophy/   # Testing philosophy
 │
-├── .github/workflows/          # CI/CD pipelines
-│   └── tests.yml              # GitHub Actions workflow
+├── .github/workflows/         # CI/CD
+│   └── tests.yml             # GitHub Actions workflow
 │
-├── conftest.py                 # Pytest configuration & fixtures
-├── pytest.ini                  # Pytest settings
-├── requirements.txt            # Python dependencies
-├── .coveragerc                 # Coverage configuration
-├── mypy.ini                    # Type checking configuration
-├── .pre-commit-config.yaml     # Pre-commit hooks
-├── docker-compose.yml          # Docker setup
-└── Dockerfile                  # Docker image definition
+├── quick_start.py             # Interactive onboarding script
+├── conftest.py                # Pytest fixtures (25+)
+├── pytest.ini                 # Pytest configuration
+├── requirements.txt           # Core dependencies
+├── requirements-optional.txt  # Optional dependencies (DB, visual)
+├── .pre-commit-config.yaml    # Code quality hooks
+├── mypy.ini                   # Type checking
+├── docker-compose.yml         # Docker setup
+└── CHANGELOG.md              # Version history
 ```
 
 ---
@@ -1348,7 +1354,7 @@ This framework provides a **solid, professional architecture** for QA automation
 
 - Open an issue on GitHub
 - Check existing documentation
-- Review test examples in `tests/examples/`
+- Review API and database examples in `tests/examples/api/` and `tests/examples/database/`
 
 ### Want to Contribute?
 

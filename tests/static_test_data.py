@@ -1,7 +1,7 @@
 """
 Test Data - Universal Test Automation Framework
 Author: Marc Arevalo
-Version: 6.0
+Version: 6.2.0
 
 Universal test data structures for any web application.
 All application-specific values MUST be provided via environment variables.

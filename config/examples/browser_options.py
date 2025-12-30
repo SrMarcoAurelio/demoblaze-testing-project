@@ -5,7 +5,7 @@ This module provides optimized browser configurations for different scenarios.
 Copy and adapt these functions to your conftest.py for improved performance.
 
 Author: Marc Arevalo
-Version: 6.0.1
+Version: 6.2.0
 """
 
 from selenium import webdriver
