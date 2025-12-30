@@ -14,12 +14,12 @@ python -m framework.cli.setup_wizard
 ```
 
 **Features:**
-- ✅ Interactive prompts for all settings
-- ✅ Basic configuration (URL, browser, timeouts)
-- ✅ Advanced configuration (Grid, performance, parallel)
-- ✅ Generates `.env` file with comments
-- ✅ Validates user input
-- ✅ Shows next steps after setup
+- [Yes] Interactive prompts for all settings
+- [Yes] Basic configuration (URL, browser, timeouts)
+- [Yes] Advanced configuration (Grid, performance, parallel)
+- [Yes] Generates `.env` file with comments
+- [Yes] Validates user input
+- [Yes] Shows next steps after setup
 
 **When to Use:**
 - Initial framework setup
@@ -33,11 +33,11 @@ python -m framework.cli.setup_wizard
 |---------|----------------|-----------------|
 | **Purpose** | Quick onboarding | Full configuration |
 | **Location** | Project root | framework/cli/ |
-| **Dependencies check** | ✅ Yes | ❌ No |
-| **Runs tests** | ✅ Yes | ❌ No |
-| **Advanced settings** | ❌ No | ✅ Yes |
-| **Grid support** | ❌ No | ✅ Yes |
-| **Performance config** | ❌ No | ✅ Yes |
+| **Dependencies check** | [Yes] Yes | [No] No |
+| **Runs tests** | [Yes] Yes | [No] No |
+| **Advanced settings** | [No] No | [Yes] Yes |
+| **Grid support** | [No] No | [Yes] Yes |
+| **Performance config** | [No] No | [Yes] Yes |
 
 **Recommendation:**
 - New users: Run `quick_start.py` first

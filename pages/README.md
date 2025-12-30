@@ -73,10 +73,10 @@ The framework provides templates in `templates/page_objects/`:
 
 ## What NOT to Put Here
 
-- ❌ Framework code (use `framework/` for that)
-- ❌ Test files (use `tests/` for that)
-- ❌ Utilities (use `utils/` for that)
-- ❌ Configuration (use `config/` for that)
+- Framework code (use `framework/` for that)
+- Test files (use `tests/` for that)
+- Utilities (use `utils/` for that)
+- Configuration (use `config/` for that)
 
 ## Need Help?
 
