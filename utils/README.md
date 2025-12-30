@@ -5,25 +5,25 @@
 
 ---
 
-## 📋 Overview
+##  Overview
 
 This package contains utility modules that make the test automation framework **universal and reusable** across any web application. These utilities are completely decoupled from any specific application implementation.
 
 ---
 
-## 🎯 Philosophy: Universal Design
+##  Philosophy: Universal Design
 
 This framework follows a **universal design philosophy**:
 
-✅ **Application-Agnostic**: No hardcoded application-specific logic
-✅ **Configurable**: All application-specific values externalized to config
-✅ **Reusable**: Helpers can be used across different projects
-✅ **Extensible**: Easy to add new helpers without modifying existing code
-✅ **Well-Documented**: Clear examples and type hints for easy adoption
+[Yes] **Application-Agnostic**: No hardcoded application-specific logic
+[Yes] **Configurable**: All application-specific values externalized to config
+[Yes] **Reusable**: Helpers can be used across different projects
+[Yes] **Extensible**: Easy to add new helpers without modifying existing code
+[Yes] **Well-Documented**: Clear examples and type hints for easy adoption
 
 ---
 
-## 📦 Package Structure
+##  Package Structure
 
 ```
 utils/
@@ -80,7 +80,7 @@ utils/
 
 ---
 
-## 🔧 Modules
+##  Modules
 
 ### 1. `data_generator.py`
 
@@ -166,13 +166,13 @@ result = validate_password_strength("MyP@ssw0rd123")
 
 ---
 
-## 🌍 How This Framework is Universal
+##  How This Framework is Universal
 
 ### 1. **No Application-Specific Logic**
 
 The helpers contain ZERO hardcoded values for any specific application:
 
-❌ **BAD (Not Universal):**
+[No] **BAD (Not Universal):**
 ```python
 def login(username):
     # Hardcoded Universal Test Automation Framework-specific logic
@@ -180,7 +180,7 @@ def login(username):
     driver.find_element(By.ID, "login2").click()  # Universal Test Automation Framework-specific ID
 ```
 
-✅ **GOOD (Universal):**
+[Yes] **GOOD (Universal):**
 ```python
 def generate_unique_username(prefix="testuser"):
     # Works for ANY application
@@ -341,4 +341,4 @@ When adding new helpers:
 
 ---
 
-**Remember**: The goal is to make this framework work on **ANY web application** with minimal changes. Keep utils universal! 🌍
+**Remember**: The goal is to make this framework work on **ANY web application** with minimal changes. Keep utils universal! 

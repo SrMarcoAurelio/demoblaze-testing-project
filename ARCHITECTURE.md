@@ -82,13 +82,13 @@ The framework itself is thoroughly tested:
 ```
 universal-test-framework/
 │
-├── 🎯 USER SPACE (Your Code)
+├── USER SPACE (Your Code)
 │   ├── pages/                      # YOUR page objects (empty by default)
 │   │   └── README.md              # Instructions for creating page objects
 │   └── tests/                     # YOUR application tests go here
 │       └── test_*.py
 │
-├── 🔧 FRAMEWORK CORE (Universal)
+├── FRAMEWORK CORE (Universal)
 │   └── framework/
 │       ├── core/                  # Discovery-based core engine
 │       │   ├── discovery_engine.py      # Page structure discovery
@@ -107,7 +107,7 @@ universal-test-framework/
 │           ├── base_adapter.py         # Adapter interface
 │           └── adapter_template.py     # Template for custom adapters
 │
-├── 🔨 UTILITIES (Reusable)
+├── UTILITIES (Reusable)
 │   └── utils/
 │       ├── api/                   # REST API testing
 │       │   ├── api_client.py           # HTTP client wrapper
@@ -154,14 +154,14 @@ universal-test-framework/
 │       │
 │       └── locators_loader.py     # Locator file loader
 │
-├── ⚙️ CONFIGURATION
+├── CONFIGURATION
 │   ├── config/                    # Configuration examples
 │   │   └── examples/              # Browser configs, environment examples
 │   ├── config.py                  # Main configuration loader
 │   ├── .env                       # Environment variables (user-created)
 │   └── .env.template              # Environment template
 │
-├── 🧪 TESTING INFRASTRUCTURE
+├── TESTING INFRASTRUCTURE
 │   ├── tests/
 │   │   ├── unit/                  # Framework unit tests
 │   │   ├── framework/             # Framework feature tests
@@ -173,17 +173,17 @@ universal-test-framework/
 │   ├── pytest.ini                 # Pytest configuration
 │   └── static_test_data.py        # Shared test data
 │
-├── 📚 TEMPLATES
+├── TEMPLATES
 │   ├── templates/
 │   │   ├── page_objects/          # Page object templates
 │   │   ├── tests/                 # Test templates
 │   │   └── locators/              # Locator file templates
 │
-├── 🚀 ONBOARDING
+├── ONBOARDING
 │   ├── quick_start.py             # Interactive setup script
 │   └── auto_configure.py          # Auto-configuration tool
 │
-├── 🤖 CI/CD
+├── CI/CD
 │   ├── .github/workflows/         # GitHub Actions
 │   ├── .pre-commit-config.yaml    # Pre-commit hooks
 │   └── docker-compose.yml         # Docker Selenium Grid
@@ -704,4 +704,4 @@ When contributing to the framework:
 ---
 
 **Framework Architecture v6.2.0**
-**Built with ❤️ for the QA Community**
+**Professional QA Automation Framework**

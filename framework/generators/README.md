@@ -1,6 +1,6 @@
 # Code Generators - Planned Feature
 
-**Status:** 🚧 Planned for future releases (v7.0+)
+**Status:**  Planned for future releases (v7.0+)
 
 ## Overview
 

@@ -2,11 +2,11 @@
 
 This directory contains **universal templates** for creating test automation components.
 
-## 🎯 Purpose
+## Goal: Purpose
 
 These templates are **starting points** for building YOUR test automation suite. They demonstrate best practices and framework usage, but **require adaptation** to YOUR application.
 
-## ⚠️ Important
+## WARNING: Important
 
 - **DO NOT use templates directly** - They will not work without adaptation
 - **DO NOT treat framework examples as YOUR tests** - They demonstrate features, not your application
@@ -30,7 +30,7 @@ templates/
     └── __template_config.py
 ```
 
-## 🚀 How to Use Templates
+##  How to Use Templates
 
 ### Step 1: Copy the Template
 
@@ -145,7 +145,7 @@ Security test template demonstrating:
 - YOUR input validation
 - YOUR access control
 
-⚠️ **Only test applications you have permission to test!**
+WARNING: **Only test applications you have permission to test!**
 
 ### Configuration Templates
 
@@ -179,7 +179,7 @@ Environment variables template showing:
 
 **Security:** Never commit `.env` to version control!
 
-## ✅ Adaptation Checklist
+## [Yes] Adaptation Checklist
 
 Each template includes a checklist at the bottom:
 
@@ -195,7 +195,7 @@ Each template includes a checklist at the bottom:
 
 Work through the checklist to ensure complete adaptation.
 
-## 🎓 Learning Resources
+##  Learning Resources
 
 ### Study the Framework Examples
 
@@ -226,7 +226,7 @@ Read the framework documentation to understand:
 4. **Explicit waits** - Always wait for elements before interaction
 5. **No assertions in page objects** - Keep assertions in tests
 
-## ❓ FAQ
+##  FAQ
 
 **Q: Can I use templates without modification?**
 A: No. Templates have placeholder values that won't work without adaptation.
@@ -249,7 +249,7 @@ A: Use browser DevTools (F12), inspect elements, copy selectors.
 **Q: What if a template doesn't fit my use case?**
 A: Adapt it or create your own. Templates are guides, not requirements.
 
-## 🔗 Next Steps
+##  Next Steps
 
 1. **Read** framework documentation (documentation/README.md)
 2. **Study** framework examples (tests/examples/)
@@ -260,7 +260,7 @@ A: Adapt it or create your own. Templates are guides, not requirements.
 7. **Test** with YOUR application
 8. **Iterate** and improve
 
-## 📞 Support
+##  Support
 
 For template questions:
 - Check adaptation checklist in each template

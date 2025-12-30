@@ -5,10 +5,10 @@ This directory contains **example tests** that demonstrate framework capabilitie
 ## Purpose
 
 These examples demonstrate:
-- ✅ How to use framework utilities (API client, database, etc.)
-- ✅ Patterns and best practices
-- ✅ Real-world usage scenarios
-- ✅ Integration with external systems
+- How to use framework utilities (API client, database, etc.)
+- Patterns and best practices
+- Real-world usage scenarios
+- Integration with external systems
 
 ## What's Included
 
@@ -140,9 +140,9 @@ grep -A 10 "test_authentication" tests/examples/api/test_api_example.py
 
 ## What NOT to Do
 
-❌ **Don't modify these examples** - They're reference material
-❌ **Don't add app-specific tests here** - Use `tests/` root for your tests
-❌ **Don't expect these to test YOUR app** - They test example APIs/DBs
+**Don't modify these examples** - They're reference material
+**Don't add app-specific tests here** - Use `tests/` root for your tests
+**Don't expect these to test YOUR app** - They test example APIs/DBs
 
 ## Adding Your Own Examples
 

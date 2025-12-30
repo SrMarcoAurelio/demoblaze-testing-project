@@ -12,7 +12,7 @@ Professional test automation framework built with Python, Selenium, and Pytest f
 
 ---
 
-## 🚀 5-Minute Quick Start
+## Quick Start Guide
 
 **Want to get started? Use our interactive setup script:**
 
@@ -84,21 +84,21 @@ Professional frameworks don't assume your application structure - they provide t
 |---------|----------------|---------------------|-----------------|------------|
 | **Language** | Python | Python | Keyword-driven | Python/JS/Java |
 | **Learning Curve** | Medium | Low | Low | Medium-High |
-| **Page Objects** | ✅ Built-in templates | ⚠️ Manual implementation | ❌ Not native | ✅ Built-in |
-| **Fixtures** | ✅ Pytest (25+) | ⚠️ setUp/tearDown | ⚠️ Test Setup/Teardown | ✅ Built-in |
-| **Security Testing** | ✅ UI-level payloads | ❌ Manual | ❌ Manual | ⚠️ Limited |
-| **Accessibility** | ✅ axe-core integration | ❌ Manual | ❌ Manual | ✅ Built-in |
-| **Performance** | ✅ Built-in metrics | ❌ Manual | ⚠️ Limited | ✅ Built-in tracing |
-| **Reports** | ✅ HTML + Allure | ⚠️ unittest basic | ✅ HTML + Logs | ✅ HTML + Trace viewer |
-| **Parallel Execution** | ✅ pytest-xdist | ⚠️ Manual | ✅ Built-in | ✅ Built-in |
-| **Type Safety** | ✅ Full type hints | ⚠️ Partial | ❌ No | ✅ Full TypeScript |
-| **CI/CD Templates** | ✅ GitHub Actions | ❌ Manual | ⚠️ Basic | ✅ Multiple platforms |
+| **Page Objects** | [Yes] Built-in templates | [Partial] Manual implementation | [No] Not native | [Yes] Built-in |
+| **Fixtures** | [Yes] Pytest (25+) | [Partial] setUp/tearDown | [Partial] Test Setup/Teardown | [Yes] Built-in |
+| **Security Testing** | [Yes] UI-level payloads | [No] Manual | [No] Manual | [Partial] Limited |
+| **Accessibility** | [Yes] axe-core integration | [No] Manual | [No] Manual | [Yes] Built-in |
+| **Performance** | [Yes] Built-in metrics | [No] Manual | [Partial] Limited | [Yes] Built-in tracing |
+| **Reports** | [Yes] HTML + Allure | [Partial] unittest basic | [Yes] HTML + Logs | [Yes] HTML + Trace viewer |
+| **Parallel Execution** | [Yes] pytest-xdist | [Partial] Manual | [Yes] Built-in | [Yes] Built-in |
+| **Type Safety** | [Yes] Full type hints | [Partial] Partial | [No] No | [Yes] Full TypeScript |
+| **CI/CD Templates** | [Yes] GitHub Actions | [No] Manual | [Partial] Basic | [Yes] Multiple platforms |
 | **Browser Support** | Chrome, Firefox, Edge | All | All | Chrome, Firefox, WebKit |
 | **Best For** | Python teams, comprehensive testing | Simple scripts | Non-programmers | Modern JS apps, video recording |
 
 ### When to Use This Framework
 
-✅ **Perfect fit if you:**
+**Perfect fit if you:**
 - Work primarily with Python
 - Need Page Object Model out-of-the-box
 - Want comprehensive test types (functional, security, accessibility, performance)
@@ -107,7 +107,7 @@ Professional frameworks don't assume your application structure - they provide t
 - Value pytest's powerful fixture system
 - Want professional development practices (pre-commit hooks, type checking)
 
-❌ **Consider alternatives if you:**
+**Consider alternatives if you:**
 - **Robot Framework**: Your team prefers keyword-driven testing or includes non-programmers
 - **Playwright**: You need video recording, network interception, or test modern JavaScript frameworks
 - **Cypress**: You're a pure JavaScript team doing component testing
@@ -188,7 +188,7 @@ pytest --cov=pages --cov=utils
 
 ## Framework Architecture
 
-📖 **For detailed architecture documentation, see [ARCHITECTURE.md](ARCHITECTURE.md)**
+**For detailed architecture documentation, see [ARCHITECTURE.md](ARCHITECTURE.md)**
 
 ### Core Components (`framework/`)
 
