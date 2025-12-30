@@ -49,11 +49,11 @@ class PerformanceThreshold:
     def get_threshold_status(self, duration: float) -> str:
         """Get status string for duration vs threshold."""
         if duration <= self.max_duration:
-            return f"✓ PASS ({duration:.3f}s <= {self.max_duration}s)"
+            return f"OK PASS ({duration:.3f}s <= {self.max_duration}s)"
         else:
             exceeds_by = duration - self.max_duration
             percentage = (exceeds_by / self.max_duration) * 100
-            return f"✗ FAIL ({duration:.3f}s > {self.max_duration}s by {exceeds_by:.3f}s / {percentage:.1f}%)"
+            return f"FAIL FAIL ({duration:.3f}s > {self.max_duration}s by {exceeds_by:.3f}s / {percentage:.1f}%)"
 
 
 class PerformanceMetricsCollector:

@@ -312,7 +312,7 @@ def _build_violations_section(data: Dict[str, Any]) -> str:
     if not violations:
         return """
         <div class="section">
-            <h2>✅ Performance Violations</h2>
+            <h2>[OK] Performance Violations</h2>
             <div class="no-violations">
                 🎉 Excellent! All performance metrics are within defined thresholds.
             </div>
@@ -330,7 +330,7 @@ def _build_violations_section(data: Dict[str, Any]) -> str:
 
         violations_html += f"""
         <div class="violation">
-            <div class="violation-title">⚠️ {name}</div>
+            <div class="violation-title">WARNING️ {name}</div>
             <div><strong>Actual:</strong> {duration:.3f}s |
                  <strong>Threshold:</strong> {threshold:.3f}s |
                  <strong>Exceeded by:</strong> {exceeded:.3f}s ({percentage:.1f}%)</div>
@@ -339,7 +339,7 @@ def _build_violations_section(data: Dict[str, Any]) -> str:
 
     return f"""
     <div class="section">
-        <h2>⚠️ Performance Violations ({len(violations)})</h2>
+        <h2>WARNING️ Performance Violations ({len(violations)})</h2>
         {violations_html}
     </div>
     """
@@ -456,7 +456,7 @@ def _build_thresholds_section(data: Dict[str, Any]) -> str:
 
     return f"""
     <div class="section">
-        <h2>🎯 Performance Thresholds</h2>
+        <h2> Performance Thresholds</h2>
         <table>
             <thead>
                 <tr>

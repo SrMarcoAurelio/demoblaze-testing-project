@@ -160,12 +160,12 @@ class VisualComparator:
 
         if match:
             logger.info(
-                f"✓ Images match ({difference_percentage:.2f}% difference, "
+                f"OK Images match ({difference_percentage:.2f}% difference, "
                 f"threshold={self.threshold}%)"
             )
         else:
             logger.warning(
-                f"✗ Images differ ({difference_percentage:.2f}% difference, "
+                f"FAIL Images differ ({difference_percentage:.2f}% difference, "
                 f"threshold={self.threshold}%)"
             )
 

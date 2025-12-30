@@ -54,7 +54,7 @@ class ResponseValidator:
             actual in expected_status
         ), f"Expected status {expected_status}, got {actual}"
 
-        logger.debug(f"✓ Status code {actual} matches expected")
+        logger.debug(f"OK Status code {actual} matches expected")
         return True
 
     @staticmethod
@@ -73,7 +73,7 @@ class ResponseValidator:
         """
         try:
             data = response.json()
-            logger.debug("✓ Response is valid JSON")
+            logger.debug("OK Response is valid JSON")
             return data
         except json.JSONDecodeError as e:
             raise AssertionError(f"Response is not valid JSON: {e}")
@@ -102,7 +102,7 @@ class ResponseValidator:
             actual_ms <= max_time_ms
         ), f"Response time {actual_ms:.2f}ms exceeds limit {max_time_ms}ms"
 
-        logger.debug(f"✓ Response time {actual_ms:.2f}ms within limit")
+        logger.debug(f"OK Response time {actual_ms:.2f}ms within limit")
         return True
 
     @staticmethod
@@ -127,7 +127,7 @@ class ResponseValidator:
             header_name in response.headers
         ), f"Header '{header_name}' not found in response"
 
-        logger.debug(f"✓ Header '{header_name}' exists")
+        logger.debug(f"OK Header '{header_name}' exists")
         return True
 
     @staticmethod
@@ -157,7 +157,7 @@ class ResponseValidator:
             actual == expected_value
         ), f"Header '{header_name}': expected '{expected_value}', got '{actual}'"
 
-        logger.debug(f"✓ Header '{header_name}' matches expected value")
+        logger.debug(f"OK Header '{header_name}' matches expected value")
         return True
 
     @staticmethod
@@ -184,7 +184,7 @@ class ResponseValidator:
             expected_type in actual
         ), f"Expected Content-Type '{expected_type}', got '{actual}'"
 
-        logger.debug(f"✓ Content-Type matches: {expected_type}")
+        logger.debug(f"OK Content-Type matches: {expected_type}")
         return True
 
     @staticmethod
@@ -222,10 +222,10 @@ class ResponseValidator:
                 current == expected_value
             ), f"Field '{field_path}': expected '{expected_value}', got '{current}'"
             logger.debug(
-                f"✓ Field '{field_path}' = '{current}' matches expected"
+                f"OK Field '{field_path}' = '{current}' matches expected"
             )
         else:
-            logger.debug(f"✓ Field '{field_path}' exists")
+            logger.debug(f"OK Field '{field_path}' exists")
 
         return True
 
@@ -264,7 +264,7 @@ class ResponseValidator:
         ), f"Field '{field_path}': expected {expected_type.__name__}, got {actual_type.__name__}"
 
         logger.debug(
-            f"✓ Field '{field_path}' type is {expected_type.__name__}"
+            f"OK Field '{field_path}' type is {expected_type.__name__}"
         )
         return True
 
@@ -311,19 +311,19 @@ class ResponseValidator:
             assert (
                 actual_length == expected_length
             ), f"Array '{field_path}': expected length {expected_length}, got {actual_length}"
-            logger.debug(f"✓ Array '{field_path}' length = {actual_length}")
+            logger.debug(f"OK Array '{field_path}' length = {actual_length}")
 
         if min_length is not None:
             assert (
                 actual_length >= min_length
             ), f"Array '{field_path}': length {actual_length} < minimum {min_length}"
-            logger.debug(f"✓ Array '{field_path}' length >= {min_length}")
+            logger.debug(f"OK Array '{field_path}' length >= {min_length}")
 
         if max_length is not None:
             assert (
                 actual_length <= max_length
             ), f"Array '{field_path}': length {actual_length} > maximum {max_length}"
-            logger.debug(f"✓ Array '{field_path}' length <= {max_length}")
+            logger.debug(f"OK Array '{field_path}' length <= {max_length}")
 
         return True
 
@@ -349,7 +349,7 @@ class ResponseValidator:
             response.status_code >= 400
         ), f"Expected error status (>=400), got {response.status_code}"
 
-        logger.debug(f"✓ Response is error: {response.status_code}")
+        logger.debug(f"OK Response is error: {response.status_code}")
 
         if expected_error_message:
             data = response.json()
@@ -369,6 +369,6 @@ class ResponseValidator:
                 found_message
             ), f"Expected error message '{expected_error_message}' not found in '{found_message}'"
 
-            logger.debug(f"✓ Error message matches: {expected_error_message}")
+            logger.debug(f"OK Error message matches: {expected_error_message}")
 
         return True

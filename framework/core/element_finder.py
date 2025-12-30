@@ -65,13 +65,13 @@ class ElementFinder:
         try:
             search_context = context if context else self.driver
             element = search_context.find_element(by, value)
-            self.logger.debug(f"✓ Found element: {by}='{value}'")
+            self.logger.debug(f"Found Found element: {by}='{value}'")
             return element
         except NoSuchElementException:
-            self.logger.debug(f"✗ Element not found: {by}='{value}'")
+            self.logger.debug(f"Not found Element not found: {by}='{value}'")
             return None
         except StaleElementReferenceException:
-            self.logger.warning(f"⚠ Stale element: {by}='{value}'")
+            self.logger.warning(f"Warning Stale element: {by}='{value}'")
             return None
 
     def find_elements(
@@ -95,12 +95,12 @@ class ElementFinder:
             search_context = context if context else self.driver
             elements = search_context.find_elements(by, value)
             self.logger.debug(
-                f"✓ Found {len(elements)} elements: {by}='{value}'"
+                f"Found Found {len(elements)} elements: {by}='{value}'"
             )
             return elements
         except Exception as e:
             self.logger.warning(
-                f"✗ Error finding elements {by}='{value}': {e}"
+                f"Not found Error finding elements {by}='{value}': {e}"
             )
             return []
 
@@ -130,11 +130,11 @@ class ElementFinder:
         for by, value in locator_strategies:
             element = self.find_element(by, value)
             if element:
-                self.logger.debug(f"✓ Fallback succeeded: {by}='{value}'")
+                self.logger.debug(f"Found Fallback succeeded: {by}='{value}'")
                 return element
 
         self.logger.warning(
-            f"✗ All fallback strategies failed: {len(locator_strategies)} attempts"
+            f"Not found All fallback strategies failed: {len(locator_strategies)} attempts"
         )
         return None
 
@@ -242,7 +242,7 @@ class ElementFinder:
             elements = self.find_elements(by, value)
             all_clickable.extend(elements)
 
-        self.logger.debug(f"✓ Found {len(all_clickable)} clickable elements")
+        self.logger.debug(f"Found Found {len(all_clickable)} clickable elements")
         return all_clickable
 
     def find_input_elements(self) -> List[WebElement]:
@@ -270,7 +270,7 @@ class ElementFinder:
             elements = self.find_elements(by, value)
             all_inputs.extend(elements)
 
-        self.logger.debug(f"✓ Found {len(all_inputs)} input elements")
+        self.logger.debug(f"Found Found {len(all_inputs)} input elements")
         return all_inputs
 
     def find_forms(self) -> List[WebElement]:
@@ -288,7 +288,7 @@ class ElementFinder:
                 print(f"Form: {form.get_attribute('id')}")
         """
         forms = self.find_elements(By.TAG_NAME, "form")
-        self.logger.debug(f"✓ Found {len(forms)} forms")
+        self.logger.debug(f"Found Found {len(forms)} forms")
         return forms
 
     def find_links(self) -> List[WebElement]:
@@ -306,7 +306,7 @@ class ElementFinder:
                 print(f"Link: {link.text} -> {link.get_attribute('href')}")
         """
         links = self.find_elements(By.TAG_NAME, "a")
-        self.logger.debug(f"✓ Found {len(links)} links")
+        self.logger.debug(f"Found Found {len(links)} links")
         return links
 
     def is_element_present(self, by: By, value: str) -> bool:

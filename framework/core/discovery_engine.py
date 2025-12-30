@@ -102,14 +102,14 @@ class DiscoveryEngine:
                 }
                 forms.append(form_data)
                 self.logger.debug(
-                    f"✓ Discovered form: id='{form_data['id']}', "
+                    f"Found Discovered form: id='{form_data['id']}', "
                     f"{len(form_data['inputs'])} inputs"
                 )
             except StaleElementReferenceException:
-                self.logger.debug("⚠ Skipped stale form element")
+                self.logger.debug("Warning Skipped stale form element")
                 continue
 
-        self.logger.info(f"✓ Discovered {len(forms)} forms")
+        self.logger.info(f"Found Discovered {len(forms)} forms")
         return forms
 
     def _discover_inputs(
@@ -322,7 +322,7 @@ class DiscoveryEngine:
             + len(navigation["breadcrumbs"])
         )
 
-        self.logger.info(f"✓ Discovered {total_nav_items} navigation items")
+        self.logger.info(f"Found Discovered {total_nav_items} navigation items")
         return navigation
 
     def _discover_header_navigation(self) -> List[Dict[str, Any]]:
@@ -519,7 +519,7 @@ class DiscoveryEngine:
         if html:
             metadata["lang"] = html.get_attribute("lang") or ""
 
-        self.logger.debug(f"✓ Discovered page metadata: {metadata['title']}")
+        self.logger.debug(f"Found Discovered page metadata: {metadata['title']}")
         return metadata
 
     def discover_interactive_elements(self) -> Dict[str, Any]:
@@ -607,7 +607,7 @@ class DiscoveryEngine:
         }
 
         self.logger.info(
-            f"✓ Generated page report: "
+            f"Found Generated page report: "
             f"{report['summary']['total_forms']} forms, "
             f"{report['summary']['total_interactive']} interactive elements"
         )

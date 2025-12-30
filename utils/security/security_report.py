@@ -145,7 +145,7 @@ class SecurityReportGenerator:
 """
 
         if not report.vulnerabilities:
-            md += "✅ No vulnerabilities detected.\n"
+            md += "[OK] No vulnerabilities detected.\n"
         else:
             for i, vuln in enumerate(report.vulnerabilities, 1):
                 md += f"""### {i}. {vuln.vulnerability_type} ({vuln.severity.value.upper()})
@@ -315,7 +315,7 @@ class SecurityReportGenerator:
         if not report.vulnerabilities:
             html += """
         <div class="no-vulns">
-            ✅ No vulnerabilities detected.
+            [OK] No vulnerabilities detected.
         </div>
 """
         else:
